@@ -51,7 +51,7 @@ const Synth = () => {
   };
 
   return (
-    <div className="Synth">
+    <div className="synth" id="synth">
       <label htmlFor="synthToggle">Synth On/Off</label>
       <input
         type="checkbox"

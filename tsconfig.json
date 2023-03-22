@@ -6,6 +6,10 @@
       "dom.iterable",
       "esnext"
     ],
+    "baseUrl": ".", // プロジェクトのルートディレクトリをベースURLとして設定
+    "paths": {
+      "@/*": ["src/*"] // '@' で始まるパスを 'src' ディレクトリにマッピング
+    },
     "allowJs": true,
     "skipLibCheck": true,
     "esModuleInterop": true,

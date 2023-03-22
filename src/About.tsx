@@ -1,9 +1,9 @@
 import React from "react";
-import "./About.scss";
+import "./styles/About.scss";
 
 const About = () => {
   return (
-    <section className="about">
+    <section className="about" id="about">
       <p>About Auther</p>
       <p>
         This Software is made by{" "}
