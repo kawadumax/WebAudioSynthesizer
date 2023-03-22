@@ -1,6 +1,6 @@
 import React from "react";
-import logo from "./logo.svg";
-import "./styles/Header.scss";
+import logo from "@assets/logo.svg";
+import "@styles/Header.scss";
 
 const Header = () => {
   // コンポーネントの実装

@@ -8,7 +8,7 @@
     ],
     "baseUrl": ".", // プロジェクトのルートディレクトリをベースURLとして設定
     "paths": {
-      "@/*": ["src/*"] // '@' で始まるパスを 'src' ディレクトリにマッピング
+      "@/*": ["src/*"]
     },
     "allowJs": true,
     "skipLibCheck": true,
