@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import Knob from "./parts/Knob";
 
 const Synth = () => {
   // オーディオコンテキストの初期化
@@ -52,6 +53,7 @@ const Synth = () => {
 
   return (
     <div className="synth" id="synth">
+      <Knob></Knob>
       <label htmlFor="synthToggle">Synth On/Off</label>
       <input
         type="checkbox"
