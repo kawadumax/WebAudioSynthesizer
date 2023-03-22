@@ -1,0 +1,10 @@
+@import "variables";
+section.about {
+  background-color: #282c34;
+  color: white;
+  padding: 20px;
+
+  a {
+    color: $primary-color;
+  }
+}
