@@ -15,6 +15,7 @@ const About = () => {
         If you would like to hire him, please feel free to contact (
         ultima.times.sounds[at]gmail.com ).
       </p>
+      <p>作者について</p>
       <p>
         このソフトウェアは <a href="https://github.com/kawadumax">kawadumax</a>{" "}
         によって作られました。
