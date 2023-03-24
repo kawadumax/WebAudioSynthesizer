@@ -6,11 +6,17 @@ interface Position {
   y: number;
 }
 
-const Knob = () => {
+interface Props {
+  // audioParam: AudioParam;
+  handleValueChange: (newGain: number) => void;
+}
+
+const Knob = ({ handleValueChange }: Props) => {
   const [angle, setAngle] = useState<number>(0);
   const [isDragging, setIsDragging] = useState<boolean>(false);
   const [startPos, setStartPos] = useState<Position>({ x: 0, y: 0 });
   const [currentPos, setCurrentPos] = useState<Position>({ x: 0, y: 0 });
+
   const knobRef = useRef<SVGSVGElement>(null);
 
   useEffect(() => {
