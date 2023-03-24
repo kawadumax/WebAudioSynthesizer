@@ -35,6 +35,27 @@ const Knob = ({ handleValueChange }: Props) => {
     setCurrentPos({ x: clientX, y: clientY });
   };
 
+  const handleTouchStart = (event: React.TouchEvent<SVGSVGElement>) => {
+    setIsDragging(true);
+    const { clientX, clientY } = event.touches[0];
+    setStartPos({ x: clientX, y: clientY });
+    setCurrentPos({ x: clientX, y: clientY });
+  };
+
+  const handleStart = (
+    event: React.TouchEvent<SVGSVGElement> | React.MouseEvent<SVGSVGElement>
+  ) => {
+    event.preventDefault();
+    // タッチパッドの場合
+    if (event.type === "touchstart") {
+      // タッチの座標を取得して処理
+      handleTouchStart(event as React.TouchEvent<SVGSVGElement>);
+    } else if (event.type === "mousedown") {
+      // マウスの座標を取得して処理
+      handleMouseDown(event as React.MouseEvent<SVGSVGElement>);
+    }
+  };
+
   const handleMouseMove = (event: React.MouseEvent<SVGSVGElement>) => {
     if (isDragging) {
       const { clientX, clientY } = event;
@@ -42,8 +63,47 @@ const Knob = ({ handleValueChange }: Props) => {
     }
   };
 
+  const handleTouchMove = (event: React.TouchEvent<SVGSVGElement>) => {
+    if (isDragging) {
+      const { clientX, clientY } = event.touches[0];
+      setCurrentPos({ x: clientX, y: clientY });
+    }
+  };
+
+  const handleMove = (
+    event: React.TouchEvent<SVGSVGElement> | React.MouseEvent<SVGSVGElement>
+  ) => {
+    event.preventDefault();
+    // タッチパッドの場合
+    if (event.type === "touchmove") {
+      // タッチの座標を取得して処理
+      handleTouchMove(event as React.TouchEvent<SVGSVGElement>);
+    } else if (event.type === "mousemove") {
+      // マウスの座標を取得して処理
+      handleMouseMove(event as React.MouseEvent<SVGSVGElement>);
+    }
+  };
+
   const handleMouseUp = () => {
     setIsDragging(false);
+  };
+
+  const handleTouchEnd = () => {
+    setIsDragging(false);
+  };
+
+  const handleEnd = (
+    event: React.TouchEvent<SVGSVGElement> | React.MouseEvent<SVGSVGElement>
+  ) => {
+    event.preventDefault();
+    // タッチパッドの場合
+    if (event.type === "touchend") {
+      // タッチの座標を取得して処理
+      handleMouseUp();
+    } else if (event.type === "mouseup") {
+      // マウスの座標を取得して処理
+      handleTouchEnd();
+    }
   };
 
   const getAngleDiff = (startPos: Position, currentPos: Position) => {
@@ -62,11 +122,15 @@ const Knob = ({ handleValueChange }: Props) => {
       width="100"
       height="100"
       viewBox="0 0 100 100"
-      onMouseDown={handleMouseDown}
-      onMouseMove={handleMouseMove}
-      onMouseUp={handleMouseUp}
+      onMouseDown={handleStart}
+      onTouchStart={handleStart}
+      onMouseMove={handleMove}
+      onTouchMove={handleMove}
+      onMouseUp={handleEnd}
+      onTouchEnd={handleEnd}
     >
       <circle cx="50" cy="50" r="40" fill="white" stroke="white" />
+      {/* rextは左上がアンカーポイントになる。 初期配置アングルは下。太めのlineで、極座標でやったら影は回転せずに済むかも。*/}
       <rect x="47" y="50" width="6px" height="42px" transform={transform} />
     </svg>
   );
