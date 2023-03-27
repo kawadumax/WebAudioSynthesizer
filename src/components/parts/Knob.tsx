@@ -12,6 +12,8 @@ interface Props {
 }
 
 const Knob = ({ handleValueChange }: Props) => {
+  const knobCenterPos = { x: 50, y: 50 };
+
   const [angle, setAngle] = useState<number>(0);
   const [isDragging, setIsDragging] = useState<boolean>(false);
   const [startPos, setStartPos] = useState<Position>({ x: 0, y: 0 });
@@ -21,12 +23,39 @@ const Knob = ({ handleValueChange }: Props) => {
 
   useEffect(() => {
     if (isDragging) {
-      const angleDiff = getAngleDiff(startPos, currentPos);
-      const newAngle = angle + angleDiff;
+      const newAngle = getAngle(currentPos);
       setAngle(newAngle);
-      setStartPos(currentPos);
     }
   }, [isDragging, angle, startPos, currentPos]);
+
+  // 移動のイベントはdocumentから取ることでSVGの範囲を超えてノブを動かせる
+  useEffect(() => {
+    const handleDocumentMouseMove = (event: MouseEvent) => {
+      if (isDragging) {
+        setCurrentPos({
+          x: event.clientX,
+          y: event.clientY,
+        });
+      }
+    };
+    if (isDragging) {
+      document.addEventListener("mousemove", handleDocumentMouseMove);
+    }
+    return () => {
+      document.removeEventListener("mousemove", handleDocumentMouseMove);
+    };
+  }, [isDragging, setCurrentPos]);
+
+  useEffect(() => {
+    const handleMoveEnd = (event: MouseEvent) => {
+      setIsDragging(false);
+    };
+    document.addEventListener("mouseup", handleMoveEnd);
+
+    return () => {
+      document.removeEventListener("mouseup", handleMoveEnd);
+    };
+  }, []);
 
   const handleMouseDown = (event: React.MouseEvent<SVGSVGElement>) => {
     setIsDragging(true);
@@ -37,9 +66,10 @@ const Knob = ({ handleValueChange }: Props) => {
 
   const handleTouchStart = (event: React.TouchEvent<SVGSVGElement>) => {
     setIsDragging(true);
-    const { clientX, clientY } = event.touches[0];
+    const { clientX, clientY } = event.targetTouches[0];
     setStartPos({ x: clientX, y: clientY });
     setCurrentPos({ x: clientX, y: clientY });
+    console.log("touch start");
   };
 
   const handleStart = (
@@ -56,63 +86,17 @@ const Knob = ({ handleValueChange }: Props) => {
     }
   };
 
-  const handleMouseMove = (event: React.MouseEvent<SVGSVGElement>) => {
-    if (isDragging) {
-      const { clientX, clientY } = event;
-      setCurrentPos({ x: clientX, y: clientY });
+  const getAngle = (currentPos: Position) => {
+    let angle = 0;
+    if (knobRef.current?.getBoundingClientRect) {
+      const svgPos = knobRef.current?.getBoundingClientRect();
+      const dx = currentPos.x - (svgPos.x + knobCenterPos.x);
+      const dy = currentPos.y - (svgPos.y + knobCenterPos.y);
+      angle = Math.atan2(dy, dx) * (180 / Math.PI) - 90;
     }
+    return angle;
   };
-
-  const handleTouchMove = (event: React.TouchEvent<SVGSVGElement>) => {
-    if (isDragging) {
-      const { clientX, clientY } = event.touches[0];
-      setCurrentPos({ x: clientX, y: clientY });
-    }
-  };
-
-  const handleMove = (
-    event: React.TouchEvent<SVGSVGElement> | React.MouseEvent<SVGSVGElement>
-  ) => {
-    event.preventDefault();
-    // タッチパッドの場合
-    if (event.type === "touchmove") {
-      // タッチの座標を取得して処理
-      handleTouchMove(event as React.TouchEvent<SVGSVGElement>);
-    } else if (event.type === "mousemove") {
-      // マウスの座標を取得して処理
-      handleMouseMove(event as React.MouseEvent<SVGSVGElement>);
-    }
-  };
-
-  const handleMouseUp = () => {
-    setIsDragging(false);
-  };
-
-  const handleTouchEnd = () => {
-    setIsDragging(false);
-  };
-
-  const handleEnd = (
-    event: React.TouchEvent<SVGSVGElement> | React.MouseEvent<SVGSVGElement>
-  ) => {
-    event.preventDefault();
-    // タッチパッドの場合
-    if (event.type === "touchend") {
-      // タッチの座標を取得して処理
-      handleMouseUp();
-    } else if (event.type === "mouseup") {
-      // マウスの座標を取得して処理
-      handleTouchEnd();
-    }
-  };
-
-  const getAngleDiff = (startPos: Position, currentPos: Position) => {
-    const dx = currentPos.x - startPos.x;
-    const dy = currentPos.y - startPos.y;
-    const angle = Math.atan2(dy, dx);
-    return angle * (3 / Math.PI);
-  };
-
+  // degree指定
   const transform = `rotate(${angle}, 50, 50)`;
 
   return (
@@ -124,13 +108,15 @@ const Knob = ({ handleValueChange }: Props) => {
       viewBox="0 0 100 100"
       onMouseDown={handleStart}
       onTouchStart={handleStart}
-      onMouseMove={handleMove}
-      onTouchMove={handleMove}
-      onMouseUp={handleEnd}
-      onTouchEnd={handleEnd}
     >
-      <circle cx="50" cy="50" r="40" fill="white" stroke="white" />
-      {/* rextは左上がアンカーポイントになる。 初期配置アングルは下。太めのlineで、極座標でやったら影は回転せずに済むかも。*/}
+      <circle
+        cx={knobCenterPos.x}
+        cy={knobCenterPos.y}
+        r="40"
+        fill="white"
+        stroke="white"
+      />
+      {/* rectは左上がアンカーポイントになる。 初期配置アングルは下。太めのlineで、極座標でやったら影は回転せずに済むかも。*/}
       <rect x="47" y="50" width="6px" height="42px" transform={transform} />
     </svg>
   );
