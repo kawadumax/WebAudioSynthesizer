@@ -6,7 +6,6 @@ import About from "@components/About";
 function Main() {
   return (
     <main>
-      <p>テスト</p>
       <Synth></Synth>
       <About></About>
     </main>

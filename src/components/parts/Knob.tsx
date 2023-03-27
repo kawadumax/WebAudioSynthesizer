@@ -7,7 +7,6 @@ interface Position {
 }
 
 interface Props {
-  // audioParam: AudioParam;
   handleValueChange: (newGain: number) => void;
 }
 
@@ -16,7 +15,6 @@ const Knob = ({ handleValueChange }: Props) => {
 
   const [angle, setAngle] = useState<number>(0);
   const [isDragging, setIsDragging] = useState<boolean>(false);
-  const [startPos, setStartPos] = useState<Position>({ x: 0, y: 0 });
   const [currentPos, setCurrentPos] = useState<Position>({ x: 0, y: 0 });
 
   const knobRef = useRef<SVGSVGElement>(null);
@@ -26,7 +24,7 @@ const Knob = ({ handleValueChange }: Props) => {
       const newAngle = getAngle(currentPos);
       setAngle(newAngle);
     }
-  }, [isDragging, angle, startPos, currentPos]);
+  }, [isDragging, angle, currentPos]);
 
   // 移動のイベントはdocumentから取ることでSVGの範囲を超えてノブを動かせる
   useEffect(() => {
@@ -60,30 +58,7 @@ const Knob = ({ handleValueChange }: Props) => {
   const handleMouseDown = (event: React.MouseEvent<SVGSVGElement>) => {
     setIsDragging(true);
     const { clientX, clientY } = event;
-    setStartPos({ x: clientX, y: clientY });
     setCurrentPos({ x: clientX, y: clientY });
-  };
-
-  const handleTouchStart = (event: React.TouchEvent<SVGSVGElement>) => {
-    setIsDragging(true);
-    const { clientX, clientY } = event.targetTouches[0];
-    setStartPos({ x: clientX, y: clientY });
-    setCurrentPos({ x: clientX, y: clientY });
-    console.log("touch start");
-  };
-
-  const handleStart = (
-    event: React.TouchEvent<SVGSVGElement> | React.MouseEvent<SVGSVGElement>
-  ) => {
-    event.preventDefault();
-    // タッチパッドの場合
-    if (event.type === "touchstart") {
-      // タッチの座標を取得して処理
-      handleTouchStart(event as React.TouchEvent<SVGSVGElement>);
-    } else if (event.type === "mousedown") {
-      // マウスの座標を取得して処理
-      handleMouseDown(event as React.MouseEvent<SVGSVGElement>);
-    }
   };
 
   const getAngle = (currentPos: Position) => {
@@ -92,6 +67,7 @@ const Knob = ({ handleValueChange }: Props) => {
       const svgPos = knobRef.current?.getBoundingClientRect();
       const dx = currentPos.x - (svgPos.x + knobCenterPos.x);
       const dy = currentPos.y - (svgPos.y + knobCenterPos.y);
+      // 初期角度が真下なので、-90する。rotateにはdegreeを渡すのでラジアンから変換する。
       angle = Math.atan2(dy, dx) * (180 / Math.PI) - 90;
     }
     return angle;
@@ -106,8 +82,7 @@ const Knob = ({ handleValueChange }: Props) => {
       width="100"
       height="100"
       viewBox="0 0 100 100"
-      onMouseDown={handleStart}
-      onTouchStart={handleStart}
+      onMouseDown={handleMouseDown}
     >
       <circle
         cx={knobCenterPos.x}
