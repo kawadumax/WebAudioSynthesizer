@@ -73,7 +73,7 @@ const Knob = ({ handleValueChange }: Props) => {
     return angle;
   };
   // degree指定
-  const transform = `rotate(${angle}, 50, 50)`;
+  const transform = `rotate(${angle}, ${knobCenterPos.x}, ${knobCenterPos.y})`;
 
   return (
     <svg

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Knob from "@components/parts/Knob";
+import Display from "@components/parts/Display";
 
 interface Props {
   audioContext: AudioContext;
@@ -22,6 +23,7 @@ const GainKnob = ({ audioContext }: Props) => {
   return (
     <div className="gain-knob">
       <Knob handleValueChange={handleGainChange} />
+      <Display parameter={gain}></Display>
     </div>
   );
 };

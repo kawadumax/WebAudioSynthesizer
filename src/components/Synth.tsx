@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import "@styles/Synth.scss";
 import GainKnob from "@components/controls/GainKnob";
 
 const Synth = () => {
