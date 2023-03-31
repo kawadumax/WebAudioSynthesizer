@@ -22,7 +22,6 @@ const Knob = ({
   const knobCenterPos = { x: 50, y: 50 };
 
   const [angle, setAngle] = useState<number>(0);
-  // const [value, setValue] = useState<number>(defaultValue);
   const [isDragging, setIsDragging] = useState<boolean>(false);
   const [currentPos, setCurrentPos] = useState<Position>({ x: 0, y: 0 });
 
@@ -30,6 +29,8 @@ const Knob = ({
 
   const minAngle = -120;
   const maxAngle = 120;
+
+  // handleValueChange(defaultValue);
 
   useEffect(() => {
     if (isDragging) {
@@ -83,7 +84,7 @@ const Knob = ({
       const dx = currentPos.x - (svgPos.x + knobCenterPos.x);
       const dy = currentPos.y - (svgPos.y + knobCenterPos.y);
       // rotateにはdegreeを渡すのでラジアンから変換する。
-      // atan2は(dy,dx)と渡すのが普通だけど、回転の開始角を下から始めたかったので
+      // atan2は(dy,dx)と渡すのが普通だけど、回転の開始角を下から始めるため
       // dyとdxを入れ替えて、かつ上下を入れ替えて渡している。
       angle = Math.atan2(dx, -dy) * (180 / Math.PI);
     }
@@ -99,7 +100,7 @@ const Knob = ({
     const rateAngle = (angle - minAngle) / (maxAngle - minAngle);
     //重みを元に現在のvalueを計算
     const value = (maxValue - minValue) * rateAngle + minValue;
-    return Number(value.toFixed(2));
+    return value;
   };
 
   // degree指定

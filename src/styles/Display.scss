@@ -1,3 +1,5 @@
+@import url("https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap");
+
 .parameter-display {
   //   filter: drop-shadow(3px 3px 5px rgba(0, 0, 0, 0.5));
   display: block;
@@ -9,6 +11,7 @@
   background-color: white;
   color: rgba(0, 0, 0, 0.7);
   border-radius: 5px;
-  font-family: Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif;
+  font-family: "Share Tech Mono", monospace;
+  font-size: larger;
   box-shadow: 1px 1px 4px 1px rgba(0, 0, 0, 0.5) inset;
 }
