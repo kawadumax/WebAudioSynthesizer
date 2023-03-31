@@ -22,7 +22,7 @@ const GainKnob = ({ audioContext }: Props) => {
 
   return (
     <div className="gain-knob">
-      <Knob handleValueChange={handleGainChange} />
+      <Knob handleValueChange={handleGainChange} defaultValue={0.5} />
       <Display parameter={gain}></Display>
     </div>
   );
