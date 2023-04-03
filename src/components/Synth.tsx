@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import "@styles/Synth.scss";
 import GainKnob from "@components/controls/GainKnob";
+import PowerToggle from "./controls/PowerToggle";
 
 const Synth = () => {
   // オーディオコンテキストの初期化
@@ -55,13 +56,7 @@ const Synth = () => {
   return (
     <div className="synth" id="synth">
       {audioContext && <GainKnob audioContext={audioContext}></GainKnob>}
-      <label htmlFor="synthToggle">Synth On/Off</label>
-      <input
-        type="checkbox"
-        id="synthToggle"
-        checked={synthEnabled}
-        onChange={handleCheckboxChange}
-      />
+      <PowerToggle></PowerToggle>
     </div>
   );
 };

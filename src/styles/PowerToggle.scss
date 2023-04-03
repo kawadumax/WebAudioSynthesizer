@@ -1,0 +1,12 @@
+.power-toggle {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  .power-toggle-led {
+    margin-left: -15px;
+  }
+  label {
+    margin-right: -15px;
+  }
+}
