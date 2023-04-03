@@ -64,7 +64,6 @@ const Toggle = ({ onToggle }: ToggleProps) => {
           from={isChecked ? movedX : initialX}
           to={isChecked ? initialX : movedX}
           dur="0.2s"
-          // begin=
           fill="freeze"
           id="move"
         />

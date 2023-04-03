@@ -1,6 +1,7 @@
 import React, { useState, useEffect, Component } from "react";
 import Led from "@components/parts/Led";
 import Toggle from "@components/parts/Toggle";
+import Label from "@components/parts/Label";
 import "@styles/PowerToggle.scss";
 
 const PowerToggle = () => {
@@ -10,7 +11,7 @@ const PowerToggle = () => {
   };
   return (
     <div className="power-toggle">
-      <label>Power</label>
+      <Label>Power</Label>
       <Toggle onToggle={handlePower}></Toggle>
       <Led className="power-toggle-led" isActive={power}></Led>
     </div>
