@@ -4,21 +4,37 @@ import Key from "@components/parts/Key";
 interface Props {
   width?: number;
   height?: number;
+  numOfKeys?: number;
 }
 
-const Keyboard = ({ width, height }: Props) => {
-  const scale = ["C4", "D4", "E4", "F4", "G4", "A4", "B4", "C5", "D5", "E5"];
+const Keyboard = ({ width, height, numOfKeys = 12 }: Props) => {
   const Padding = 10;
   const KEYBOARD_WIDTH = (width ? width : 200) + Padding;
   const KEYBOARD_HEIGHT = (height ? height : 100) + Padding;
   return (
     <svg width={KEYBOARD_WIDTH} height={KEYBOARD_HEIGHT}>
-      {scale.map((item, index) => (
-        <Key color="white" key={index} x={index * 20} y={0}></Key>
+      {[...Array(numOfKeys)].map((_, index) => (
+        <Key
+          color="white"
+          key={index}
+          x={index * 20 + Padding / 2}
+          y={Padding / 2}
+        ></Key>
       ))}
-      {scale.map((item, index) => (
-        <Key color="black" key={index} x={index * 20} y={0}></Key>
-      ))}
+      {[...Array(numOfKeys)].map((_, index) => {
+        // シドの間とミファの間は飛ばす。
+        if (index % 7 == 3 || index % 7 == 6) {
+          return;
+        }
+        return (
+          <Key
+            color="black"
+            key={index}
+            x={index * 20 + Padding / 2 + 10}
+            y={Padding / 2}
+          ></Key>
+        );
+      })}
     </svg>
   );
 };
