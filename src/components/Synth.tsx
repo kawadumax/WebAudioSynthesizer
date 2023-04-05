@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import "@styles/Synth.scss";
 import GainKnob from "@components/controls/GainKnob";
-import PowerToggle from "./controls/PowerToggle";
+import PowerToggle from "@components/controls/PowerToggle";
+import Keyboard from "@components/controls/Keyboard";
 
 const Synth = () => {
   // オーディオコンテキストの初期化
@@ -62,6 +63,7 @@ const Synth = () => {
     <div className="synth" id="synth">
       {audioContext && <GainKnob audioContext={audioContext}></GainKnob>}
       <PowerToggle onPower={handlePowerChange}></PowerToggle>
+      <Keyboard></Keyboard>
     </div>
   );
 };
