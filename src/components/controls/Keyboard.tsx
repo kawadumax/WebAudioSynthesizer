@@ -22,8 +22,8 @@ const Keyboard = ({ width, height, numOfKeys = 12 }: Props) => {
         ></Key>
       ))}
       {[...Array(numOfKeys)].map((_, index) => {
-        // シドの間とミファの間は飛ばす。
-        if (index % 7 == 3 || index % 7 == 6) {
+        // シドの間とミファの間、一番最後は黒鍵の描画を飛ばす。
+        if (index % 7 == 3 || index % 7 == 6 || index == numOfKeys - 1) {
           return;
         }
         return (

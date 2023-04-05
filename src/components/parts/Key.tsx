@@ -6,9 +6,10 @@ interface Props {
   color: "black" | "white";
   x: number;
   y: number;
+  label?: string;
 }
 
-const Key = ({ className, color, x, y }: Props) => {
+const Key = ({ className, color, x, y, label = "C" }: Props) => {
   const WHITE_WIDTH = 20;
   const WHITE_HEIGHT = 100;
   const BLACK_WIDTH = WHITE_WIDTH - 6;
