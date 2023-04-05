@@ -24,6 +24,7 @@ const Keyboard = ({ width, height, numOfKeys = 12 }: Props) => {
           y={Padding / 2}
           width={KEY_WIDTH}
           height={KEYBOARD_HEIGHT}
+          index={index}
         ></Key>
       ))}
       {[...Array(numOfKeys)].map((_, index) => {
@@ -39,6 +40,7 @@ const Keyboard = ({ width, height, numOfKeys = 12 }: Props) => {
             y={Padding / 2}
             width={KEYBOARD_WIDTH / numOfKeys}
             height={KEYBOARD_HEIGHT}
+            index={index}
           ></Key>
         );
       })}
