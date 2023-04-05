@@ -4,11 +4,20 @@ import Toggle from "@components/parts/Toggle";
 import Label from "@components/parts/Label";
 import "@styles/PowerToggle.scss";
 
-const PowerToggle = () => {
+interface Props {
+  onPower: (isToggled: boolean) => void;
+}
+
+const PowerToggle = ({ onPower }: Props) => {
   const [power, setPower] = useState(false);
   const handlePower = () => {
     setPower(!power);
   };
+
+  useEffect(() => {
+    onPower(power);
+  }, [power]);
+
   return (
     <div className="power-toggle">
       <Label>Power</Label>

@@ -14,7 +14,6 @@ const Toggle = ({ onToggle }: ToggleProps) => {
   }, [isChecked]);
 
   const handleClick = () => {
-    // console.log("clicked! now :" + isChecked);
     setIsChecked(!isChecked);
     if (onToggle) {
       onToggle(!isChecked);
@@ -63,7 +62,7 @@ const Toggle = ({ onToggle }: ToggleProps) => {
           attributeName="cx"
           from={isChecked ? movedX : initialX}
           to={isChecked ? initialX : movedX}
-          dur="0.2s"
+          dur="0.1s"
           fill="freeze"
           id="move"
         />

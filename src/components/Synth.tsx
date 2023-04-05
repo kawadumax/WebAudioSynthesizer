@@ -20,14 +20,12 @@ const Synth = () => {
     };
   }, []); // 空の依存配列を指定して、このエフェクトをコンポーネントのマウント時にのみ実行します
 
-  const handleCheckboxChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  useEffect(() => {
     if (audioContext === null) {
       return;
     }
 
-    setSynthEnabled(event.target.checked);
-
-    if (event.target.checked) {
+    if (synthEnabled) {
       // シンセサイザをオンにする処理
       const gainNode = audioContext.createGain();
       const oscillator = audioContext.createOscillator();
@@ -51,12 +49,19 @@ const Synth = () => {
         oscillator.stop();
       }
     }
+  }, [synthEnabled]);
+
+  const handlePowerChange = (power: boolean) => {
+    if (audioContext === null) {
+      return;
+    }
+    setSynthEnabled(power);
   };
 
   return (
     <div className="synth" id="synth">
       {audioContext && <GainKnob audioContext={audioContext}></GainKnob>}
-      <PowerToggle></PowerToggle>
+      <PowerToggle onPower={handlePowerChange}></PowerToggle>
     </div>
   );
 };
