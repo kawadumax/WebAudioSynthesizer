@@ -9,16 +9,21 @@ interface Props {
 
 const Keyboard = ({ width, height, numOfKeys = 12 }: Props) => {
   const Padding = 10;
-  const KEYBOARD_WIDTH = (width ? width : 200) + Padding;
-  const KEYBOARD_HEIGHT = (height ? height : 100) + Padding;
+  const SVG_WIDTH = (width ? width : 200) + Padding;
+  const SVG_HEIGHT = (height ? height : 100) + Padding;
+  const KEYBOARD_WIDTH = width ? width : 200;
+  const KEYBOARD_HEIGHT = height ? height : 100;
+  const KEY_WIDTH = KEYBOARD_WIDTH / numOfKeys;
   return (
-    <svg width={KEYBOARD_WIDTH} height={KEYBOARD_HEIGHT}>
+    <svg width={SVG_WIDTH} height={SVG_HEIGHT}>
       {[...Array(numOfKeys)].map((_, index) => (
         <Key
           color="white"
           key={index}
-          x={index * 20 + Padding / 2}
+          x={index * KEY_WIDTH + Padding / 2}
           y={Padding / 2}
+          width={KEY_WIDTH}
+          height={KEYBOARD_HEIGHT}
         ></Key>
       ))}
       {[...Array(numOfKeys)].map((_, index) => {
@@ -30,8 +35,10 @@ const Keyboard = ({ width, height, numOfKeys = 12 }: Props) => {
           <Key
             color="black"
             key={index}
-            x={index * 20 + Padding / 2 + 10}
+            x={index * KEY_WIDTH + Padding / 2 + KEY_WIDTH / 2}
             y={Padding / 2}
+            width={KEYBOARD_WIDTH / numOfKeys}
+            height={KEYBOARD_HEIGHT}
           ></Key>
         );
       })}

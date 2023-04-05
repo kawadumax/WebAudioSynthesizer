@@ -63,7 +63,7 @@ const Synth = () => {
     <div className="synth" id="synth">
       {audioContext && <GainKnob audioContext={audioContext}></GainKnob>}
       <PowerToggle onPower={handlePowerChange}></PowerToggle>
-      <Keyboard numOfKeys={12} width={800} height={500}></Keyboard>
+      <Keyboard numOfKeys={12} width={800} height={300}></Keyboard>
     </div>
   );
 };
