@@ -5,6 +5,7 @@ interface Props {
   width?: number;
   height?: number;
   numOfKeys?: number;
+  audioContext: AudioContext;
 }
 
 const Keyboard = ({ width, height, numOfKeys = 12 }: Props) => {

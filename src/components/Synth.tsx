@@ -59,11 +59,28 @@ const Synth = () => {
     setSynthEnabled(power);
   };
 
+  const renderSynth = (audioContext: AudioContext | null) => {
+    if (audioContext) {
+      return (
+        <>
+          <GainKnob audioContext={audioContext}></GainKnob>
+          <PowerToggle onPower={handlePowerChange}></PowerToggle>
+          <Keyboard
+            numOfKeys={12}
+            width={800}
+            height={300}
+            audioContext={audioContext}
+          ></Keyboard>
+        </>
+      );
+    } else {
+      <p>Can Not Initialize Audio Context.</p>;
+    }
+  };
+
   return (
     <div className="synth" id="synth">
-      {audioContext && <GainKnob audioContext={audioContext}></GainKnob>}
-      <PowerToggle onPower={handlePowerChange}></PowerToggle>
-      <Keyboard numOfKeys={12} width={800} height={300}></Keyboard>
+      {renderSynth(audioContext)}
     </div>
   );
 };

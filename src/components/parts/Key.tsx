@@ -1,6 +1,5 @@
 import React from "react";
 import "@styles/Key.scss";
-import { transcode } from "buffer";
 
 interface Props {
   className?: string;
@@ -11,9 +10,19 @@ interface Props {
   height: number;
   // label?: string;
   index: number;
+  onKeyClick?: (key: number) => void;
 }
 
-const Key = ({ className, color, x, y, width, height, index }: Props) => {
+const Key = ({
+  className,
+  color,
+  x,
+  y,
+  width,
+  height,
+  index,
+  onKeyClick,
+}: Props) => {
   const labels = ["F", "G", "A", "B", "C", "D", "E"];
   const label = labels[index % 7];
   const WHITE_WIDTH = width;
@@ -22,15 +31,24 @@ const Key = ({ className, color, x, y, width, height, index }: Props) => {
   const BLACK_HEIGHT = WHITE_HEIGHT / 2;
   //フォントサイズは鍵の横幅に合わせる
   const WHITE_FONT_SIZE = WHITE_WIDTH;
+  const tone = 60;
+
   const transform = `translate(${x}, ${y})`;
+
+  const handleClick = (event: React.MouseEvent<SVGGElement, MouseEvent>) => {
+    if (onKeyClick) {
+      onKeyClick(tone);
+    }
+  };
+
   return (
-    <g className="key" transform={transform}>
+    <g className="key" transform={transform} onClick={handleClick}>
       <rect
         className={className + " " + color}
-        width={color == "white" ? WHITE_WIDTH : BLACK_WIDTH}
-        height={color == "white" ? WHITE_HEIGHT : BLACK_HEIGHT}
+        width={color === "white" ? WHITE_WIDTH : BLACK_WIDTH}
+        height={color === "white" ? WHITE_HEIGHT : BLACK_HEIGHT}
       ></rect>
-      {color == "white" ? (
+      {color === "white" ? (
         <text
           x={WHITE_WIDTH / 2}
           y={WHITE_HEIGHT - WHITE_FONT_SIZE}
@@ -38,7 +56,6 @@ const Key = ({ className, color, x, y, width, height, index }: Props) => {
           textAnchor="middle"
           dominantBaseline="central"
           fontFamily="Share Tech Mono, monospace"
-          fill="rgba(0,0,0,0.2)"
           fontWeight="thin"
         >
           {label}
