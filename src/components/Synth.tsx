@@ -8,12 +8,24 @@ const Synth = () => {
   // オーディオコンテキストの初期化
   const [synthEnabled, setSynthEnabled] = useState(false);
   const [oscillator, setOscillator] = useState<OscillatorNode | null>(null);
+  const [gainNode, setGainNode] = useState<GainNode | null>(null);
   const [audioContext, setAudioContext] = useState<AudioContext | null>(null);
 
   useEffect(() => {
     // ここにオーディオ関連の処理を記述します
     const audioContext = new window.AudioContext();
     setAudioContext(audioContext);
+
+    // シンセサイザの初期設定
+    const gainNode = audioContext.createGain();
+    const oscillator = audioContext.createOscillator();
+    setGainNode(gainNode);
+    setOscillator(oscillator);
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+
+    oscillator.frequency.setValueAtTime(440, audioContext.currentTime); // A4
+    oscillator.type = "sine";
 
     // コンポーネントのクリーンアップ時にオーディオコンテキストを閉じます
     return () => {
@@ -26,25 +38,13 @@ const Synth = () => {
       return;
     }
 
-    if (synthEnabled) {
-      // シンセサイザをオンにする処理
-      const gainNode = audioContext.createGain();
-      const oscillator = audioContext.createOscillator();
-
-      oscillator.connect(gainNode);
-      gainNode.connect(audioContext.destination);
-
-      oscillator.frequency.setValueAtTime(440, audioContext.currentTime); // A4
-      oscillator.type = "sine";
-
+    if (synthEnabled && oscillator && gainNode) {
       oscillator.start();
 
       oscillator.onended = () => {
         oscillator.disconnect(gainNode);
         gainNode.disconnect(audioContext.destination);
       };
-
-      setOscillator(oscillator);
     } else {
       if (oscillator) {
         oscillator.stop();

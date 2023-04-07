@@ -32,11 +32,13 @@ const Key = ({ className, color, x, y, width, height, index }: Props) => {
       ></rect>
       {color == "white" ? (
         <text
-          x={WHITE_WIDTH / 2 - 23}
-          y={WHITE_HEIGHT - 10}
+          x={WHITE_WIDTH / 2}
+          y={WHITE_HEIGHT - WHITE_FONT_SIZE}
           fontSize={WHITE_FONT_SIZE}
+          textAnchor="middle"
+          dominantBaseline="central"
           fontFamily="Share Tech Mono, monospace"
-          fill="rgba(0,0,0,0.6)"
+          fill="rgba(0,0,0,0.2)"
           fontWeight="thin"
         >
           {label}
