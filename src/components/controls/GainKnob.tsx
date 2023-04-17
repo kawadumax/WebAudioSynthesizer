@@ -1,23 +1,22 @@
 import React, { useState, useEffect } from "react";
 import Knob from "@components/parts/Knob";
 import Display from "@components/parts/Display";
+import { useAudioContextCircuit } from "../circuits/AudioContextCircuit";
 
-interface Props {
-  audioContext: AudioContext;
-}
-
-const GainKnob = ({ audioContext }: Props) => {
-  const [gain, setGain] = useState<number>(0);
-
-  const gainNode = audioContext.createGain();
-  gainNode.gain.value = gain;
+const GainKnob = () => {
+  const [gain, setGain] = useState(0.5);
+  const { gainNode } = useAudioContextCircuit();
 
   useEffect(() => {
-    gainNode.gain.value = gain;
-  }, [gain, gainNode.gain]);
+    if (gainNode) {
+      gainNode.gain.value = gain;
+    }
+  }, [gain]);
 
   const handleGainChange = (newGain: number) => {
-    setGain(newGain);
+    if (gainNode) {
+      setGain(newGain);
+    }
   };
 
   return (

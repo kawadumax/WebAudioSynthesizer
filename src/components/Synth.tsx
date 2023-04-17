@@ -3,52 +3,37 @@ import "@styles/Synth.scss";
 import GainKnob from "@components/controls/GainKnob";
 import PowerToggle from "@components/controls/PowerToggle";
 import Keyboard from "@components/controls/Keyboard";
-
+import { useAudioContextCircuit } from "./circuits/AudioContextCircuit";
 const Synth = () => {
   // オーディオコンテキストの初期化
   const [synthEnabled, setSynthEnabled] = useState(false);
-  const [oscillator, setOscillator] = useState<OscillatorNode | null>(null);
-  const [gainNode, setGainNode] = useState<GainNode | null>(null);
-  const [audioContext, setAudioContext] = useState<AudioContext | null>(null);
+  const {
+    audioContext,
+    gainNode,
+    oscillatorNode,
+    createAudioContext,
+    closeAudioContext,
+    // createOscillator,
+    startOscillator,
+    stopOscillator,
+  } = useAudioContextCircuit();
 
   useEffect(() => {
     // ここにオーディオ関連の処理を記述します
-    const audioContext = new window.AudioContext();
-    setAudioContext(audioContext);
-
-    // シンセサイザの初期設定
-    const gainNode = audioContext.createGain();
-    const oscillator = audioContext.createOscillator();
-    setGainNode(gainNode);
-    setOscillator(oscillator);
-    oscillator.connect(gainNode);
-    gainNode.connect(audioContext.destination);
-
-    oscillator.frequency.setValueAtTime(440, audioContext.currentTime); // A4
-    oscillator.type = "sine";
+    createAudioContext();
 
     // コンポーネントのクリーンアップ時にオーディオコンテキストを閉じます
     return () => {
-      audioContext.close();
+      closeAudioContext();
     };
   }, []); // 空の依存配列を指定して、このエフェクトをコンポーネントのマウント時にのみ実行します
 
   useEffect(() => {
-    if (audioContext === null) {
-      return;
-    }
-
-    if (synthEnabled && oscillator && gainNode) {
-      oscillator.start();
-
-      oscillator.onended = () => {
-        oscillator.disconnect(gainNode);
-        gainNode.disconnect(audioContext.destination);
-      };
+    console.log(synthEnabled);
+    if (synthEnabled) {
+      startOscillator();
     } else {
-      if (oscillator) {
-        oscillator.stop();
-      }
+      stopOscillator();
     }
   }, [synthEnabled]);
 
@@ -63,7 +48,7 @@ const Synth = () => {
     if (audioContext) {
       return (
         <>
-          <GainKnob audioContext={audioContext}></GainKnob>
+          <GainKnob></GainKnob>
           <PowerToggle onPower={handlePowerChange}></PowerToggle>
           <Keyboard
             numOfKeys={12}
@@ -74,7 +59,7 @@ const Synth = () => {
         </>
       );
     } else {
-      <p>Can Not Initialize Audio Context.</p>;
+      return <p>Can Not Initialize Audio Context.</p>;
     }
   };
 
