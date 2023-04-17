@@ -1,5 +1,6 @@
 import React from "react";
 import Key from "@components/parts/Key";
+import useKeyboardCircuit from "../circuits/KeyboardCircuit";
 
 interface Props {
   width?: number;
@@ -15,6 +16,10 @@ const Keyboard = ({ width, height, numOfKeys = 12 }: Props) => {
   const KEYBOARD_WIDTH = width ? width : 200;
   const KEYBOARD_HEIGHT = height ? height : 100;
   const KEY_WIDTH = KEYBOARD_WIDTH / numOfKeys;
+  const { allToneNames } = useKeyboardCircuit();
+
+  console.log(allToneNames);
+
   return (
     <svg width={SVG_WIDTH} height={SVG_HEIGHT}>
       {[...Array(numOfKeys)].map((_, index) => (

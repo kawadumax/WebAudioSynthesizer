@@ -28,14 +28,13 @@ const Synth = () => {
     };
   }, []); // 空の依存配列を指定して、このエフェクトをコンポーネントのマウント時にのみ実行します
 
-  useEffect(() => {
-    console.log(synthEnabled);
-    if (synthEnabled) {
-      startOscillator();
-    } else {
-      stopOscillator();
-    }
-  }, [synthEnabled]);
+  // useEffect(() => {
+  //   if (synthEnabled) {
+  //     startOscillator();
+  //   } else {
+  //     stopOscillator();
+  //   }
+  // }, [synthEnabled]);
 
   const handlePowerChange = (power: boolean) => {
     if (audioContext === null) {
