@@ -2,7 +2,9 @@ import { useState, useCallback } from "react";
 
 const useKeyboardCircuit = () => {
   const getFreqByToneNumber = (tone: number) => {
-    return Math.exp((tone / 12) * Math.log(2));
+    //1オクターブで周波数が2倍なので、半音上がると2の十二乗根倍になる。
+    //これを元に、48番目の音階であるA4=440hzを基準として計算で周波数を求める。
+    return standardTuningPitch.A4 * Math.exp(((tone - 48) / 12) * Math.log(2));
   };
 
   const toneNamesSharp = [
@@ -38,10 +40,21 @@ const useKeyboardCircuit = () => {
     toneNamesSharp.map((tone) => tone + octave)
   );
   const standardTuningPitch = { A4: 440 };
-  const aPitches = { A3: 220, A2: 110, A1: 55, A0: 27.5 };
+  // const aPitches = { A3: 220, A2: 110, A1: 55, A0: 27.5 };
   // const minPitch = { A0: standardTuningPitch["A4"] / 16 };
 
-  return { allToneNames };
+  const wholeTones = allToneNames.map((tone, index) => {
+    return {
+      [tone]: getFreqByToneNumber(index),
+    };
+  });
+
+  const naturalTones = wholeTones.filter((obj) => {
+    const key = Object.keys(obj);
+    return key.length < 3;
+  });
+
+  return { wholeTones, naturalTones };
 };
 
 export default useKeyboardCircuit;

@@ -3,24 +3,28 @@ import "@styles/Key.scss";
 
 interface Props {
   className?: string;
-  color: "black" | "white";
+  keyColor: "black" | "white";
   x: number;
   y: number;
   width: number;
   height: number;
   // label?: string;
   index: number;
+  toneName?: string;
+  toneFreq?: number;
   onKeyClick?: (key: number) => void;
 }
 
 const Key = ({
   className,
-  color,
+  keyColor,
   x,
   y,
   width,
   height,
   index,
+  toneName,
+  toneFreq,
   onKeyClick,
 }: Props) => {
   const labels = ["F", "G", "A", "B", "C", "D", "E"];
@@ -44,11 +48,11 @@ const Key = ({
   return (
     <g className="key" transform={transform} onClick={handleClick}>
       <rect
-        className={className + " " + color}
-        width={color === "white" ? WHITE_WIDTH : BLACK_WIDTH}
-        height={color === "white" ? WHITE_HEIGHT : BLACK_HEIGHT}
+        className={className + " " + keyColor}
+        width={keyColor === "white" ? WHITE_WIDTH : BLACK_WIDTH}
+        height={keyColor === "white" ? WHITE_HEIGHT : BLACK_HEIGHT}
       ></rect>
-      {color === "white" ? (
+      {keyColor === "white" ? (
         <text
           x={WHITE_WIDTH / 2}
           y={WHITE_HEIGHT - WHITE_FONT_SIZE}
