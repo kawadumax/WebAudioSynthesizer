@@ -55,10 +55,10 @@ const Key = ({
           fontFamily="Share Tech Mono, monospace"
           fontWeight="thin"
         >
-          <tspan textAnchor="middle" dominantBaseline="central">
+          <tspan textAnchor="middle" dominantBaseline="hanging">
             {toneName ? toneName[0] : null}
           </tspan>
-          <tspan dx="-10" textAnchor="middle" dominantBaseline="central">
+          <tspan dx="-10" textAnchor="middle" dominantBaseline="hanging">
             {toneName ? toneName[1] : null}
           </tspan>
         </text>

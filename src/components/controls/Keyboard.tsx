@@ -10,26 +10,28 @@ interface Props {
 }
 
 const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
-  const Padding = 10;
-  const SVG_WIDTH = (width ? width : 200) + Padding;
-  const SVG_HEIGHT = (height ? height : 100) + Padding;
-  const KEYBOARD_WIDTH = width ? width : 200;
-  const KEYBOARD_HEIGHT = height ? height : 100;
-  const KEY_WIDTH = KEYBOARD_WIDTH / numOfKeys;
   const { makeSequencedKeys } = useKeyboardCircuit();
-
-  // keyにhandlerを渡す
-  const handleKeyPressed = (keyOrFreq: string | number, freq?: number) => {
-    console.log(keyOrFreq);
-    if (freq) console.log(freq);
-  };
-
   const startKey = 44;
   const endKey = startKey + numOfKeys;
   const { wholeTones, naturalTones, accidentalTones } = makeSequencedKeys(
     startKey,
     endKey
   );
+  
+  const Padding = 10;
+  const SVG_WIDTH = (width ? width : 200) + Padding;
+  const SVG_HEIGHT = (height ? height : 100) + Padding;
+  const KEYBOARD_WIDTH = width ? width : 200;
+  const KEYBOARD_HEIGHT = height ? height : 100;
+  const KEY_WIDTH = KEYBOARD_WIDTH / naturalTones.length;
+
+  console.log("KEY_WIDTH: " + KEY_WIDTH);
+
+  // keyにhandlerを渡す
+  const handleKeyPressed = (keyOrFreq: string | number, freq?: number) => {
+    console.log(keyOrFreq);
+    if (freq) console.log(freq);
+  };
 
   const renderBlackKeys = () => {
     const result: Array<JSX.Element | null> = [];
@@ -51,7 +53,7 @@ const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
             key={index}
             x={index * KEY_WIDTH + Padding / 2 + KEY_WIDTH / 2}
             y={Padding / 2}
-            width={KEYBOARD_WIDTH / numOfKeys}
+            width={KEY_WIDTH}
             height={KEYBOARD_HEIGHT}
             index={index}
             onKeyClick={handleKeyPressed}
