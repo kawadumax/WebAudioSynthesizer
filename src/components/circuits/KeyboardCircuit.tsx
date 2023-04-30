@@ -1,7 +1,10 @@
-import { useState, useCallback } from "react";
-
 const useKeyboardCircuit = () => {
-  const getFreqByToneNumber = (tone: number) => {
+  interface Tone {
+    name: string;
+    freq: number;
+  }
+
+  const toneNumberToFreq = (tone: number) => {
     //1オクターブで周波数が2倍なので、半音上がると2の十二乗根倍になる。
     //これを元に、48番目の音階であるA4=440hzを基準として計算で周波数を求める。
     return standardTuningPitch.A4 * Math.exp(((tone - 48) / 12) * Math.log(2));
@@ -43,18 +46,35 @@ const useKeyboardCircuit = () => {
   // const aPitches = { A3: 220, A2: 110, A1: 55, A0: 27.5 };
   // const minPitch = { A0: standardTuningPitch["A4"] / 16 };
 
-  const wholeTones = allToneNames.map((tone, index) => {
+  const wholeTones: Tone[] = allToneNames.map((tone, index) => {
     return {
-      [tone]: getFreqByToneNumber(index),
+      name: tone,
+      freq: toneNumberToFreq(index),
     };
   });
 
-  const naturalTones = wholeTones.filter((obj) => {
-    const key = Object.keys(obj);
-    return key.length < 3;
+  const wholeNaturalTones = wholeTones.filter((tone) => {
+    return tone.name.length < 3;
   });
 
-  return { wholeTones, naturalTones };
+  const wholeAccidentalTones = wholeTones.filter((tone) => {
+    return tone.name.length >= 3;
+  });
+
+  const makeSequencedKeys = (startIndex: number, endIndex: number) => {
+    const rangedWholeTones = wholeTones.slice(startIndex, endIndex);
+
+    const naturalTones = rangedWholeTones.filter((tone) => {
+      return tone.name.length < 3;
+    });
+
+    const accidentalTones = rangedWholeTones.filter((tone) => {
+      return tone.name.length >= 3;
+    });
+    return { wholeTones, naturalTones, accidentalTones };
+  };
+
+  return { makeSequencedKeys };
 };
 
 export default useKeyboardCircuit;

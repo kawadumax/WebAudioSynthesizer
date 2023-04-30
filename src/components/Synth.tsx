@@ -50,8 +50,8 @@ const Synth = () => {
           <GainKnob></GainKnob>
           <PowerToggle onPower={handlePowerChange}></PowerToggle>
           <Keyboard
-            numOfKeys={12}
-            width={800}
+            numOfKeys={24}
+            width={1600}
             height={300}
             audioContext={audioContext}
           ></Keyboard>
