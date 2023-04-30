@@ -12,6 +12,8 @@ interface Props {
   toneName?: string;
   toneFreq?: number;
   onKeyClick?: (keyOrFreq: string | number, freq?: number) => void;
+  onKeyPressed?: (keyOrFreq: string | number, freq?: number) => void;
+  onKeyReleased?: (keyOrFreq: string | number, freq?: number) => void;
 }
 
 const Key = ({
@@ -24,6 +26,8 @@ const Key = ({
   toneName,
   toneFreq,
   onKeyClick,
+  onKeyPressed,
+  onKeyReleased
 }: Props) => {
   const WHITE_WIDTH = width;
   const WHITE_HEIGHT = height;
@@ -35,13 +39,25 @@ const Key = ({
   const transform = `translate(${x}, ${y})`;
 
   const handleClick = (event: React.MouseEvent<SVGGElement, MouseEvent>) => {
-    if (onKeyClick) {
-      if (toneName && toneFreq) onKeyClick(toneName, toneFreq);
+    // if (onKeyClick) {
+    //   if (toneName && toneFreq) onKeyClick(toneName, toneFreq);
+    // }
+  };
+
+  const handleMouseDown = (event: React.MouseEvent<SVGGElement, MouseEvent>) => {
+    if (onKeyPressed) {
+      if (toneName && toneFreq) onKeyPressed(toneName, toneFreq);
+    }
+  };
+
+  const handleMouseUp = (event: React.MouseEvent<SVGGElement, MouseEvent>) => {
+    if (onKeyReleased) {
+      if (toneName && toneFreq) onKeyReleased(toneName, toneFreq);
     }
   };
 
   return (
-    <g className="key" transform={transform} onClick={handleClick}>
+    <g className="key" transform={transform} onClick={handleClick} onMouseDown={handleMouseDown} onMouseUp={handleMouseUp}>
       <rect
         className={className + " " + keyColor}
         width={keyColor === "white" ? WHITE_WIDTH : BLACK_WIDTH}

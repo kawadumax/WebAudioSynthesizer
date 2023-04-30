@@ -11,7 +11,7 @@ interface AudioContextStore {
   createAudioContext: () => void;
   closeAudioContext: () => void;
   // createOscillator: () => void;
-  startOscillator: () => void;
+  startOscillator: (freq: number) => void;
   stopOscillator: () => void;
 }
 
@@ -51,14 +51,14 @@ const AudioContextCircuit = ({ children }: AudioContextCircuitProps) => {
     }
   };
 
-  const startOscillator = () => {
+  const startOscillator = (freq:number) => {
     if (audioContext && gainNode) {
       const oscillatorNode = audioContext.createOscillator();
+      setOscillatorNode(oscillatorNode);
       oscillatorNode.connect(gainNode);
       gainNode.connect(audioContext.destination);
-      oscillatorNode.frequency.setValueAtTime(440, audioContext.currentTime); // A4
+      oscillatorNode.frequency.setValueAtTime(freq, audioContext.currentTime); // A4
       oscillatorNode.type = "sine";
-      setOscillatorNode(oscillatorNode);
       oscillatorNode.start();
       oscillatorNode.onended = () => {
         oscillatorNode.disconnect(gainNode);

@@ -1,6 +1,7 @@
 import React from "react";
 import Key from "@components/parts/Key";
 import useKeyboardCircuit from "../circuits/KeyboardCircuit";
+import { useAudioContextCircuit } from "../circuits/AudioContextCircuit";
 
 interface Props {
   width?: number;
@@ -10,6 +11,16 @@ interface Props {
 }
 
 const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
+  const {
+    // audioContext,
+    // gainNode,
+    // oscillatorNode,
+    // createAudioContext,
+    // closeAudioContext,
+    // createOscillator,
+    startOscillator,
+    stopOscillator,
+  } = useAudioContextCircuit();
   const { makeSequencedKeys } = useKeyboardCircuit();
   const startKey = 44;
   const endKey = startKey + numOfKeys;
@@ -31,6 +42,7 @@ const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
   const handleKeyPressed = (keyOrFreq: string | number, freq?: number) => {
     console.log(keyOrFreq);
     if (freq) console.log(freq);
+    if (freq) startOscillator(freq);
   };
 
   const renderBlackKeys = () => {
@@ -56,7 +68,7 @@ const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
             width={KEY_WIDTH}
             height={KEYBOARD_HEIGHT}
             index={index}
-            onKeyClick={handleKeyPressed}
+            onKeyPressed={handleKeyPressed}
             toneName={atone.name}
             toneFreq={atone.freq}
           ></Key>

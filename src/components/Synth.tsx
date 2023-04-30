@@ -9,13 +9,8 @@ const Synth = () => {
   const [synthEnabled, setSynthEnabled] = useState(false);
   const {
     audioContext,
-    gainNode,
-    oscillatorNode,
     createAudioContext,
     closeAudioContext,
-    // createOscillator,
-    startOscillator,
-    stopOscillator,
   } = useAudioContextCircuit();
 
   useEffect(() => {
