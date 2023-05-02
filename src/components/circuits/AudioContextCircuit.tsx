@@ -59,7 +59,6 @@ const AudioContextCircuit = ({ children }: AudioContextCircuitProps) => {
       oscillatorNode.start();
       oscillatorNode.onended = () => {
         oscillatorNode.disconnect(gainNode);
-        gainNode.disconnect(audioContext.destination);
       };
       setSoundSouces([
         ...soundSources,
@@ -72,10 +71,11 @@ const AudioContextCircuit = ({ children }: AudioContextCircuitProps) => {
   };
 
   const stopOscillator = (tone: Tone) => {
-    const soundSource = soundSources.find((ss) => {
+    const index = soundSources.findIndex((ss) => {
       return ss.tone.name === tone.name;
     });
-    soundSource?.oscNode.stop();
+    const source = soundSources.splice(index)[0];
+    source.oscNode.stop();
   };
 
   return (

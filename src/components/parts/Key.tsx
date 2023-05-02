@@ -67,7 +67,7 @@ const Key = ({
         width={keyColor === "white" ? WHITE_WIDTH : BLACK_WIDTH}
         height={keyColor === "white" ? WHITE_HEIGHT : BLACK_HEIGHT}
       ></rect>
-      {keyColor === "white" ? (
+      {keyColor === "white" ? ( //白鍵にだけ音階名を付記
         <text
           x={WHITE_WIDTH / 2}
           y={WHITE_HEIGHT - WHITE_FONT_SIZE}
