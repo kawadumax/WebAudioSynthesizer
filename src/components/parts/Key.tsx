@@ -38,18 +38,22 @@ const Key = ({
   const handleMouseDown = (
     event: React.MouseEvent<SVGGElement, MouseEvent>
   ) => {
+    event.preventDefault();
     if (onKeyPressed) onKeyPressed(tone);
   };
 
   const handleMouseUp = (event: React.MouseEvent<SVGGElement, MouseEvent>) => {
+    event.preventDefault();
     if (onKeyReleased) onKeyReleased(tone);
   };
 
   const handleTouchStart = (event: React.TouchEvent<SVGGElement>) => {
+    event.preventDefault();
     if (onKeyPressed) onKeyPressed(tone);
   };
 
   const handleTouchEnd = (event: React.TouchEvent<SVGGElement>) => {
+    event.preventDefault();
     if (onKeyReleased) onKeyReleased(tone);
   };
 
