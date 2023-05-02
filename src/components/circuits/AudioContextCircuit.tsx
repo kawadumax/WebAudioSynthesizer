@@ -74,8 +74,10 @@ const AudioContextCircuit = ({ children }: AudioContextCircuitProps) => {
     const index = soundSources.findIndex((ss) => {
       return ss.tone.name === tone.name;
     });
-    const source = soundSources.splice(index)[0];
-    source.oscNode.stop();
+    if(index >= 0){
+      const source = soundSources.splice(index, 1)[0];
+      source.oscNode.stop();
+    }
   };
 
   return (

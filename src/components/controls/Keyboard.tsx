@@ -28,11 +28,12 @@ const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
   const KEY_WIDTH = KEYBOARD_WIDTH / naturalTones.length;
 
   const handleKeyPressed = (tone: Tone) => {
-    console.log({ ...tone });
+    console.log("Pressed: ", { ...tone });
     startOscillator(tone);
   };
 
   const handleKeyReleased = (tone: Tone) => {
+    console.log("Released: ", { ...tone });
     stopOscillator(tone);
   };
 
