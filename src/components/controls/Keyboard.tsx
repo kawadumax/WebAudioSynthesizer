@@ -1,7 +1,7 @@
-import React from "react";
 import Key from "@components/parts/Key";
 import useKeyboardCircuit from "../circuits/KeyboardCircuit";
 import { useAudioContextCircuit } from "../circuits/AudioContextCircuit";
+import { Tone } from "../circuits/TypeCircuit";
 
 interface Props {
   width?: number;
@@ -11,16 +11,7 @@ interface Props {
 }
 
 const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
-  const {
-    // audioContext,
-    // gainNode,
-    // oscillatorNode,
-    // createAudioContext,
-    // closeAudioContext,
-    // createOscillator,
-    startOscillator,
-    stopOscillator,
-  } = useAudioContextCircuit();
+  const { startOscillator, stopOscillator } = useAudioContextCircuit();
   const { makeSequencedKeys } = useKeyboardCircuit();
   const startKey = 44;
   const endKey = startKey + numOfKeys;
@@ -28,7 +19,7 @@ const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
     startKey,
     endKey
   );
-  
+
   const Padding = 10;
   const SVG_WIDTH = (width ? width : 200) + Padding;
   const SVG_HEIGHT = (height ? height : 100) + Padding;
@@ -36,13 +27,13 @@ const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
   const KEYBOARD_HEIGHT = height ? height : 100;
   const KEY_WIDTH = KEYBOARD_WIDTH / naturalTones.length;
 
-  console.log("KEY_WIDTH: " + KEY_WIDTH);
+  const handleKeyPressed = (tone: Tone) => {
+    console.log({ ...tone });
+    startOscillator(tone);
+  };
 
-  // keyにhandlerを渡す
-  const handleKeyPressed = (keyOrFreq: string | number, freq?: number) => {
-    console.log(keyOrFreq);
-    if (freq) console.log(freq);
-    if (freq) startOscillator(freq);
+  const handleKeyReleased = (tone: Tone) => {
+    stopOscillator(tone);
   };
 
   const renderBlackKeys = () => {
@@ -69,8 +60,8 @@ const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
             height={KEYBOARD_HEIGHT}
             index={index}
             onKeyPressed={handleKeyPressed}
-            toneName={atone.name}
-            toneFreq={atone.freq}
+            onKeyReleased={handleKeyReleased}
+            tone={atone}
           ></Key>
         );
       }
@@ -89,9 +80,8 @@ const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
           width={KEY_WIDTH}
           height={KEYBOARD_HEIGHT}
           index={index}
-          onKeyClick={handleKeyPressed}
-          toneName={tone.name}
-          toneFreq={tone.freq}
+          onKeyReleased={handleKeyReleased}
+          tone={tone}
         ></Key>
       ))}
       {renderBlackKeys()}

@@ -7,11 +7,8 @@ import { useAudioContextCircuit } from "./circuits/AudioContextCircuit";
 const Synth = () => {
   // オーディオコンテキストの初期化
   const [synthEnabled, setSynthEnabled] = useState(false);
-  const {
-    audioContext,
-    createAudioContext,
-    closeAudioContext,
-  } = useAudioContextCircuit();
+  const { audioContext, createAudioContext, closeAudioContext } =
+    useAudioContextCircuit();
 
   useEffect(() => {
     // ここにオーディオ関連の処理を記述します
@@ -46,7 +43,7 @@ const Synth = () => {
           <PowerToggle onPower={handlePowerChange}></PowerToggle>
           <Keyboard
             numOfKeys={24}
-            width={1600}
+            width={1200}
             height={300}
             audioContext={audioContext}
           ></Keyboard>

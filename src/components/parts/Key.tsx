@@ -1,4 +1,5 @@
 import React from "react";
+import { Tone } from "../circuits/TypeCircuit";
 import "@styles/Key.scss";
 
 interface Props {
@@ -9,11 +10,9 @@ interface Props {
   width: number;
   height: number;
   index: number;
-  toneName?: string;
-  toneFreq?: number;
-  onKeyClick?: (keyOrFreq: string | number, freq?: number) => void;
-  onKeyPressed?: (keyOrFreq: string | number, freq?: number) => void;
-  onKeyReleased?: (keyOrFreq: string | number, freq?: number) => void;
+  tone: Tone;
+  onKeyPressed?: (tone: Tone) => void;
+  onKeyReleased?: (tone: Tone) => void;
 }
 
 const Key = ({
@@ -23,11 +22,9 @@ const Key = ({
   y,
   width,
   height,
-  toneName,
-  toneFreq,
-  onKeyClick,
+  tone,
   onKeyPressed,
-  onKeyReleased
+  onKeyReleased,
 }: Props) => {
   const WHITE_WIDTH = width;
   const WHITE_HEIGHT = height;
@@ -38,26 +35,27 @@ const Key = ({
 
   const transform = `translate(${x}, ${y})`;
 
-  const handleClick = (event: React.MouseEvent<SVGGElement, MouseEvent>) => {
-    // if (onKeyClick) {
-    //   if (toneName && toneFreq) onKeyClick(toneName, toneFreq);
-    // }
-  };
-
-  const handleMouseDown = (event: React.MouseEvent<SVGGElement, MouseEvent>) => {
+  const handleMouseDown = (
+    event: React.MouseEvent<SVGGElement, MouseEvent>
+  ) => {
     if (onKeyPressed) {
-      if (toneName && toneFreq) onKeyPressed(toneName, toneFreq);
+      if (tone) onKeyPressed(tone);
     }
   };
 
   const handleMouseUp = (event: React.MouseEvent<SVGGElement, MouseEvent>) => {
     if (onKeyReleased) {
-      if (toneName && toneFreq) onKeyReleased(toneName, toneFreq);
+      if (tone) onKeyReleased(tone);
     }
   };
 
   return (
-    <g className="key" transform={transform} onClick={handleClick} onMouseDown={handleMouseDown} onMouseUp={handleMouseUp}>
+    <g
+      className="key"
+      transform={transform}
+      onMouseDown={handleMouseDown}
+      onMouseUp={handleMouseUp}
+    >
       <rect
         className={className + " " + keyColor}
         width={keyColor === "white" ? WHITE_WIDTH : BLACK_WIDTH}
@@ -72,10 +70,10 @@ const Key = ({
           fontWeight="thin"
         >
           <tspan textAnchor="middle" dominantBaseline="hanging">
-            {toneName ? toneName[0] : null}
+            {tone.name ? tone.name[0] : null}
           </tspan>
           <tspan dx="-10" textAnchor="middle" dominantBaseline="hanging">
-            {toneName ? toneName[1] : null}
+            {tone.name ? tone.name[1] : null}
           </tspan>
         </text>
       ) : null}

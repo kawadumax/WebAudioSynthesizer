@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState } from "react";
+import { SoundSource, Tone } from "./TypeCircuit";
 
 interface AudioContextCircuitProps {
   children: React.ReactNode;
@@ -7,21 +8,19 @@ interface AudioContextCircuitProps {
 interface AudioContextStore {
   audioContext: AudioContext | null;
   gainNode: GainNode | null;
-  oscillatorNode: OscillatorNode | null;
+  soundSources: SoundSource[];
   createAudioContext: () => void;
   closeAudioContext: () => void;
-  // createOscillator: () => void;
-  startOscillator: (freq: number) => void;
-  stopOscillator: () => void;
+  startOscillator: (tone: Tone) => void;
+  stopOscillator: (tone: Tone) => void;
 }
 
 const AudioContextContainer = createContext<AudioContextStore>({
   audioContext: null,
   gainNode: null,
-  oscillatorNode: null,
+  soundSources: [],
   createAudioContext: () => {},
   closeAudioContext: () => {},
-  // createOscillator: () => {},
   startOscillator: () => {},
   stopOscillator: () => {},
 });
@@ -29,14 +28,11 @@ const AudioContextContainer = createContext<AudioContextStore>({
 const AudioContextCircuit = ({ children }: AudioContextCircuitProps) => {
   const [audioContext, setAudioContext] = useState<AudioContext | null>(null);
   const [gainNode, setGainNode] = useState<GainNode | null>(null);
-  const [oscillatorNode, setOscillatorNode] = useState<OscillatorNode | null>(
-    null
-  );
+  const [soundSources, setSoundSouces] = useState<SoundSource[]>([]);
 
   const createAudioContext = () => {
     const audioContext = new AudioContext();
     setAudioContext(audioContext);
-
     const gainNode = audioContext.createGain();
     gainNode.gain.setValueAtTime(0.5, audioContext.currentTime);
     gainNode.connect(audioContext.destination);
@@ -51,24 +47,35 @@ const AudioContextCircuit = ({ children }: AudioContextCircuitProps) => {
     }
   };
 
-  const startOscillator = (freq:number) => {
+  const startOscillator = (tone: Tone) => {
     if (audioContext && gainNode) {
       const oscillatorNode = audioContext.createOscillator();
-      setOscillatorNode(oscillatorNode);
       oscillatorNode.connect(gainNode);
-      gainNode.connect(audioContext.destination);
-      oscillatorNode.frequency.setValueAtTime(freq, audioContext.currentTime); // A4
+      oscillatorNode.frequency.setValueAtTime(
+        tone.freq,
+        audioContext.currentTime
+      );
       oscillatorNode.type = "sine";
       oscillatorNode.start();
       oscillatorNode.onended = () => {
         oscillatorNode.disconnect(gainNode);
         gainNode.disconnect(audioContext.destination);
       };
+      setSoundSouces([
+        ...soundSources,
+        {
+          tone: tone,
+          oscNode: oscillatorNode,
+        },
+      ]);
     }
   };
 
-  const stopOscillator = () => {
-    if (oscillatorNode) oscillatorNode.stop();
+  const stopOscillator = (tone: Tone) => {
+    const soundSource = soundSources.find((ss) => {
+      return ss.tone.name === tone.name;
+    });
+    soundSource?.oscNode.stop();
   };
 
   return (
@@ -76,10 +83,9 @@ const AudioContextCircuit = ({ children }: AudioContextCircuitProps) => {
       value={{
         audioContext,
         gainNode,
-        oscillatorNode,
+        soundSources,
         createAudioContext,
         closeAudioContext,
-        // createOscillator,
         startOscillator,
         stopOscillator,
       }}
