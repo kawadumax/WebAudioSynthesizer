@@ -80,6 +80,7 @@ const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
           width={KEY_WIDTH}
           height={KEYBOARD_HEIGHT}
           index={index}
+          onKeyPressed={handleKeyPressed}
           onKeyReleased={handleKeyReleased}
           tone={tone}
         ></Key>
