@@ -2,38 +2,65 @@
 
 header {
   display: flex;
-  justify-content: center;
+  justify-content: space-around;
   background-color: #282c34;
 
-  p {
-    padding: 10px;
-  }
+  h1,
   a,
-  p {
+  small {
+    font-family: "Share Tech Mono", monospace;
+  }
+
+  h1 {
+    color: white;
+    white-space: nowrap;
+  }
+
+  a {
     color: $primary-color;
   }
 
-  .react-logo {
-    display: flex;
+  nav {
+    ul {
+      display: flex;
+      justify-content: center;
 
-    p {
-      padding-right: 0;
-      margin-right: 0;
-      white-space: nowrap;
-    }
-
-    img {
-      height: 50%;
-      margin: auto 0;
-      animation: spin 10s linear infinite;
-    }
-
-    @keyframes spin {
-      0% {
-        transform: rotate(0deg);
+      li {
+        list-style: none;
+        padding: 10px;
       }
-      100% {
-        transform: rotate(360deg);
+    }
+  }
+
+  div.logo {
+    display: flex;
+    justify-content: left;
+
+    .react-logo {
+      display: flex;
+      align-items: center;
+
+      small {
+        white-space: nowrap;
+        margin-left: 10px;
+        color: white;
+        margin-top: 10px;
+      }
+
+      img {
+        height: 50%;
+        margin: auto 0;
+        animation: spin 10s linear infinite;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+
+        100% {
+          transform: rotate(360deg);
+        }
       }
     }
   }

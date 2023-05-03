@@ -4,7 +4,7 @@ import "@styles/About.scss";
 const About = () => {
   return (
     <section className="about" id="about">
-      <p>About Auther</p>
+      <h2>## About Auther</h2>
       <p>
         This Software is made by{" "}
         <a href="https://github.com/kawadumax">kawadumax</a>
@@ -15,7 +15,7 @@ const About = () => {
         If you would like to hire him, please feel free to contact (
         ultima.times.sounds[at]gmail.com ).
       </p>
-      <p>作者について</p>
+      <h2>## 作者について</h2>
       <p>
         このソフトウェアは <a href="https://github.com/kawadumax">kawadumax</a>{" "}
         によって作られました。
