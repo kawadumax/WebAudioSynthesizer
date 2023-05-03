@@ -1,4 +1,5 @@
 @import "variables";
+
 section.about {
   background-color: #282c34;
   color: white;
@@ -6,5 +7,10 @@ section.about {
 
   a {
     color: $primary-color;
+  }
+
+  h2,
+  p {
+    font-family: "Share Tech Mono", monospace;
   }
 }
