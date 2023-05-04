@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import "@styles/Synth.scss";
 import GainKnob from "@components/controls/GainKnob";
 import PowerToggle from "@components/controls/PowerToggle";
@@ -45,7 +45,6 @@ const Synth = () => {
             numOfKeys={24}
             width={1200}
             height={300}
-            audioContext={audioContext}
           ></Keyboard>
         </>
       );
