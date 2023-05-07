@@ -1,4 +1,5 @@
-import Key from "@components/parts/Key";
+import BlackKey from "@components/parts/BlackKey";
+import WhiteKey from "@components/parts/WhiteKey";
 import useKeyboardCircuit from "../circuits/KeyboardCircuit";
 import { useAudioContextCircuit } from "../circuits/AudioContextCircuit";
 import { Tone } from "../circuits/TypeCircuit";
@@ -36,6 +37,30 @@ const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
     stopOscillator(tone);
   };
 
+  const createKeyProps = (
+    index: number,
+    x: number,
+    tone: Tone,
+  ) => ({
+    key: index,
+    x,
+    y: Padding / 2,
+    width: KEY_WIDTH,
+    height: KEYBOARD_HEIGHT,
+    index,
+    onKeyPressed: handleKeyPressed,
+    onKeyReleased: handleKeyReleased,
+    tone,
+  });
+
+  const renderWhiteKeys = () =>{
+    return naturalTones.map((tone, index) => (
+      <WhiteKey
+        {...createKeyProps(index, index * KEY_WIDTH + Padding / 2, tone)}
+      ></WhiteKey>
+    ))
+  }
+
   const renderBlackKeys = () => {
     const result: Array<JSX.Element | null> = [];
 
@@ -51,18 +76,9 @@ const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
       const atone = accidentalTones.shift();
       if (atone) {
         result.push(
-          <Key
-            keyColor="black"
-            key={index}
-            x={index * KEY_WIDTH + Padding / 2 + KEY_WIDTH / 2}
-            y={Padding / 2}
-            width={KEY_WIDTH}
-            height={KEYBOARD_HEIGHT}
-            index={index}
-            onKeyPressed={handleKeyPressed}
-            onKeyReleased={handleKeyReleased}
-            tone={atone}
-          ></Key>
+          <BlackKey
+            {...createKeyProps(index, index * KEY_WIDTH + Padding / 2 + KEY_WIDTH / 2, atone)}
+          ></BlackKey>
         );
       }
     });
@@ -71,20 +87,7 @@ const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
 
   return (
     <svg width={SVG_WIDTH} height={SVG_HEIGHT}>
-      {naturalTones.map((tone, index) => (
-        <Key
-          keyColor="white"
-          key={index}
-          x={index * KEY_WIDTH + Padding / 2}
-          y={Padding / 2}
-          width={KEY_WIDTH}
-          height={KEYBOARD_HEIGHT}
-          index={index}
-          onKeyPressed={handleKeyPressed}
-          onKeyReleased={handleKeyReleased}
-          tone={tone}
-        ></Key>
-      ))}
+      {renderWhiteKeys()}
       {renderBlackKeys()}
     </svg>
   );
