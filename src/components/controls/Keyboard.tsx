@@ -15,7 +15,7 @@ const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
   const { makeSequencedKeys } = useKeyboardCircuit();
   const startKey = 44;
   const endKey = startKey + numOfKeys;
-  const { wholeTones, naturalTones, accidentalTones } = makeSequencedKeys(
+  const { naturalTones, accidentalTones } = makeSequencedKeys(
     startKey,
     endKey
   );
@@ -68,7 +68,7 @@ const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
       if (
         ntone.name.includes("E") ||
         ntone.name.includes("B") ||
-        index == naturalTones.length - 1
+        index === naturalTones.length - 1
       ) {
         result.push(null);
         return;
