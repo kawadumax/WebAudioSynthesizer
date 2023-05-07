@@ -1,11 +1,11 @@
 import React, { createContext, useContext, useState } from "react";
 import { SoundSource, Tone } from "./TypeCircuit";
 
-interface AudioContextCircuitProps {
+interface Props {
   children: React.ReactNode;
 }
 
-interface AudioContextStore {
+interface AudioContextContainer {
   audioContext: AudioContext | null;
   gainNode: GainNode | null;
   soundSources: SoundSource[];
@@ -15,7 +15,7 @@ interface AudioContextStore {
   stopOscillator: (tone: Tone) => void;
 }
 
-const AudioContextContainer = createContext<AudioContextStore>({
+const AudioContextContainer = createContext<AudioContextContainer>({
   audioContext: null,
   gainNode: null,
   soundSources: [],
@@ -25,7 +25,7 @@ const AudioContextContainer = createContext<AudioContextStore>({
   stopOscillator: () => {},
 });
 
-const AudioContextCircuit = ({ children }: AudioContextCircuitProps) => {
+const AudioContextCircuit = ({ children }: Props) => {
   const [audioContext, setAudioContext] = useState<AudioContext | null>(null);
   const [gainNode, setGainNode] = useState<GainNode | null>(null);
   const [soundSources, setSoundSouces] = useState<SoundSource[]>([]);

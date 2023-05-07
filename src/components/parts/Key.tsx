@@ -1,6 +1,7 @@
 import React from "react";
 import { Tone } from "../circuits/TypeCircuit";
 import "@styles/Key.scss";
+import useKeyboardCircuit, { useKeyboardContext } from "../circuits/KeyboardCircuit";
 
 interface Props {
   className?: string;
@@ -11,8 +12,8 @@ interface Props {
   height: number;
   index: number;
   tone: Tone;
-  onKeyPressed?: (tone: Tone) => void;
-  onKeyReleased?: (tone: Tone) => void;
+  // onKeyPressed?: (tone: Tone) => void;
+  // onKeyReleased?: (tone: Tone) => void;
 }
 
 const Key = ({
@@ -23,9 +24,10 @@ const Key = ({
   width,
   height,
   tone,
-  onKeyPressed,
-  onKeyReleased,
+  // onKeyPressed,
+  // onKeyReleased,
 }: Props) => {
+  const { isKeyPressed, handleStartSound, handleStopSound } = useKeyboardCircuit();
   const WHITE_WIDTH = width;
   const WHITE_HEIGHT = height;
   const BLACK_WIDTH = (WHITE_WIDTH * 3) / 4;
@@ -35,36 +37,46 @@ const Key = ({
 
   const transform = `translate(${x}, ${y})`;
 
-  const handleMouseDown = (
-    event: React.MouseEvent<SVGGElement, MouseEvent>
-  ) => {
-    event.preventDefault();
-    if (onKeyPressed) onKeyPressed(tone);
-  };
+  // const handleMouseDown = (
+  //   event: React.MouseEvent<SVGGElement, MouseEvent>
+  // ) => {
+  //   event.preventDefault();
+  //   if (onKeyPressed) onKeyPressed(tone);
+  // };
 
-  const handleMouseUp = (event: React.MouseEvent<SVGGElement, MouseEvent>) => {
-    event.preventDefault();
-    if (onKeyReleased) onKeyReleased(tone);
-  };
+  // const handleMouseUp = (event: React.MouseEvent<SVGGElement, MouseEvent>) => {
+  //   event.preventDefault();
+  //   if (onKeyReleased) onKeyReleased(tone);
+  // };
 
-  const handleTouchStart = (event: React.TouchEvent<SVGGElement>) => {
-    event.preventDefault();
-    if (onKeyPressed) onKeyPressed(tone);
-  };
+  // const handleTouchStart = (event: React.TouchEvent<SVGGElement>) => {
+  //   event.preventDefault();
+  //   if (onKeyPressed) onKeyPressed(tone);
+  // };
 
-  const handleTouchEnd = (event: React.TouchEvent<SVGGElement>) => {
-    event.preventDefault();
-    if (onKeyReleased) onKeyReleased(tone);
-  };
+  // const handleTouchEnd = (event: React.TouchEvent<SVGGElement>) => {
+  //   event.preventDefault();
+  //   if (onKeyReleased) onKeyReleased(tone);
+  // };
+
+  const handleMouseEnter = () => {
+    if (isKeyPressed) handleStartSound(tone);
+  }
+
+  const handleMouseLeave = () => {
+    if (isKeyPressed) handleStopSound(tone);
+  }
 
   return (
     <g
       className="key"
       transform={transform}
-      onMouseDown={handleMouseDown}
-      onTouchStart={handleTouchStart}
-      onTouchEnd={handleTouchEnd}
-      onMouseUp={handleMouseUp}
+      // onMouseDown={handleMouseDown}
+      // onTouchStart={handleTouchStart}
+      // onTouchEnd={handleTouchEnd}
+      // onMouseUp={handleMouseUp}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
     >
       <rect
         className={className + " " + keyColor}

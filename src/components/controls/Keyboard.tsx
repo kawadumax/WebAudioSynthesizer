@@ -1,6 +1,6 @@
 import BlackKey from "@components/parts/BlackKey";
 import WhiteKey from "@components/parts/WhiteKey";
-import useKeyboardCircuit from "../circuits/KeyboardCircuit";
+import useKeyboardCircuit, { useKeyboardContext } from "../circuits/KeyboardCircuit";
 import { useAudioContextCircuit } from "../circuits/AudioContextCircuit";
 import { Tone } from "../circuits/TypeCircuit";
 
@@ -11,8 +11,17 @@ interface Props {
 }
 
 const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
+  const keyboardContext = useKeyboardContext();
+
+  if (!keyboardContext) {
+    throw new Error("KeyboardContext is not provided.");
+  }
+
+  const { setIsKeyPressed } = keyboardContext;
+
   const { startOscillator, stopOscillator } = useAudioContextCircuit();
-  const { makeSequencedKeys } = useKeyboardCircuit();
+  const { makeSequencedKeys, handleStartSound, handleStopSound } = useKeyboardCircuit();
+  // const { setIsKeyPressed } = useKeyboardContext();
   const startKey = 44;
   const endKey = startKey + numOfKeys;
   const { naturalTones, accidentalTones } = makeSequencedKeys(
@@ -27,14 +36,16 @@ const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
   const KEYBOARD_HEIGHT = height ? height : 100;
   const KEY_WIDTH = KEYBOARD_WIDTH / naturalTones.length;
 
-  const handleKeyPressed = (tone: Tone) => {
-    console.log("Pressed: ", { ...tone });
-    startOscillator(tone);
+  const handleKeyPressed = () => {
+    // console.log("Pressed: ", { ...tone });
+    // startOscillator(tone);
+    setIsKeyPressed(true);
   };
 
-  const handleKeyReleased = (tone: Tone) => {
-    console.log("Released: ", { ...tone });
-    stopOscillator(tone);
+  const handleKeyReleased = () => {
+    // console.log("Released: ", { ...tone });
+    // stopOscillator(tone);
+    setIsKeyPressed(false);
   };
 
   const createKeyProps = (
@@ -48,12 +59,12 @@ const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
     width: KEY_WIDTH,
     height: KEYBOARD_HEIGHT,
     index,
-    onKeyPressed: handleKeyPressed,
-    onKeyReleased: handleKeyReleased,
+    onKeyPressed: handleStartSound,
+    onKeyReleased: handleStopSound,
     tone,
   });
 
-  const renderWhiteKeys = () =>{
+  const renderWhiteKeys = () => {
     return naturalTones.map((tone, index) => (
       <WhiteKey
         {...createKeyProps(index, index * KEY_WIDTH + Padding / 2, tone)}
@@ -86,7 +97,7 @@ const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
   };
 
   return (
-    <svg width={SVG_WIDTH} height={SVG_HEIGHT}>
+    <svg width={SVG_WIDTH} height={SVG_HEIGHT} onMouseDown={handleKeyPressed} onMouseUp={handleKeyReleased}>
       {renderWhiteKeys()}
       {renderBlackKeys()}
     </svg>
