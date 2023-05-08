@@ -1,5 +1,22 @@
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useState, useReducer } from "react";
 import { SoundSource, Tone } from "./TypeCircuit";
+
+type SoundSourceState = SoundSource[];
+
+type SoundSourceAction =
+  | { type: 'ADD'; payload: SoundSource }
+  | { type: 'REMOVE'; payload: Tone };
+
+const soundSourceReducer = (state: SoundSourceState, action: SoundSourceAction): SoundSourceState => {
+  switch (action.type) {
+    case 'ADD':
+      return [...state, action.payload];
+    case 'REMOVE':
+      return state.filter((ss) => ss.tone.name !== action.payload.name);
+    default:
+      return state;
+  }
+};
 
 interface Props {
   children: React.ReactNode;
@@ -19,16 +36,16 @@ const AudioContextContainer = createContext<AudioContextContainer>({
   audioContext: null,
   gainNode: null,
   soundSources: [],
-  createAudioContext: () => {},
-  closeAudioContext: () => {},
-  startOscillator: () => {},
-  stopOscillator: () => {},
+  createAudioContext: () => { },
+  closeAudioContext: () => { },
+  startOscillator: () => { },
+  stopOscillator: () => { },
 });
 
 const AudioContextCircuit = ({ children }: Props) => {
   const [audioContext, setAudioContext] = useState<AudioContext | null>(null);
   const [gainNode, setGainNode] = useState<GainNode | null>(null);
-  const [soundSources, setSoundSouces] = useState<SoundSource[]>([]);
+  const [soundSources, dispatch] = useReducer(soundSourceReducer, []);
 
   const createAudioContext = () => {
     const audioContext = new AudioContext();
@@ -60,23 +77,17 @@ const AudioContextCircuit = ({ children }: Props) => {
       oscillatorNode.onended = () => {
         oscillatorNode.disconnect(gainNode);
       };
-      setSoundSouces([
-        ...soundSources,
-        {
-          tone: tone,
-          oscNode: oscillatorNode,
-        },
-      ]);
+      dispatch({ type: "ADD", payload: { tone: tone, oscNode: oscillatorNode } });
     }
   };
 
   const stopOscillator = (tone: Tone) => {
-    const index = soundSources.findIndex((ss) => {
-      return ss.tone.name === tone.name;
-    });
-    if(index >= 0){ //findImdexはマッチしないと-1を返す
-      const source = soundSources.splice(index, 1)[0];
-      source.oscNode.stop();
+    const target = soundSources.find((source) => source.tone.name === tone.name);
+    if (target) {
+      target.oscNode.stop();
+      dispatch({ type: "REMOVE", payload: tone });
+    } else {
+      console.log("Don't match:", tone)
     }
   };
 
