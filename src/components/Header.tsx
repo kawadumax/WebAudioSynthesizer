@@ -1,4 +1,5 @@
 import logo from "@assets/logo.svg";
+import githubIcon from "@assets/github-mark-white.svg";
 import "@styles/Header.scss";
 
 const Header = () => {
@@ -16,6 +17,17 @@ const Header = () => {
         <ul>
           <li><a href="#about">About</a></li>
           <li><a href="#synth">Synth</a></li>
+          <li>
+            <a href="https://github.com/kawadumax/WebAudioSynthesizer">
+              <img
+                decoding="async"
+                src={githubIcon}
+                alt="GitHub Repository"
+              // width="24" // 必要に応じてサイズを調整
+              // height="24" // 必要に応じてサイズを調整
+              />
+            </a>
+          </li>
         </ul>
       </nav>
     </header>
