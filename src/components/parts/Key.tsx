@@ -14,8 +14,6 @@ interface Props {
   height: number;
   index: number;
   tone: Tone;
-  // onKeyPressed?: (tone: Tone) => void;
-  // onKeyReleased?: (tone: Tone) => void;
 }
 
 const Key = ({
@@ -26,9 +24,8 @@ const Key = ({
   width,
   height,
   tone,
-}: // onKeyPressed,
-// onKeyReleased,
-Props) => {
+}:
+  Props) => {
   const { handleStartSound, handleStopSound } = useKeyboardCircuit();
   const keyboardContext = useKeyboardContext();
   if (!keyboardContext) {
@@ -44,17 +41,17 @@ Props) => {
 
   const transform = `translate(${x}, ${y})`;
 
-  // const handleMouseDown = (
-  //   event: React.MouseEvent<SVGGElement, MouseEvent>
-  // ) => {
-  //   event.preventDefault();
-  //   if (onKeyPressed) onKeyPressed(tone);
-  // };
+  const handleMouseDown = (
+    event: React.MouseEvent<SVGGElement, MouseEvent>
+  ) => {
+    event.preventDefault();
+    handleStartSound(tone);
+  };
 
-  // const handleMouseUp = (event: React.MouseEvent<SVGGElement, MouseEvent>) => {
-  //   event.preventDefault();
-  //   if (onKeyReleased) onKeyReleased(tone);
-  // };
+  const handleMouseUp = (event: React.MouseEvent<SVGGElement, MouseEvent>) => {
+    event.preventDefault();
+    handleStopSound(tone);
+  };
 
   // const handleTouchStart = (event: React.TouchEvent<SVGGElement>) => {
   //   event.preventDefault();
@@ -67,12 +64,10 @@ Props) => {
   // };
 
   const handleMouseEnter = () => {
-    console.log("Enter: isKeyPressed: " + isKeyPressed);
     if (isKeyPressed) handleStartSound(tone);
   };
 
   const handleMouseLeave = () => {
-    console.log("Leave: isKeyPressed: " + isKeyPressed);
     if (isKeyPressed) handleStopSound(tone);
   };
 
@@ -80,10 +75,10 @@ Props) => {
     <g
       className="key"
       transform={transform}
-      // onMouseDown={handleMouseDown}
+      onMouseDown={handleMouseDown}
       // onTouchStart={handleTouchStart}
       // onTouchEnd={handleTouchEnd}
-      // onMouseUp={handleMouseUp}
+      onMouseUp={handleMouseUp}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >

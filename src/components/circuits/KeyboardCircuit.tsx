@@ -9,16 +9,6 @@ interface Props {
 interface KeyboardCircuitContext {
   isKeyPressed: boolean;
   setIsKeyPressed: React.Dispatch<React.SetStateAction<boolean>>;
-  // makeSequencedKeys: (
-  //   startIndex: number,
-  //   endIndex: number
-  // ) => {
-  //   wholeTones: Tone[];
-  //   naturalTones: Tone[];
-  //   accidentalTones: Tone[];
-  // };
-  // handleStartSound: (tone: Tone) => void;
-  // handleStopSound: (tone: Tone) => void;
 }
 
 const KeyboardContext = createContext<KeyboardCircuitContext | null>(null);
@@ -97,18 +87,8 @@ const useKeyboardCircuit = () => {
 
   const [isKeyPressed, setIsKeyPressed] = useState(false);
 
-  const handleMousePressed = (tone: Tone) => {
-    console.log("Pressed: ", { ...tone });
-    setIsKeyPressed(true);
-  };
-
-  const handleMouseReleased = (tone: Tone) => {
-    console.log("Released: ", { ...tone });
-    setIsKeyPressed(false);
-  };
-
   const handleStartSound = (tone: Tone) => {
-    stopOscillator(tone);
+    startOscillator(tone);
   };
 
   const handleStopSound = (tone: Tone) => {
