@@ -9,22 +9,21 @@ interface Props {
 interface KeyboardCircuitContext {
   isKeyPressed: boolean;
   setIsKeyPressed: React.Dispatch<React.SetStateAction<boolean>>;
-  makeSequencedKeys: (
-    startIndex: number,
-    endIndex: number
-  ) => {
-    wholeTones: Tone[];
-    naturalTones: Tone[];
-    accidentalTones: Tone[];
-  };
-  handleStartSound: (tone: Tone) => void;
-  handleStopSound: (tone: Tone) => void;
+  // makeSequencedKeys: (
+  //   startIndex: number,
+  //   endIndex: number
+  // ) => {
+  //   wholeTones: Tone[];
+  //   naturalTones: Tone[];
+  //   accidentalTones: Tone[];
+  // };
+  // handleStartSound: (tone: Tone) => void;
+  // handleStopSound: (tone: Tone) => void;
 }
 
-const KeyboardContext = createContext<KeyboardCircuitContext | null>(null);;
+const KeyboardContext = createContext<KeyboardCircuitContext | null>(null);
 
 const useKeyboardCircuit = () => {
-
   const { startOscillator, stopOscillator } = useAudioContextCircuit();
   const toneNumberToFreq = (tone: number) => {
     //1オクターブで周波数が2倍なので、半音上がると2の十二乗根倍になる。
@@ -110,20 +109,26 @@ const useKeyboardCircuit = () => {
 
   const handleStartSound = (tone: Tone) => {
     stopOscillator(tone);
-  }
+  };
 
   const handleStopSound = (tone: Tone) => {
     stopOscillator(tone);
-  }
+  };
 
-  return { isKeyPressed, setIsKeyPressed, makeSequencedKeys, handleStartSound, handleStopSound };
+  return {
+    isKeyPressed,
+    setIsKeyPressed,
+    makeSequencedKeys,
+    handleStartSound,
+    handleStopSound,
+  };
 };
 
 export const KeyboardContextProvider = ({ children }: Props) => {
-  const keyboardCircuit = useKeyboardCircuit();
+  const { isKeyPressed, setIsKeyPressed } = useKeyboardCircuit();
+  const keyboardState = { isKeyPressed, setIsKeyPressed };
   return (
-    <KeyboardContext.Provider
-      value={keyboardCircuit}>
+    <KeyboardContext.Provider value={keyboardState}>
       {children}
     </KeyboardContext.Provider>
   );

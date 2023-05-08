@@ -1,7 +1,9 @@
 import React from "react";
 import { Tone } from "../circuits/TypeCircuit";
 import "@styles/Key.scss";
-import useKeyboardCircuit, { useKeyboardContext } from "../circuits/KeyboardCircuit";
+import useKeyboardCircuit, {
+  useKeyboardContext,
+} from "../circuits/KeyboardCircuit";
 
 interface Props {
   className?: string;
@@ -24,10 +26,15 @@ const Key = ({
   width,
   height,
   tone,
-  // onKeyPressed,
-  // onKeyReleased,
-}: Props) => {
-  const { isKeyPressed, handleStartSound, handleStopSound } = useKeyboardCircuit();
+}: // onKeyPressed,
+// onKeyReleased,
+Props) => {
+  const { handleStartSound, handleStopSound } = useKeyboardCircuit();
+  const keyboardContext = useKeyboardContext();
+  if (!keyboardContext) {
+    throw new Error("KeyboardContext is not provided.");
+  }
+  const { isKeyPressed } = keyboardContext;
   const WHITE_WIDTH = width;
   const WHITE_HEIGHT = height;
   const BLACK_WIDTH = (WHITE_WIDTH * 3) / 4;
@@ -60,12 +67,14 @@ const Key = ({
   // };
 
   const handleMouseEnter = () => {
+    console.log("Enter: isKeyPressed: " + isKeyPressed);
     if (isKeyPressed) handleStartSound(tone);
-  }
+  };
 
   const handleMouseLeave = () => {
+    console.log("Leave: isKeyPressed: " + isKeyPressed);
     if (isKeyPressed) handleStopSound(tone);
-  }
+  };
 
   return (
     <g

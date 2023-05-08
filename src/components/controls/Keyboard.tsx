@@ -1,8 +1,11 @@
 import BlackKey from "@components/parts/BlackKey";
 import WhiteKey from "@components/parts/WhiteKey";
-import useKeyboardCircuit, { useKeyboardContext } from "../circuits/KeyboardCircuit";
+import useKeyboardCircuit, {
+  useKeyboardContext,
+} from "../circuits/KeyboardCircuit";
 import { useAudioContextCircuit } from "../circuits/AudioContextCircuit";
 import { Tone } from "../circuits/TypeCircuit";
+import React from "react";
 
 interface Props {
   width?: number;
@@ -12,22 +15,18 @@ interface Props {
 
 const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
   const keyboardContext = useKeyboardContext();
-
   if (!keyboardContext) {
     throw new Error("KeyboardContext is not provided.");
   }
-
-  const { setIsKeyPressed } = keyboardContext;
+  const { setIsKeyPressed, isKeyPressed } = keyboardContext;
 
   const { startOscillator, stopOscillator } = useAudioContextCircuit();
-  const { makeSequencedKeys, handleStartSound, handleStopSound } = useKeyboardCircuit();
+  const { makeSequencedKeys, handleStartSound, handleStopSound } =
+    useKeyboardCircuit();
   // const { setIsKeyPressed } = useKeyboardContext();
   const startKey = 44;
   const endKey = startKey + numOfKeys;
-  const { naturalTones, accidentalTones } = makeSequencedKeys(
-    startKey,
-    endKey
-  );
+  const { naturalTones, accidentalTones } = makeSequencedKeys(startKey, endKey);
 
   const Padding = 10;
   const SVG_WIDTH = (width ? width : 200) + Padding;
@@ -36,23 +35,22 @@ const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
   const KEYBOARD_HEIGHT = height ? height : 100;
   const KEY_WIDTH = KEYBOARD_WIDTH / naturalTones.length;
 
-  const handleKeyPressed = () => {
-    // console.log("Pressed: ", { ...tone });
+  const handleKeyPressed = (event: React.MouseEvent) => {
+    event.preventDefault();
+    console.log("Pressed: " + isKeyPressed);
     // startOscillator(tone);
     setIsKeyPressed(true);
   };
 
-  const handleKeyReleased = () => {
+  const handleKeyReleased = (event: React.MouseEvent) => {
+    event.preventDefault();
+    console.log("Released: " + isKeyPressed);
     // console.log("Released: ", { ...tone });
     // stopOscillator(tone);
     setIsKeyPressed(false);
   };
 
-  const createKeyProps = (
-    index: number,
-    x: number,
-    tone: Tone,
-  ) => ({
+  const createKeyProps = (index: number, x: number, tone: Tone) => ({
     key: index,
     x,
     y: Padding / 2,
@@ -69,8 +67,8 @@ const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
       <WhiteKey
         {...createKeyProps(index, index * KEY_WIDTH + Padding / 2, tone)}
       ></WhiteKey>
-    ))
-  }
+    ));
+  };
 
   const renderBlackKeys = () => {
     const result: Array<JSX.Element | null> = [];
@@ -88,7 +86,11 @@ const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
       if (atone) {
         result.push(
           <BlackKey
-            {...createKeyProps(index, index * KEY_WIDTH + Padding / 2 + KEY_WIDTH / 2, atone)}
+            {...createKeyProps(
+              index,
+              index * KEY_WIDTH + Padding / 2 + KEY_WIDTH / 2,
+              atone
+            )}
           ></BlackKey>
         );
       }
@@ -97,7 +99,12 @@ const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
   };
 
   return (
-    <svg width={SVG_WIDTH} height={SVG_HEIGHT} onMouseDown={handleKeyPressed} onMouseUp={handleKeyReleased}>
+    <svg
+      width={SVG_WIDTH}
+      height={SVG_HEIGHT}
+      onMouseDown={handleKeyPressed}
+      onMouseUp={handleKeyReleased}
+    >
       {renderWhiteKeys()}
       {renderBlackKeys()}
     </svg>
