@@ -33,13 +33,11 @@ const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
 
   const handleKeyPressed = (event: MouseEvent) => {
     event.preventDefault();
-    console.log("Pressed: " + isKeyPressed);
     setIsKeyPressed(true);
   };
 
   const handleKeyReleased = (event: MouseEvent) => {
     event.preventDefault();
-    console.log("Released: " + isKeyPressed);
     setIsKeyPressed(false);
   };
 
