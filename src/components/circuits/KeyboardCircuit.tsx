@@ -1,5 +1,20 @@
+import { useContext, useState, createContext } from "react";
 import { Tone } from "./TypeCircuit";
+import { useAudioContextCircuit } from "../circuits/AudioContextCircuit";
+
+interface Props {
+  children: React.ReactNode;
+}
+
+interface KeyboardCircuitContext {
+  isKeyPressed: boolean;
+  setIsKeyPressed: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+const KeyboardContext = createContext<KeyboardCircuitContext | null>(null);
+
 const useKeyboardCircuit = () => {
+  const { startOscillator, stopOscillator } = useAudioContextCircuit();
   const toneNumberToFreq = (tone: number) => {
     //1オクターブで周波数が2倍なので、半音上がると2の十二乗根倍になる。
     //これを元に、48番目の音階であるA4=440hzを基準として計算で周波数を求める。
@@ -70,7 +85,35 @@ const useKeyboardCircuit = () => {
     return { wholeTones, naturalTones, accidentalTones };
   };
 
-  return { makeSequencedKeys };
+  const [isKeyPressed, setIsKeyPressed] = useState(false);
+
+  const handleStartSound = (tone: Tone) => {
+    startOscillator(tone);
+  };
+
+  const handleStopSound = (tone: Tone) => {
+    stopOscillator(tone);
+  };
+
+  return {
+    isKeyPressed,
+    setIsKeyPressed,
+    makeSequencedKeys,
+    handleStartSound,
+    handleStopSound,
+  };
 };
+
+export const KeyboardContextProvider = ({ children }: Props) => {
+  const { isKeyPressed, setIsKeyPressed } = useKeyboardCircuit();
+  const keyboardState = { isKeyPressed, setIsKeyPressed };
+  return (
+    <KeyboardContext.Provider value={keyboardState}>
+      {children}
+    </KeyboardContext.Provider>
+  );
+};
+
+export const useKeyboardContext = () => useContext(KeyboardContext);
 
 export default useKeyboardCircuit;

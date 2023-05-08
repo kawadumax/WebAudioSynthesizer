@@ -1,9 +1,11 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import "@styles/Synth.scss";
 import GainKnob from "@components/controls/GainKnob";
 import PowerToggle from "@components/controls/PowerToggle";
 import Keyboard from "@components/controls/Keyboard";
 import { useAudioContextCircuit } from "./circuits/AudioContextCircuit";
+import { KeyboardContextProvider } from './circuits/KeyboardCircuit';
+
 const Synth = () => {
   // オーディオコンテキストの初期化
   const [synthEnabled, setSynthEnabled] = useState(false);
@@ -41,12 +43,13 @@ const Synth = () => {
         <>
           <GainKnob></GainKnob>
           <PowerToggle onPower={handlePowerChange}></PowerToggle>
-          <Keyboard
-            numOfKeys={24}
-            width={1200}
-            height={300}
-            audioContext={audioContext}
-          ></Keyboard>
+          <KeyboardContextProvider>
+            <Keyboard
+              numOfKeys={24}
+              width={1200}
+              height={300}
+            ></Keyboard>
+          </KeyboardContextProvider>
         </>
       );
     } else {

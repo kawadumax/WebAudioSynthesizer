@@ -1,6 +1,9 @@
 import React from "react";
 import { Tone } from "../circuits/TypeCircuit";
 import "@styles/Key.scss";
+import useKeyboardCircuit, {
+  useKeyboardContext,
+} from "../circuits/KeyboardCircuit";
 
 interface Props {
   className?: string;
@@ -11,8 +14,6 @@ interface Props {
   height: number;
   index: number;
   tone: Tone;
-  onKeyPressed?: (tone: Tone) => void;
-  onKeyReleased?: (tone: Tone) => void;
 }
 
 const Key = ({
@@ -23,9 +24,14 @@ const Key = ({
   width,
   height,
   tone,
-  onKeyPressed,
-  onKeyReleased,
-}: Props) => {
+}:
+  Props) => {
+  const { handleStartSound, handleStopSound } = useKeyboardCircuit();
+  const keyboardContext = useKeyboardContext();
+  if (!keyboardContext) {
+    throw new Error("KeyboardContext is not provided.");
+  }
+  const { isKeyPressed } = keyboardContext;
   const WHITE_WIDTH = width;
   const WHITE_HEIGHT = height;
   const BLACK_WIDTH = (WHITE_WIDTH * 3) / 4;
@@ -39,22 +45,30 @@ const Key = ({
     event: React.MouseEvent<SVGGElement, MouseEvent>
   ) => {
     event.preventDefault();
-    if (onKeyPressed) onKeyPressed(tone);
+    handleStartSound(tone);
   };
 
   const handleMouseUp = (event: React.MouseEvent<SVGGElement, MouseEvent>) => {
     event.preventDefault();
-    if (onKeyReleased) onKeyReleased(tone);
+    handleStopSound(tone);
   };
 
-  const handleTouchStart = (event: React.TouchEvent<SVGGElement>) => {
-    event.preventDefault();
-    if (onKeyPressed) onKeyPressed(tone);
+  // const handleTouchStart = (event: React.TouchEvent<SVGGElement>) => {
+  //   event.preventDefault();
+  //   if (onKeyPressed) onKeyPressed(tone);
+  // };
+
+  // const handleTouchEnd = (event: React.TouchEvent<SVGGElement>) => {
+  //   event.preventDefault();
+  //   if (onKeyReleased) onKeyReleased(tone);
+  // };
+
+  const handleMouseEnter = () => {
+    if (isKeyPressed) handleStartSound(tone);
   };
 
-  const handleTouchEnd = (event: React.TouchEvent<SVGGElement>) => {
-    event.preventDefault();
-    if (onKeyReleased) onKeyReleased(tone);
+  const handleMouseLeave = () => {
+    if (isKeyPressed) handleStopSound(tone);
   };
 
   return (
@@ -62,9 +76,11 @@ const Key = ({
       className="key"
       transform={transform}
       onMouseDown={handleMouseDown}
-      onTouchStart={handleTouchStart}
-      onTouchEnd={handleTouchEnd}
+      // onTouchStart={handleTouchStart}
+      // onTouchEnd={handleTouchEnd}
       onMouseUp={handleMouseUp}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
     >
       <rect
         className={className + " " + keyColor}

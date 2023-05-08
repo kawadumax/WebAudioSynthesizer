@@ -15,8 +15,7 @@
     "react-dom": "^18.2.0",
     "react-scripts": "5.0.1",
     "sass-loader": "^13.2.1",
-    "typescript": "^4.9.5",
-    "web-vitals": "^2.1.4"
+    "typescript": "^4.9.5"
   },
   "scripts": {
     "start": "react-app-rewired start",
@@ -45,5 +44,27 @@
   "devDependencies": {
     "customize-cra": "^1.0.0",
     "react-app-rewired": "^2.2.1"
+  },
+  "jest": {
+    "moduleNameMapper": {
+      "^@components(/.*)$": "<rootDir>/src/components$1",
+      "^@utils(/.*)$": "<rootDir>/src/utils$1",
+      "^@styles(/.*)$": "<rootDir>/src/styles$1",
+      "^@assets(/.*)$": "<rootDir>/src/assets$1",
+      "^@/(.*)$": "<rootDir>/src/$1"
+    },
+    "roots": [
+      "<rootDir>/tests"
+    ],
+    "setupFilesAfterEnv": [
+      "<rootDir>/tests/setupTests.ts"
+    ],
+    "testMatch": [
+      "<rootDir>/tests/**/*.test.(tsx|ts)"
+    ],
+    "collectCoverageFrom": [
+      "src/**/*.{js,jsx,ts,tsx}",
+      "!src/**/*.d.ts"
+    ]
   }
 }
