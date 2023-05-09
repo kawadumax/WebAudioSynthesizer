@@ -31,23 +31,47 @@ const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
   const KEYBOARD_HEIGHT = height ? height : 100;
   const KEY_WIDTH = KEYBOARD_WIDTH / naturalTones.length;
 
-  const handleKeyPressed = (event: MouseEvent) => {
+  const handleKeyPressed = (event: MouseEvent | TouchEvent) => {
     event.preventDefault();
+    console.log("Pressed: ", event)
     setIsKeyPressed(true);
   };
 
-  const handleKeyReleased = (event: MouseEvent) => {
+  const handleKeyReleased = (event: MouseEvent | TouchEvent) => {
     event.preventDefault();
+    console.log("Released: ", event)
     setIsKeyPressed(false);
+  };
+
+  const handleTouchMove = (event: TouchEvent) => {
+    event.preventDefault();
+    console.log("Touch Moved: ", event)
+  };
+
+  const handleTouchStart = (event: TouchEvent) => {
+    event.preventDefault();
+    console.log("Touch Start: ", event)
+  };
+
+  const handleTouchEnd = (event: TouchEvent) => {
+    event.preventDefault();
+    console.log("Touch End: ", event)
   };
 
   useEffect(() => {
     document.addEventListener("mousedown", handleKeyPressed);
     document.addEventListener("mouseup", handleKeyReleased);
+    //event.preventDefault()と{ passive: false }の組み合わせでスクロールも無効化できる。
+    document.addEventListener("touchmove", handleTouchMove, { passive: false });
+    document.addEventListener("touchstart", handleTouchStart, { passive: false });
+    document.addEventListener("touchend", handleTouchEnd, { passive: false });
 
     return () => {
       document.removeEventListener("mousedown", handleKeyPressed);
       document.removeEventListener("mouseup", handleKeyReleased);
+      document.removeEventListener("touchmove", handleTouchMove);
+      document.removeEventListener("touchstart", handleTouchStart);
+      document.removeEventListener("touchend", handleTouchEnd);
     };
   }, []);
 

@@ -75,9 +75,9 @@ const Key = ({
     <g
       className="key"
       transform={transform}
-      onMouseDown={handleMouseDown}
       // onTouchStart={handleTouchStart}
       // onTouchEnd={handleTouchEnd}
+      onMouseDown={handleMouseDown}
       onMouseUp={handleMouseUp}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
