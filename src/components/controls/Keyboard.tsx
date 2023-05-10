@@ -4,7 +4,7 @@ import useKeyboardCircuit, {
   useKeyboardContext,
 } from "../circuits/KeyboardCircuit";
 import { Tone } from "../circuits/TypeCircuit";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 interface Props {
   width?: number;
@@ -33,45 +33,69 @@ const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
 
   const handleKeyPressed = (event: MouseEvent | TouchEvent) => {
     event.preventDefault();
-    console.log("Pressed: ", event)
+    console.log("Pressed: ", event);
     setIsKeyPressed(true);
   };
 
   const handleKeyReleased = (event: MouseEvent | TouchEvent) => {
     event.preventDefault();
-    console.log("Released: ", event)
+    console.log("Released: ", event);
     setIsKeyPressed(false);
   };
 
-  const handleTouchMove = (event: TouchEvent) => {
-    event.preventDefault();
-    console.log("Touch Moved: ", event)
-  };
+  // const handleTouchMove: React.TouchEventHandler<SVGSVGElement> = (event) => {
+  //   event.preventDefault();
+  //   console.log("Touch Moved: ", event);
+  // };
 
   const handleTouchStart = (event: TouchEvent) => {
     event.preventDefault();
-    console.log("Touch Start: ", event)
+    console.log("Touch Start: ", event);
   };
 
   const handleTouchEnd = (event: TouchEvent) => {
     event.preventDefault();
-    console.log("Touch End: ", event)
+    console.log("Touch End: ", event);
   };
 
   useEffect(() => {
     document.addEventListener("mousedown", handleKeyPressed);
     document.addEventListener("mouseup", handleKeyReleased);
     //event.preventDefault()と{ passive: false }の組み合わせでスクロールも無効化できる。
-    document.addEventListener("touchmove", handleTouchMove, { passive: false });
-    document.addEventListener("touchstart", handleTouchStart, { passive: false });
+    // document.addEventListener("touchmove", handleTouchMove, { passive: false });
+    document.addEventListener("touchstart", handleTouchStart, {
+      passive: false,
+    });
     document.addEventListener("touchend", handleTouchEnd, { passive: false });
 
     return () => {
       document.removeEventListener("mousedown", handleKeyPressed);
       document.removeEventListener("mouseup", handleKeyReleased);
-      document.removeEventListener("touchmove", handleTouchMove);
+      // document.removeEventListener("touchmove", handleTouchMove);
       document.removeEventListener("touchstart", handleTouchStart);
       document.removeEventListener("touchend", handleTouchEnd);
+    };
+  }, []);
+
+  const refSVG = useRef<SVGSVGElement>(null);
+
+  useEffect(() => {
+    const handleTouchMove = (event: TouchEvent) => {
+      event.preventDefault();
+      console.log("Touch Moved: ", event);
+    };
+
+    const element = refSVG.current;
+    if (element) {
+      element.addEventListener("touchmove", handleTouchMove, {
+        passive: false,
+      });
+    }
+
+    return () => {
+      if (element) {
+        element.removeEventListener("touchmove", handleTouchMove);
+      }
     };
   }, []);
 
@@ -125,8 +149,11 @@ const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
 
   return (
     <svg
-      width={SVG_WIDTH}
+      // width={SVG_WIDTH}
       height={SVG_HEIGHT}
+      width="100%"
+      // onTouchMove={handleTouchMove}
+      ref={refSVG}
     >
       {renderWhiteKeys()}
       {renderBlackKeys()}
