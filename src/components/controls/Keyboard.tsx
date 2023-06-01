@@ -149,9 +149,9 @@ const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
 
   return (
     <svg
-      // width={SVG_WIDTH}
-      height={SVG_HEIGHT}
       width="100%"
+      height={SVG_HEIGHT}
+      viewBox={"0 0 " + SVG_WIDTH + " " + SVG_HEIGHT}
       // onTouchMove={handleTouchMove}
       ref={refSVG}
     >

@@ -19,3 +19,11 @@ https://web-audio-synthesizer.vercel.app/ で確認できます。
 <!-- ## Written in SCSS
 
 Tailwind ではなく SCSS を使うことでコンポーネントの可読性を高めています。 -->
+
+# アプリケーションの起動
+
+ルートディレクトリで下記のコマンドを実行してください。
+
+```shell
+npm start
+```
