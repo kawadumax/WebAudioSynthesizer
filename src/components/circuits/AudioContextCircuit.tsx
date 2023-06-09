@@ -1,6 +1,9 @@
+
+
 import React, { createContext, useContext, useState, useReducer } from "react";
 import { SoundSource, Tone } from "./TypeCircuit";
 
+// 現在再生中のオシレータを格納し管理する配列
 type SoundSourceState = SoundSource[];
 
 type SoundSourceAction =

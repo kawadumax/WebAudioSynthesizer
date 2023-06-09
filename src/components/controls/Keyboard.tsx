@@ -44,9 +44,23 @@ const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
   };
 
   // const handleTouchMove: React.TouchEventHandler<SVGSVGElement> = (event) => {
-  //   event.preventDefault();
-  //   console.log("Touch Moved: ", event);
-  // };
+  const handleTouchMove = (event: TouchEvent) => {
+    event.preventDefault();
+    //TODO
+    console.log("Touch Moved: ", event);
+    // 各鍵盤のどの領域にあるのかを判定する。
+    //// 現在の指の座標を取得する。
+    const cord = { x: event.touches[0].screenX, y: event.touches[0].screenY };
+    // console.log(cord);
+    //// すべての鍵を走査して指の座標があるかを調べる？ OR 計算でどのキー上にあるのかを求める
+    //////キーボードの上端と下端を取得する
+    //////キーボードの左端と右端を取得する
+    //////キーの分割数を取得する、
+    //////キーボードの範囲内にあるとき、キーの左から何番目にあるのかを取得する
+    // 判定したキーがまだ鳴ってなかったら鳴らす。
+    // 指がないのに鳴ってるキーがあったら止める。 
+
+  };
 
   const handleTouchStart = (event: TouchEvent) => {
     event.preventDefault();
@@ -62,7 +76,7 @@ const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
     document.addEventListener("mousedown", handleKeyPressed);
     document.addEventListener("mouseup", handleKeyReleased);
     //event.preventDefault()と{ passive: false }の組み合わせでスクロールも無効化できる。
-    // document.addEventListener("touchmove", handleTouchMove, { passive: false });
+    document.addEventListener("touchmove", handleTouchMove, { passive: false });
     document.addEventListener("touchstart", handleTouchStart, {
       passive: false,
     });
@@ -71,7 +85,7 @@ const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
     return () => {
       document.removeEventListener("mousedown", handleKeyPressed);
       document.removeEventListener("mouseup", handleKeyReleased);
-      // document.removeEventListener("touchmove", handleTouchMove);
+      document.removeEventListener("touchmove", handleTouchMove);
       document.removeEventListener("touchstart", handleTouchStart);
       document.removeEventListener("touchend", handleTouchEnd);
     };
@@ -80,6 +94,8 @@ const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
   const refSVG = useRef<SVGSVGElement>(null);
 
   useEffect(() => {
+    // コンポーネント作成時にタッチ関連のイベントリスナを登録する
+
     const handleTouchMove = (event: TouchEvent) => {
       event.preventDefault();
       console.log("Touch Moved: ", event);
