@@ -8,14 +8,17 @@ type SoundSourceState = SoundSource[];
 
 type SoundSourceAction =
   | { type: 'ADD'; payload: SoundSource }
-  | { type: 'REMOVE'; payload: Tone };
+  | { type: 'REMOVE'; payload: Tone }
+  | { type: 'FIND'; payload: Tone }
 
-const soundSourceReducer = (state: SoundSourceState, action: SoundSourceAction): SoundSourceState => {
+const soundSourceReducer = (state: SoundSourceState, action: SoundSourceAction): SoundSourceState | boolean => {
   switch (action.type) {
     case 'ADD':
       return [...state, action.payload];
     case 'REMOVE':
       return state.filter((ss) => ss.tone.name !== action.payload.name);
+    case 'FIND':
+      return state.includes(action.payload);
     default:
       return state;
   }

@@ -1,3 +1,4 @@
+import React, { forwardRef } from "react";
 import { Tone } from "../circuits/TypeCircuit";
 import Key from "./Key";
 
@@ -9,16 +10,18 @@ interface Props {
   height: number;
   index: number;
   tone: Tone;
+  // ref: React.Ref<any>;
   onKeyPressed?: (tone: Tone) => void;
   onKeyReleased?: (tone: Tone) => void;
 }
 
-const WhiteKey = (props
-: Props) => {
+// const WhiteKey = forwardRef((props: Props, ref) => {
+const WhiteKey = (props: Props) => {
   return (
     <Key
-    {...props}
-    keyColor="white"
+      {...props}
+      keyColor="white"
+    // ref={ref}
     ></Key>
   );
 };

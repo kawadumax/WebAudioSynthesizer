@@ -4,7 +4,7 @@ import useKeyboardCircuit, {
   useKeyboardContext,
 } from "../circuits/KeyboardCircuit";
 import { Tone } from "../circuits/TypeCircuit";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState, createRef } from "react";
 
 interface Props {
   width?: number;
@@ -14,6 +14,24 @@ interface Props {
 
 const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
   const keyboardContext = useKeyboardContext();
+  const refSVG = useRef<SVGSVGElement>(null);
+
+  //子要素のKeyへのRefを作成する
+  const [keyRefs, setKeyRefs] = useState<React.RefObject<SVGGElement>[]>([]);
+
+  useEffect(() => {
+    // 子コンポーネントの数だけrefを作成
+    setKeyRefs((keyRefs) => Array(naturalTones.length).fill(null).map((_, i) => keyRefs[i] || createRef()));
+  }, []);
+
+  useEffect(() => {
+    keyRefs.forEach((ref, index) => {
+      if (ref.current) {
+        console.log(`Child ${index}: `, ref.current);
+      }
+    });
+  }, [keyRefs]);
+
   if (!keyboardContext) {
     throw new Error("KeyboardContext is not provided.");
   }
@@ -47,19 +65,37 @@ const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
   const handleTouchMove = (event: TouchEvent) => {
     event.preventDefault();
     //TODO
-    console.log("Touch Moved: ", event);
+    // console.log("Touch Moved: ", event);
     // 各鍵盤のどの領域にあるのかを判定する。
     //// 現在の指の座標を取得する。
-    const cord = { x: event.touches[0].screenX, y: event.touches[0].screenY };
+    const cord = { x: event.touches[0].clientX, y: event.touches[0].clientY };
     // console.log(cord);
     //// すべての鍵を走査して指の座標があるかを調べる？ OR 計算でどのキー上にあるのかを求める
     //////キーボードの上端と下端を取得する
+    if (refSVG.current == null) {
+      return;
+    }
+    const keyBoardRect = refSVG.current.getBoundingClientRect();
+    const topKeyboard = keyBoardRect.top;
+    const bottomKeyboard = keyBoardRect.bottom;
     //////キーボードの左端と右端を取得する
-    //////キーの分割数を取得する、
+    const leftKeyboard = keyBoardRect.left;
+    const rightKeyboard = keyBoardRect.right;
+    //////キーの分割数を取得する numOfKeys
+    //////キーボードの範囲内にないとき、早期リターン
+    if (cord.x < leftKeyboard || cord.x > rightKeyboard || cord.y > bottomKeyboard || cord.y < topKeyboard) {
+      // console.log("Touch is not in keyboard", cord, keyBoardRect);
+      return;
+    }
     //////キーボードの範囲内にあるとき、キーの左から何番目にあるのかを取得する
+    console.log("Touch is in keyboard", cord, keyBoardRect);
+    const touchedKeyOrder = Math.floor(cord.x / KEY_WIDTH);
+    // touchedKeyOrderを使ってref経由でKeyの要素を取得する
+    const touchedTone = naturalTones[touchedKeyOrder];
     // 判定したキーがまだ鳴ってなかったら鳴らす。
-    // 指がないのに鳴ってるキーがあったら止める。 
+    //// SoundSourcesで鳴ってる音源のリストを取得する
 
+    // 指がないのに鳴ってるキーがあったら止める。 
   };
 
   const handleTouchStart = (event: TouchEvent) => {
@@ -77,9 +113,7 @@ const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
     document.addEventListener("mouseup", handleKeyReleased);
     //event.preventDefault()と{ passive: false }の組み合わせでスクロールも無効化できる。
     document.addEventListener("touchmove", handleTouchMove, { passive: false });
-    document.addEventListener("touchstart", handleTouchStart, {
-      passive: false,
-    });
+    document.addEventListener("touchstart", handleTouchStart, { passive: false });
     document.addEventListener("touchend", handleTouchEnd, { passive: false });
 
     return () => {
@@ -90,8 +124,6 @@ const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
       document.removeEventListener("touchend", handleTouchEnd);
     };
   }, []);
-
-  const refSVG = useRef<SVGSVGElement>(null);
 
   useEffect(() => {
     // コンポーネント作成時にタッチ関連のイベントリスナを登録する
@@ -125,6 +157,7 @@ const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
     onKeyPressed: handleStartSound,
     onKeyReleased: handleStopSound,
     tone,
+    // ref: keyRefs[index],
   });
 
   const renderWhiteKeys = () => {

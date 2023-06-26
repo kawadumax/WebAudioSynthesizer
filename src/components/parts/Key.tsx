@@ -1,4 +1,4 @@
-import React from "react";
+import React, { forwardRef } from "react";
 import { Tone } from "../circuits/TypeCircuit";
 import "@styles/Key.scss";
 import useKeyboardCircuit, {
@@ -14,8 +14,10 @@ interface Props {
   height: number;
   index: number;
   tone: Tone;
+  // ref: React.Ref<SVGGElement>;
 }
 
+// const Key = forwardRef(({
 const Key = ({
   className,
   keyColor,
@@ -24,6 +26,7 @@ const Key = ({
   width,
   height,
   tone,
+  // ref
 }:
   Props) => {
   const { handleStartSound, handleStopSound } = useKeyboardCircuit();
@@ -81,6 +84,7 @@ const Key = ({
       onMouseUp={handleMouseUp}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
+    // ref={ref}
     >
       <rect
         className={className + " " + keyColor}
