@@ -1,5 +1,3 @@
-
-
 import React, { createContext, useContext, useState, useReducer } from "react";
 import { SoundSource, Tone } from "./TypeCircuit";
 
@@ -7,18 +5,18 @@ import { SoundSource, Tone } from "./TypeCircuit";
 type SoundSourceState = SoundSource[];
 
 type SoundSourceAction =
-  | { type: 'ADD'; payload: SoundSource }
-  | { type: 'REMOVE'; payload: Tone }
-  | { type: 'FIND'; payload: Tone }
+  | { type: "ADD"; payload: SoundSource }
+  | { type: "REMOVE"; payload: Tone };
 
-const soundSourceReducer = (state: SoundSourceState, action: SoundSourceAction): SoundSourceState | boolean => {
+const soundSourceReducer = (
+  state: SoundSourceState,
+  action: SoundSourceAction
+): SoundSourceState => {
   switch (action.type) {
-    case 'ADD':
+    case "ADD":
       return [...state, action.payload];
-    case 'REMOVE':
+    case "REMOVE":
       return state.filter((ss) => ss.tone.name !== action.payload.name);
-    case 'FIND':
-      return state.includes(action.payload);
     default:
       return state;
   }
@@ -42,10 +40,10 @@ const AudioContextContainer = createContext<AudioContextContainer>({
   audioContext: null,
   gainNode: null,
   soundSources: [],
-  createAudioContext: () => { },
-  closeAudioContext: () => { },
-  startOscillator: () => { },
-  stopOscillator: () => { },
+  createAudioContext: () => {},
+  closeAudioContext: () => {},
+  startOscillator: () => {},
+  stopOscillator: () => {},
 });
 
 const AudioContextCircuit = ({ children }: Props) => {
@@ -71,30 +69,39 @@ const AudioContextCircuit = ({ children }: Props) => {
   };
 
   const startOscillator = (tone: Tone) => {
-    if (audioContext && gainNode) {
-      const oscillatorNode = audioContext.createOscillator();
-      oscillatorNode.connect(gainNode);
-      oscillatorNode.frequency.setValueAtTime(
-        tone.freq,
-        audioContext.currentTime
-      );
-      oscillatorNode.type = "sine";
-      oscillatorNode.start();
-      oscillatorNode.onended = () => {
-        oscillatorNode.disconnect(gainNode);
-      };
-      dispatch({ type: "ADD", payload: { tone: tone, oscNode: oscillatorNode } });
-    }
+    if (!audioContext || !gainNode) return;
+    if (findSoundSource(tone)) return; //既に音が鳴っている場合は早期リターン
+    const oscillatorNode = audioContext.createOscillator();
+    oscillatorNode.connect(gainNode);
+    oscillatorNode.frequency.setValueAtTime(
+      tone.freq,
+      audioContext.currentTime
+    );
+    oscillatorNode.type = "sine";
+    oscillatorNode.start();
+    oscillatorNode.onended = () => {
+      oscillatorNode.disconnect(gainNode);
+    };
+    dispatch({
+      type: "ADD",
+      payload: { tone: tone, oscNode: oscillatorNode },
+    });
   };
 
   const stopOscillator = (tone: Tone) => {
-    const target = soundSources.find((source) => source.tone.name === tone.name);
+    const target = soundSources.find(
+      (source) => source.tone.name === tone.name
+    );
     if (target) {
       target.oscNode.stop();
       dispatch({ type: "REMOVE", payload: tone });
     } else {
-      console.log("Don't match:", tone)
+      console.log("Don't match:", tone);
     }
+  };
+
+  const findSoundSource = (tone: Tone) => {
+    return soundSources.find((ss) => ss.tone.name === tone.name);
   };
 
   return (

@@ -5,6 +5,7 @@ import useKeyboardCircuit, {
 } from "../circuits/KeyboardCircuit";
 import { Tone } from "../circuits/TypeCircuit";
 import { useEffect, useRef, useState, createRef } from "react";
+import { useAudioContextCircuit } from "../circuits/AudioContextCircuit";
 
 interface Props {
   width?: number;
@@ -13,24 +14,9 @@ interface Props {
 }
 
 const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
+  const { startOscillator, stopOscillator } = useAudioContextCircuit();
   const keyboardContext = useKeyboardContext();
   const refSVG = useRef<SVGSVGElement>(null);
-
-  //子要素のKeyへのRefを作成する
-  const [keyRefs, setKeyRefs] = useState<React.RefObject<SVGGElement>[]>([]);
-
-  useEffect(() => {
-    // 子コンポーネントの数だけrefを作成
-    setKeyRefs((keyRefs) => Array(naturalTones.length).fill(null).map((_, i) => keyRefs[i] || createRef()));
-  }, []);
-
-  useEffect(() => {
-    keyRefs.forEach((ref, index) => {
-      if (ref.current) {
-        console.log(`Child ${index}: `, ref.current);
-      }
-    });
-  }, [keyRefs]);
 
   if (!keyboardContext) {
     throw new Error("KeyboardContext is not provided.");
@@ -83,7 +69,12 @@ const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
     const rightKeyboard = keyBoardRect.right;
     //////キーの分割数を取得する numOfKeys
     //////キーボードの範囲内にないとき、早期リターン
-    if (cord.x < leftKeyboard || cord.x > rightKeyboard || cord.y > bottomKeyboard || cord.y < topKeyboard) {
+    if (
+      cord.x < leftKeyboard ||
+      cord.x > rightKeyboard ||
+      cord.y > bottomKeyboard ||
+      cord.y < topKeyboard
+    ) {
       // console.log("Touch is not in keyboard", cord, keyBoardRect);
       return;
     }
@@ -92,10 +83,8 @@ const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
     const touchedKeyOrder = Math.floor(cord.x / KEY_WIDTH);
     // touchedKeyOrderを使ってref経由でKeyの要素を取得する
     const touchedTone = naturalTones[touchedKeyOrder];
-    // 判定したキーがまだ鳴ってなかったら鳴らす。
-    //// SoundSourcesで鳴ってる音源のリストを取得する
-
-    // 指がないのに鳴ってるキーがあったら止める。 
+    startOscillator(touchedTone);
+    // 指がないのに鳴ってるキーがあったら止める。
   };
 
   const handleTouchStart = (event: TouchEvent) => {
@@ -113,7 +102,9 @@ const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
     document.addEventListener("mouseup", handleKeyReleased);
     //event.preventDefault()と{ passive: false }の組み合わせでスクロールも無効化できる。
     document.addEventListener("touchmove", handleTouchMove, { passive: false });
-    document.addEventListener("touchstart", handleTouchStart, { passive: false });
+    document.addEventListener("touchstart", handleTouchStart, {
+      passive: false,
+    });
     document.addEventListener("touchend", handleTouchEnd, { passive: false });
 
     return () => {
