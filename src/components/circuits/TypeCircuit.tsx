@@ -28,5 +28,5 @@ export interface Tone {
  */
 export interface SoundSource {
   tone: Tone;
-  oscNode: OscillatorNode;
+  oscNode?: OscillatorNode;
 }

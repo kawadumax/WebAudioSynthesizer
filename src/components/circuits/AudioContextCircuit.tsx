@@ -1,4 +1,10 @@
-import React, { createContext, useContext, useState, useReducer } from "react";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useReducer,
+  useEffect,
+} from "react";
 import { SoundSource, Tone } from "./TypeCircuit";
 
 // 現在再生中のオシレータを格納し管理する配列
@@ -74,6 +80,48 @@ const AudioContextCircuit = ({ children }: Props) => {
     current: [],
   });
 
+  useEffect(() => {
+    if (!audioContext || !gainNode) return;
+    // if (findSoundSource(tone)) {
+    //   console.log("already sounded: ", findSoundSource(tone));
+    //   return;
+    // } //既に音が鳴っている場合は早期リターン
+
+    //stateの変更差分を見て、差分に対して音を鳴らしたり止めたりする
+    //previousとcurrentの共通する要素を取得して、その共通部分をpreviousとcurrentそれぞれから引く
+    const prev = new Set(soundSourceState.previous);
+    const current = new Set(soundSourceState.current);
+
+    const filteredPrev = soundSourceState.previous.filter(
+      (item) => !current.has(item)
+    );
+    const filteredCurrent = soundSourceState.current.filter(
+      (item) => !prev.has(item)
+    );
+
+    console.log(filteredPrev); // Output: [1, 2]
+    console.log(filteredCurrent); // Output: [6, 7]
+
+    //previousに残った集合は、音を止める集合
+    for (const ss of filteredPrev) {
+      ss.oscNode?.stop();
+    }
+    //currentに残った集合は、音を鳴らす集合
+    for (const ss of filteredCurrent) {
+      ss.oscNode = audioContext.createOscillator();
+      ss.oscNode.connect(gainNode);
+      ss.oscNode.frequency.setValueAtTime(
+        ss.tone.freq,
+        audioContext.currentTime
+      );
+      ss.oscNode.type = "sine";
+      ss.oscNode.start();
+      ss.oscNode.onended = () => {
+        ss.oscNode?.disconnect(gainNode);
+      };
+    }
+  }, [soundSourceState]);
+
   const createAudioContext = () => {
     const audioContext = new AudioContext();
     setAudioContext(audioContext);
@@ -92,27 +140,27 @@ const AudioContextCircuit = ({ children }: Props) => {
   };
 
   const startOscillator = (tone: Tone) => {
-    if (!audioContext || !gainNode) return;
-    if (findSoundSource(tone)) {
-      console.log("already sounded: ", findSoundSource(tone));
-      return;
-    } //既に音が鳴っている場合は早期リターン
+    // if (!audioContext || !gainNode) return;
+    // if (findSoundSource(tone)) {
+    //   console.log("already sounded: ", findSoundSource(tone));
+    //   return;
+    // } //既に音が鳴っている場合は早期リターン
 
     console.log("will sound: ", tone);
-    const oscillatorNode = audioContext.createOscillator();
-    oscillatorNode.connect(gainNode);
-    oscillatorNode.frequency.setValueAtTime(
-      tone.freq,
-      audioContext.currentTime
-    );
-    oscillatorNode.type = "sine";
-    oscillatorNode.start();
-    oscillatorNode.onended = () => {
-      oscillatorNode.disconnect(gainNode);
-    };
+    // const oscillatorNode = audioContext.createOscillator();
+    // oscillatorNode.connect(gainNode);
+    // oscillatorNode.frequency.setValueAtTime(
+    //   tone.freq,
+    //   audioContext.currentTime
+    // );
+    // oscillatorNode.type = "sine";
+    // oscillatorNode.start();
+    // oscillatorNode.onended = () => {
+    //   oscillatorNode.disconnect(gainNode);
+    // };
     dispatch({
       type: "ADD",
-      payload: { tone: tone, oscNode: oscillatorNode },
+      payload: { tone: tone, oscNode: undefined },
     });
   };
 
@@ -121,7 +169,7 @@ const AudioContextCircuit = ({ children }: Props) => {
       (source) => source.tone.name === tone.name
     );
     if (target) {
-      target.oscNode.stop();
+      // target.oscNode.stop();
       dispatch({ type: "REMOVE", payload: tone });
     } else {
       console.log("Don't match:", tone);
@@ -130,7 +178,7 @@ const AudioContextCircuit = ({ children }: Props) => {
 
   const stopOscillatorAll = () => {
     for (const ss of soundSourceState.current) {
-      ss.oscNode.stop();
+      // ss.oscNode.stop();
       dispatch({ type: "REMOVE", payload: ss.tone });
     }
   };
