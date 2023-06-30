@@ -2,12 +2,12 @@ import React, { createContext, useContext, useState, useReducer } from "react";
 import { SoundSource, Tone } from "./TypeCircuit";
 
 // 現在再生中のオシレータを格納し管理する配列
-type SoundSourceState = SoundSource[];
+type SoundSourceState = { previous: SoundSource[]; current: SoundSource[] };
 
 type SoundSourceAction =
   | { type: "ADD"; payload: SoundSource }
   | { type: "REMOVE"; payload: Tone }
-  | { type: "DROP"; };
+  | { type: "DROP" };
 
 const soundSourceReducer = (
   state: SoundSourceState,
@@ -15,11 +15,26 @@ const soundSourceReducer = (
 ): SoundSourceState => {
   switch (action.type) {
     case "ADD":
-      return [...state, action.payload];
+      //payloadのtoneが既にstate.currentに存在していたら現在のstateをそのまま返す。
+      if (state.current.includes(action.payload)) {
+        return state;
+      }
+      return {
+        previous: [...state.current],
+        current: [...state.current, action.payload],
+      };
     case "REMOVE":
-      return state.filter((ss) => ss.tone.name !== action.payload.name);
+      return {
+        previous: [...state.current],
+        current: state.current.filter(
+          (ss) => ss.tone.name !== action.payload.name
+        ),
+      };
     case "DROP":
-      return [];
+      return {
+        previous: [...state.current],
+        current: [],
+      };
     default:
       return state;
   }
@@ -32,7 +47,7 @@ interface Props {
 interface AudioContextContainer {
   audioContext: AudioContext | null;
   gainNode: GainNode | null;
-  soundSources: SoundSource[];
+  soundSourceState: { previous: SoundSource[]; current: SoundSource[] };
   createAudioContext: () => void;
   closeAudioContext: () => void;
   startOscillator: (tone: Tone) => void;
@@ -43,18 +58,21 @@ interface AudioContextContainer {
 const AudioContextContainer = createContext<AudioContextContainer>({
   audioContext: null,
   gainNode: null,
-  soundSources: [],
-  createAudioContext: () => { },
-  closeAudioContext: () => { },
-  startOscillator: () => { },
-  stopOscillator: () => { },
-  stopOscillatorAll: () => { },
+  soundSourceState: { previous: [], current: [] },
+  createAudioContext: () => {},
+  closeAudioContext: () => {},
+  startOscillator: () => {},
+  stopOscillator: () => {},
+  stopOscillatorAll: () => {},
 });
 
 const AudioContextCircuit = ({ children }: Props) => {
   const [audioContext, setAudioContext] = useState<AudioContext | null>(null);
   const [gainNode, setGainNode] = useState<GainNode | null>(null);
-  const [soundSources, dispatch] = useReducer(soundSourceReducer, []);
+  const [soundSourceState, dispatch] = useReducer(soundSourceReducer, {
+    previous: [],
+    current: [],
+  });
 
   const createAudioContext = () => {
     const audioContext = new AudioContext();
@@ -76,9 +94,9 @@ const AudioContextCircuit = ({ children }: Props) => {
   const startOscillator = (tone: Tone) => {
     if (!audioContext || !gainNode) return;
     if (findSoundSource(tone)) {
-      console.log("already sounded: ", findSoundSource(tone))
-      return
-    }; //既に音が鳴っている場合は早期リターン
+      console.log("already sounded: ", findSoundSource(tone));
+      return;
+    } //既に音が鳴っている場合は早期リターン
 
     console.log("will sound: ", tone);
     const oscillatorNode = audioContext.createOscillator();
@@ -99,7 +117,7 @@ const AudioContextCircuit = ({ children }: Props) => {
   };
 
   const stopOscillator = (tone: Tone) => {
-    const target = soundSources.find(
+    const target = soundSourceState.current.find(
       (source) => source.tone.name === tone.name
     );
     if (target) {
@@ -111,14 +129,14 @@ const AudioContextCircuit = ({ children }: Props) => {
   };
 
   const stopOscillatorAll = () => {
-    for (const ss of soundSources) {
+    for (const ss of soundSourceState.current) {
       ss.oscNode.stop();
-      dispatch({ type: "REMOVE", payload: ss.tone })
+      dispatch({ type: "REMOVE", payload: ss.tone });
     }
   };
 
   const findSoundSource = (tone: Tone) => {
-    return soundSources.find((ss) => ss.tone.name === tone.name);
+    return soundSourceState.current.find((ss) => ss.tone.name === tone.name);
   };
 
   return (
@@ -126,7 +144,7 @@ const AudioContextCircuit = ({ children }: Props) => {
       value={{
         audioContext,
         gainNode,
-        soundSources,
+        soundSourceState,
         createAudioContext,
         closeAudioContext,
         startOscillator,
