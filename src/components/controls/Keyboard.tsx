@@ -14,7 +14,7 @@ interface Props {
 }
 
 const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
-  const { startOscillator, stopOscillator } = useAudioContextCircuit();
+  const { startOscillator, stopOscillatorAll } = useAudioContextCircuit();
   const keyboardContext = useKeyboardContext();
   const refSVG = useRef<SVGSVGElement>(null);
 
@@ -94,6 +94,7 @@ const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
 
   const handleTouchEnd = (event: TouchEvent) => {
     event.preventDefault();
+    stopOscillatorAll();
     console.log("Touch End: ", event);
   };
 
@@ -102,9 +103,7 @@ const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
     document.addEventListener("mouseup", handleKeyReleased);
     //event.preventDefault()と{ passive: false }の組み合わせでスクロールも無効化できる。
     document.addEventListener("touchmove", handleTouchMove, { passive: false });
-    document.addEventListener("touchstart", handleTouchStart, {
-      passive: false,
-    });
+    document.addEventListener("touchstart", handleTouchStart, { passive: false });
     document.addEventListener("touchend", handleTouchEnd, { passive: false });
 
     return () => {
@@ -113,28 +112,6 @@ const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
       document.removeEventListener("touchmove", handleTouchMove);
       document.removeEventListener("touchstart", handleTouchStart);
       document.removeEventListener("touchend", handleTouchEnd);
-    };
-  }, []);
-
-  useEffect(() => {
-    // コンポーネント作成時にタッチ関連のイベントリスナを登録する
-
-    const handleTouchMove = (event: TouchEvent) => {
-      event.preventDefault();
-      console.log("Touch Moved: ", event);
-    };
-
-    const element = refSVG.current;
-    if (element) {
-      element.addEventListener("touchmove", handleTouchMove, {
-        passive: false,
-      });
-    }
-
-    return () => {
-      if (element) {
-        element.removeEventListener("touchmove", handleTouchMove);
-      }
     };
   }, []);
 
@@ -148,7 +125,6 @@ const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
     onKeyPressed: handleStartSound,
     onKeyReleased: handleStopSound,
     tone,
-    // ref: keyRefs[index],
   });
 
   const renderWhiteKeys = () => {
@@ -192,7 +168,6 @@ const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
       width="100%"
       height={SVG_HEIGHT}
       viewBox={"0 0 " + SVG_WIDTH + " " + SVG_HEIGHT}
-      // onTouchMove={handleTouchMove}
       ref={refSVG}
     >
       {renderWhiteKeys()}

@@ -6,7 +6,8 @@ type SoundSourceState = SoundSource[];
 
 type SoundSourceAction =
   | { type: "ADD"; payload: SoundSource }
-  | { type: "REMOVE"; payload: Tone };
+  | { type: "REMOVE"; payload: Tone }
+  | { type: "DROP"; };
 
 const soundSourceReducer = (
   state: SoundSourceState,
@@ -17,6 +18,8 @@ const soundSourceReducer = (
       return [...state, action.payload];
     case "REMOVE":
       return state.filter((ss) => ss.tone.name !== action.payload.name);
+    case "DROP":
+      return [];
     default:
       return state;
   }
@@ -34,16 +37,18 @@ interface AudioContextContainer {
   closeAudioContext: () => void;
   startOscillator: (tone: Tone) => void;
   stopOscillator: (tone: Tone) => void;
+  stopOscillatorAll: () => void;
 }
 
 const AudioContextContainer = createContext<AudioContextContainer>({
   audioContext: null,
   gainNode: null,
   soundSources: [],
-  createAudioContext: () => {},
-  closeAudioContext: () => {},
-  startOscillator: () => {},
-  stopOscillator: () => {},
+  createAudioContext: () => { },
+  closeAudioContext: () => { },
+  startOscillator: () => { },
+  stopOscillator: () => { },
+  stopOscillatorAll: () => { },
 });
 
 const AudioContextCircuit = ({ children }: Props) => {
@@ -70,7 +75,12 @@ const AudioContextCircuit = ({ children }: Props) => {
 
   const startOscillator = (tone: Tone) => {
     if (!audioContext || !gainNode) return;
-    if (findSoundSource(tone)) return; //既に音が鳴っている場合は早期リターン
+    if (findSoundSource(tone)) {
+      console.log("already sounded: ", findSoundSource(tone))
+      return
+    }; //既に音が鳴っている場合は早期リターン
+
+    console.log("will sound: ", tone);
     const oscillatorNode = audioContext.createOscillator();
     oscillatorNode.connect(gainNode);
     oscillatorNode.frequency.setValueAtTime(
@@ -100,6 +110,13 @@ const AudioContextCircuit = ({ children }: Props) => {
     }
   };
 
+  const stopOscillatorAll = () => {
+    for (const ss of soundSources) {
+      ss.oscNode.stop();
+      dispatch({ type: "REMOVE", payload: ss.tone })
+    }
+  };
+
   const findSoundSource = (tone: Tone) => {
     return soundSources.find((ss) => ss.tone.name === tone.name);
   };
@@ -114,6 +131,7 @@ const AudioContextCircuit = ({ children }: Props) => {
         closeAudioContext,
         startOscillator,
         stopOscillator,
+        stopOscillatorAll,
       }}
     >
       {children}
