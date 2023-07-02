@@ -14,10 +14,7 @@ interface Props {
   height: number;
   index: number;
   tone: Tone;
-  // ref: React.Ref<SVGGElement>;
 }
-
-// const Key = forwardRef(({
 const Key = ({
   className,
   keyColor,
@@ -26,7 +23,6 @@ const Key = ({
   width,
   height,
   tone,
-  // ref
 }:
   Props) => {
   const { handleStartSound, handleStopSound } = useKeyboardCircuit();
@@ -71,20 +67,20 @@ const Key = ({
   };
 
   const handleMouseLeave = () => {
-    if (isKeyPressed) handleStopSound(tone);
+    if (isKeyPressed) {
+      console.log("Leave:", tone.name);
+      handleStopSound(tone);
+    }
   };
 
   return (
     <g
       className="key"
       transform={transform}
-      // onTouchStart={handleTouchStart}
-      // onTouchEnd={handleTouchEnd}
       onMouseDown={handleMouseDown}
       onMouseUp={handleMouseUp}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
-    // ref={ref}
     >
       <rect
         className={className + " " + keyColor}

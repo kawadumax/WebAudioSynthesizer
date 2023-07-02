@@ -11,7 +11,7 @@ import { SoundSource, Tone } from "./TypeCircuit";
 type SoundSourceState = { previous: SoundSource[]; current: SoundSource[] };
 
 type SoundSourceAction =
-  | { type: "ADD"; payload: SoundSource }
+  | { type: "ADD"; payload: Tone }
   | { type: "REMOVE"; payload: Tone }
   | { type: "DROP" };
 
@@ -19,30 +19,58 @@ const soundSourceReducer = (
   state: SoundSourceState,
   action: SoundSourceAction
 ): SoundSourceState => {
+  let prev: SoundSource[];
+  let current: SoundSource[];
   switch (action.type) {
     case "ADD":
+      console.log("ADD occured:", action.payload.name);
       //payloadのtoneが既にstate.currentに存在していたら現在のstateをそのまま返す。
-      if (state.current.includes(action.payload)) {
-        return state;
-      }
-      return {
-        previous: [...state.current],
-        current: [...state.current, action.payload],
-      };
+      // if (state.current.includes(action.payload)) {
+      //   console.log("already added");
+      //   return state;
+      // }
+      // return {
+      //   previous: [...state.current],
+      //   current: [...state.current, action.payload],
+      // };
+      prev = [...state.current];
+      current = [...state.current, { oscNode: undefined, tone: action.payload }];
+      break;
     case "REMOVE":
-      return {
-        previous: [...state.current],
-        current: state.current.filter(
-          (ss) => ss.tone.name !== action.payload.name
-        ),
-      };
+      // console.log("REMOVE occured:", action.payload.name);
+      // current = state.current.filter(
+      //   (ss) => ss.tone.name !== action.payload.name
+      // )
+      // return {
+      //   previous: [...state.current],
+      //   current: [...current],
+      // };
+      prev = [...state.current];
+      current = state.current.filter(
+        (ss) => ss.tone.name !== action.payload.name
+      )
+      break;
     case "DROP":
-      return {
-        previous: [...state.current],
-        current: [],
-      };
+      // return {
+      //   previous: [...state.current],
+      //   current: [],
+      // };
+      prev = [...state.current];
+      current = [];
+      break;
     default:
-      return state;
+      // return state;
+      prev = state.previous;
+      current = state.current;
+      break;
+  }
+  //更新した状態をもとに、発音状態を変更する
+  //applyState();
+
+
+  return {
+    previous: prev,
+    current: current
   }
 };
 
@@ -65,11 +93,11 @@ const AudioContextContainer = createContext<AudioContextContainer>({
   audioContext: null,
   gainNode: null,
   soundSourceState: { previous: [], current: [] },
-  createAudioContext: () => {},
-  closeAudioContext: () => {},
-  startOscillator: () => {},
-  stopOscillator: () => {},
-  stopOscillatorAll: () => {},
+  createAudioContext: () => { },
+  closeAudioContext: () => { },
+  startOscillator: () => { },
+  stopOscillator: () => { },
+  stopOscillatorAll: () => { },
 });
 
 const AudioContextCircuit = ({ children }: Props) => {
@@ -81,6 +109,8 @@ const AudioContextCircuit = ({ children }: Props) => {
   });
 
   useEffect(() => {
+    console.log("effect Occured:", soundSourceState);
+
     if (!audioContext || !gainNode) return;
     // if (findSoundSource(tone)) {
     //   console.log("already sounded: ", findSoundSource(tone));
@@ -99,11 +129,12 @@ const AudioContextCircuit = ({ children }: Props) => {
       (item) => !prev.has(item)
     );
 
-    console.log(filteredPrev); // Output: [1, 2]
-    console.log(filteredCurrent); // Output: [6, 7]
+    console.log("previous state:", filteredPrev); // Output: [1, 2]
+    console.log("current state:", filteredCurrent); // Output: [6, 7]
 
     //previousに残った集合は、音を止める集合
     for (const ss of filteredPrev) {
+      console.log("stop osc:", ss.tone.name, ss.oscNode);
       ss.oscNode?.stop();
     }
     //currentに残った集合は、音を鳴らす集合
@@ -120,7 +151,7 @@ const AudioContextCircuit = ({ children }: Props) => {
         ss.oscNode?.disconnect(gainNode);
       };
     }
-  }, [soundSourceState]);
+  }, [soundSourceState.previous, soundSourceState.current]);
 
   const createAudioContext = () => {
     const audioContext = new AudioContext();
@@ -160,27 +191,16 @@ const AudioContextCircuit = ({ children }: Props) => {
     // };
     dispatch({
       type: "ADD",
-      payload: { tone: tone, oscNode: undefined },
+      payload: { tone: tone },
     });
   };
 
   const stopOscillator = (tone: Tone) => {
-    const target = soundSourceState.current.find(
-      (source) => source.tone.name === tone.name
-    );
-    if (target) {
-      // target.oscNode.stop();
-      dispatch({ type: "REMOVE", payload: tone });
-    } else {
-      console.log("Don't match:", tone);
-    }
+    dispatch({ type: "REMOVE", payload: tone });
   };
 
   const stopOscillatorAll = () => {
-    for (const ss of soundSourceState.current) {
-      // ss.oscNode.stop();
-      dispatch({ type: "REMOVE", payload: ss.tone });
-    }
+    dispatch({ type: "DROP" });
   };
 
   const findSoundSource = (tone: Tone) => {
