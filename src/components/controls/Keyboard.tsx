@@ -102,16 +102,16 @@ const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
     document.addEventListener("mousedown", handleKeyPressed);
     document.addEventListener("mouseup", handleKeyReleased);
     //event.preventDefault()と{ passive: false }の組み合わせでスクロールも無効化できる。
-    document.addEventListener("touchmove", handleTouchMove, { passive: false });
-    document.addEventListener("touchstart", handleTouchStart, { passive: false });
-    document.addEventListener("touchend", handleTouchEnd, { passive: false });
+    // document.addEventListener("touchmove", handleTouchMove, { passive: false });
+    // document.addEventListener("touchstart", handleTouchStart, { passive: false });
+    // document.addEventListener("touchend", handleTouchEnd, { passive: false });
 
     return () => {
       document.removeEventListener("mousedown", handleKeyPressed);
       document.removeEventListener("mouseup", handleKeyReleased);
-      document.removeEventListener("touchmove", handleTouchMove);
-      document.removeEventListener("touchstart", handleTouchStart);
-      document.removeEventListener("touchend", handleTouchEnd);
+      // document.removeEventListener("touchmove", handleTouchMove);
+      // document.removeEventListener("touchstart", handleTouchStart);
+      // document.removeEventListener("touchend", handleTouchEnd);
     };
   }, []);
 
