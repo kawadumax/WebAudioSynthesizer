@@ -4,7 +4,7 @@ import useKeyboardCircuit, {
   useKeyboardContext,
 } from "../circuits/KeyboardCircuit";
 import { Tone } from "../circuits/TypeCircuit";
-import { useEffect, useRef, useState, createRef } from "react";
+import { useEffect, useRef } from "react";
 import { useAudioContextCircuit } from "../circuits/AudioContextCircuit";
 
 interface Props {

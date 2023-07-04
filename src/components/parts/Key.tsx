@@ -44,6 +44,7 @@ const Key = ({
     event: React.MouseEvent<SVGGElement, MouseEvent>
   ) => {
     event.preventDefault();
+    console.log("mouse Down")
     handleStartSound(tone);
   };
 
@@ -63,12 +64,13 @@ const Key = ({
   // };
 
   const handleMouseEnter = () => {
-    if (isKeyPressed) handleStartSound(tone);
+    if (isKeyPressed) {
+      handleStartSound(tone);
+    }
   };
 
   const handleMouseLeave = () => {
     if (isKeyPressed) {
-      console.log("Leave:", tone.name);
       handleStopSound(tone);
     }
   };

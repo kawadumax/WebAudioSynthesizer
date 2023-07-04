@@ -5,15 +5,28 @@ import React, {
   useReducer,
   useEffect,
 } from "react";
-import { SoundSource, Tone } from "./TypeCircuit";
 
-// 現在再生中のオシレータを格納し管理する配列
-type SoundSourceState = { previous: SoundSource[]; current: SoundSource[] };
+import { SoundState, Tone } from "./TypeCircuit";
 
-type SoundSourceAction =
-  | { type: "ADD"; payload: Tone }
-  | { type: "REMOVE"; payload: Tone }
-  | { type: "DROP" };
+type SoundStateAction =
+  | { type: 'START'; payload: Tone; }
+  | { type: 'STOP'; payload: Tone; }
+  | { type: 'CLEAR'; payload: Tone; };
+
+const soundStateReducer = (state: SoundState[], action: SoundStateAction): SoundState[] => {
+  switch (action.type) {
+    case 'START':
+      return [...state, { tone: action.payload, isStarted: true }];
+    case 'STOP':
+      return state.map(s =>
+        s.tone.name === action.payload.name ? { ...s, isEnded: true } : s
+      );
+    case 'CLEAR':
+      return state.filter(s => s.tone.name !== action.payload.name);
+    default:
+      return state;
+  }
+};
 
 interface Props {
   children: React.ReactNode;
@@ -22,7 +35,7 @@ interface Props {
 interface AudioContextContainer {
   audioContext: AudioContext | null;
   gainNode: GainNode | null;
-  soundSourceState: { previous: SoundSource[]; current: SoundSource[] };
+  soundStates: SoundState[];
   createAudioContext: () => void;
   closeAudioContext: () => void;
   startOscillator: (tone: Tone) => void;
@@ -33,172 +46,43 @@ interface AudioContextContainer {
 const AudioContextContainer = createContext<AudioContextContainer>({
   audioContext: null,
   gainNode: null,
-  soundSourceState: { previous: [], current: [] },
-  createAudioContext: () => {},
-  closeAudioContext: () => {},
-  startOscillator: () => {},
-  stopOscillator: () => {},
-  stopOscillatorAll: () => {},
+  soundStates: [],
+  createAudioContext: () => { },
+  closeAudioContext: () => { },
+  startOscillator: () => { },
+  stopOscillator: () => { },
+  stopOscillatorAll: () => { },
 });
 
 const AudioContextCircuit = ({ children }: Props) => {
-  const applyState = (state: SoundSourceState) => {
-    console.log("State Apply:", state.previous, state.current);
-
-    if (!audioContext || !gainNode) return;
-    // if (findSoundSource(tone)) {
-    //   console.log("already sounded: ", findSoundSource(tone));
-    //   return;
-    // } //既に音が鳴っている場合は早期リターン
-
-    //stateの変更差分を見て、差分に対して音を鳴らしたり止めたりする
-    //previousとcurrentの共通する要素を取得して、その共通部分をpreviousとcurrentそれぞれから引く
-    const prev = new Set(state.previous);
-    const current = new Set(state.current);
-
-    const filteredPrev = state.previous.filter((item) => !current.has(item));
-    const filteredCurrent = state.current.filter((item) => !prev.has(item));
-
-    console.log("filtered previous state:", filteredPrev); // Output: [1, 2]
-    console.log("filtered current state:", filteredCurrent); // Output: [6, 7]
-
-    //previousに残った集合は、音を止める集合
-    for (const ss of filteredPrev) {
-      console.log("stop osc:", ss.tone.name, ss.oscNode);
-      if (ss.oscNode) {
-        ss.oscNode.stop();
-      } else {
-        console.log("can not stop");
-      }
-    }
-    //currentに残った集合は、音を鳴らす集合
-    for (const ss of filteredCurrent) {
-      console.log("start osc:", ss);
-      ss.oscNode = audioContext.createOscillator();
-      ss.oscNode.connect(gainNode);
-      ss.oscNode.frequency.setValueAtTime(
-        ss.tone.freq,
-        audioContext.currentTime
-      );
-      ss.oscNode.type = "sine";
-      ss.oscNode.start();
-      ss.oscNode.onended = (event: Event) => {
-        const oscillatorNode = event.target as OscillatorNode;
-        oscillatorNode.disconnect(gainNode);
-      };
-    }
-  };
-
-  const soundSourceReducer = (
-    state: SoundSourceState,
-    action: SoundSourceAction
-  ): SoundSourceState => {
-    let prev: SoundSource[];
-    let current: SoundSource[];
-    switch (action.type) {
-      case "ADD":
-        console.log("ADD occured:", action.payload.name);
-        //payloadのtoneが既にstate.currentに存在していたら現在のstateをそのまま返す。
-        // if (state.current.includes(action.payload)) {
-        //   console.log("already added");
-        //   return state;
-        // }
-        // return {
-        //   previous: [...state.current],
-        //   current: [...state.current, action.payload],
-        // };
-        prev = [...state.current];
-        current = [
-          ...state.current,
-          { oscNode: undefined, tone: action.payload },
-        ];
-        break;
-      case "REMOVE":
-        console.log("REMOVE occured:", action.payload.name);
-        // current = state.current.filter(
-        //   (ss) => ss.tone.name !== action.payload.name
-        // )
-        // return {
-        //   previous: [...state.current],
-        //   current: [...current],
-        // };
-        prev = [...state.current];
-        current = state.current.filter(
-          (ss) => ss.tone.name !== action.payload.name
-        );
-        break;
-      case "DROP":
-        // return {
-        //   previous: [...state.current],
-        //   current: [],
-        // };
-        prev = [...state.current];
-        current = [];
-        break;
-      default:
-        // return state;
-        prev = state.previous;
-        current = state.current;
-        break;
-    }
-    //更新した状態をもとに、発音状態を変更する
-    const newState = { previous: prev, current: current };
-    applyState(newState);
-
-    return newState;
-  };
-
   const [audioContext, setAudioContext] = useState<AudioContext | null>(null);
   const [gainNode, setGainNode] = useState<GainNode | null>(null);
-  const [soundSourceState, dispatch] = useReducer(soundSourceReducer, {
-    previous: [],
-    current: [],
-  });
+  const [soundStates, dispatch] = useReducer(soundStateReducer, []);
 
-  // useEffect(() => {
-  //   console.log("effect Occured:", soundSourceState);
+  useEffect(() => {
+    if (!audioContext || !gainNode) {
+      return;
+    }
 
-  //   if (!audioContext || !gainNode) return;
-  //   // if (findSoundSource(tone)) {
-  //   //   console.log("already sounded: ", findSoundSource(tone));
-  //   //   return;
-  //   // } //既に音が鳴っている場合は早期リターン
-
-  //   //stateの変更差分を見て、差分に対して音を鳴らしたり止めたりする
-  //   //previousとcurrentの共通する要素を取得して、その共通部分をpreviousとcurrentそれぞれから引く
-  //   const prev = new Set(soundSourceState.previous);
-  //   const current = new Set(soundSourceState.current);
-
-  //   const filteredPrev = soundSourceState.previous.filter(
-  //     (item) => !current.has(item)
-  //   );
-  //   const filteredCurrent = soundSourceState.current.filter(
-  //     (item) => !prev.has(item)
-  //   );
-
-  //   console.log("previous state:", filteredPrev); // Output: [1, 2]
-  //   console.log("current state:", filteredCurrent); // Output: [6, 7]
-
-  //   //previousに残った集合は、音を止める集合
-  //   for (const ss of filteredPrev) {
-  //     console.log("stop osc:", ss.tone.name, ss.oscNode);
-  //     ss.oscNode?.stop();
-  //   }
-  //   //currentに残った集合は、音を鳴らす集合
-  //   for (const ss of filteredCurrent) {
-  //     ss.oscNode = audioContext.createOscillator();
-  //     ss.oscNode.connect(gainNode);
-  //     ss.oscNode.frequency.setValueAtTime(
-  //       ss.tone.freq,
-  //       audioContext.currentTime
-  //     );
-  //     ss.oscNode.type = "sine";
-  //     ss.oscNode.start();
-  //     ss.oscNode.onended = () => {
-  //       ss.oscNode?.disconnect(gainNode);
-  //     };
-  //   }
-  // }, [soundSourceState.previous, soundSourceState.current]);
+    for (const state of soundStates) {
+      if (state.isStarted && !state.isEnded && !state.oscillator) {
+        console.log("OSC START");
+        // Sound started but not stopped yet and oscillator not created
+        const osc = audioContext.createOscillator();
+        osc.frequency.value = state.tone.freq;
+        osc.connect(audioContext.destination);
+        osc.start();
+        state.oscillator = osc;
+      } else if (state.isEnded && state.oscillator) {
+        console.log("OSC STOP");
+        // Sound stopped and oscillator created
+        state.oscillator.stop();
+        state.oscillator.disconnect();
+        state.oscillator = null;
+        dispatch({ type: 'CLEAR', payload: state.tone })
+      }
+    };
+  }, [soundStates]);
 
   const createAudioContext = () => {
     const audioContext = new AudioContext();
@@ -218,40 +102,28 @@ const AudioContextCircuit = ({ children }: Props) => {
   };
 
   const startOscillator = (tone: Tone) => {
-    // if (!audioContext || !gainNode) return;
-    // if (findSoundSource(tone)) {
-    //   console.log("already sounded: ", findSoundSource(tone));
-    //   return;
-    // } //既に音が鳴っている場合は早期リターン
+    if (!audioContext || !gainNode) return;
+    if (findSoundSource(tone)) {
+      return;
+    }
 
     console.log("will sound: ", tone);
-    // const oscillatorNode = audioContext.createOscillator();
-    // oscillatorNode.connect(gainNode);
-    // oscillatorNode.frequency.setValueAtTime(
-    //   tone.freq,
-    //   audioContext.currentTime
-    // );
-    // oscillatorNode.type = "sine";
-    // oscillatorNode.start();
-    // oscillatorNode.onended = () => {
-    //   oscillatorNode.disconnect(gainNode);
-    // };
     dispatch({
-      type: "ADD",
+      type: "START",
       payload: tone,
     });
   };
 
   const stopOscillator = (tone: Tone) => {
-    dispatch({ type: "REMOVE", payload: tone });
+    dispatch({ type: "STOP", payload: tone });
   };
 
   const stopOscillatorAll = () => {
-    dispatch({ type: "DROP" });
+    // dispatch({ type: "DROP" });
   };
 
   const findSoundSource = (tone: Tone) => {
-    return soundSourceState.current.find((ss) => ss.tone.name === tone.name);
+    return soundStates.find((ss) => ss.tone.name === tone.name);
   };
 
   return (
@@ -259,7 +131,7 @@ const AudioContextCircuit = ({ children }: Props) => {
       value={{
         audioContext,
         gainNode,
-        soundSourceState,
+        soundStates,
         createAudioContext,
         closeAudioContext,
         startOscillator,
