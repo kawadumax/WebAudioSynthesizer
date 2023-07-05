@@ -14,7 +14,8 @@ interface Props {
 }
 
 const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
-  const { soundStates, startOscillator, stopOscillator } = useAudioContextCircuit();
+  const { startOscillator, stopOscillatorAll, stopOscillatorExcept } =
+    useAudioContextCircuit();
   const keyboardContext = useKeyboardContext();
   const refSVG = useRef<SVGSVGElement>(null);
 
@@ -45,7 +46,6 @@ const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
     setIsKeyPressed(false);
   };
 
-  // const handleTouchMove: React.TouchEventHandler<SVGSVGElement> = (event) => {
   const handleTouchMove = (event: TouchEvent) => {
     event.preventDefault();
     //TODO
@@ -65,7 +65,6 @@ const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
     //////キーボードの左端と右端を取得する
     const leftKeyboard = keyBoardRect.left;
     const rightKeyboard = keyBoardRect.right;
-    //////キーの分割数を取得する numOfKeys
     //////キーボードの範囲内にないとき、早期リターン
     if (
       cord.x < leftKeyboard ||
@@ -77,20 +76,13 @@ const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
       return;
     }
 
-    const toBeStop = soundStates.filter(s => s.tone.name !== touchedTone.name);
-    console.log("want to stop: ", soundStates, toBeStop);
-    for (const state of toBeStop) {
-      stopOscillator(state.tone);
-    }
-
     //////キーボードの範囲内にあるとき、キーの左から何番目にあるのかを取得する
     // console.log("Touch is in keyboard", cord, keyBoardRect);
     const touchedKeyOrder = Math.floor(cord.x / KEY_WIDTH);
     const touchedTone = naturalTones[touchedKeyOrder];
     startOscillator(touchedTone);
     // 指がないのに鳴ってるキーがあったら止める。
-
-
+    stopOscillatorExcept(touchedTone);
   };
 
   const handleTouchStart = (event: TouchEvent) => {
@@ -100,7 +92,7 @@ const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
 
   const handleTouchEnd = (event: TouchEvent) => {
     event.preventDefault();
-    // stopOscillator();
+    stopOscillatorAll();
     console.log("Touch End: ", event);
   };
 
@@ -109,7 +101,9 @@ const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
     document.addEventListener("mouseup", handleKeyReleased);
     //event.preventDefault()と{ passive: false }の組み合わせでスクロールも無効化できる。
     document.addEventListener("touchmove", handleTouchMove, { passive: false });
-    document.addEventListener("touchstart", handleTouchStart, { passive: false });
+    document.addEventListener("touchstart", handleTouchStart, {
+      passive: false,
+    });
     document.addEventListener("touchend", handleTouchEnd, { passive: false });
 
     return () => {
