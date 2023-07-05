@@ -68,12 +68,12 @@ const AudioContextContainer = createContext<AudioContextContainer>({
   audioContext: null,
   gainNode: null,
   soundStates: [],
-  createAudioContext: () => {},
-  closeAudioContext: () => {},
-  startOscillator: () => {},
-  stopOscillator: () => {},
-  stopOscillatorAll: () => {},
-  stopOscillatorExcept: () => {},
+  createAudioContext: () => { },
+  closeAudioContext: () => { },
+  startOscillator: () => { },
+  stopOscillator: () => { },
+  stopOscillatorAll: () => { },
+  stopOscillatorExcept: () => { },
 });
 
 const AudioContextCircuit = ({ children }: Props) => {
@@ -87,7 +87,6 @@ const AudioContextCircuit = ({ children }: Props) => {
 
     for (const state of soundStates) {
       if (state.isStarted && !state.isEnded && !state.oscillator) {
-        // console.log("OSC START");
         // Sound started but not stopped yet and oscillator not created
         const osc = audioContext.createOscillator();
         osc.frequency.value = state.tone.freq;
@@ -95,7 +94,6 @@ const AudioContextCircuit = ({ children }: Props) => {
         osc.start();
         state.oscillator = osc;
       } else if (state.isEnded && state.oscillator) {
-        console.log("OSC STOP");
         // Sound stopped and oscillator created
         state.oscillator.stop();
         state.oscillator.disconnect();
@@ -142,7 +140,7 @@ const AudioContextCircuit = ({ children }: Props) => {
   };
 
   const stopOscillatorAll = () => {
-    console.log("dispatch all:");
+    console.log("dispatch stop all:");
     dispatch({ type: "STOP_ALL" });
   };
 

@@ -48,17 +48,17 @@ const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
 
   const handleTouchMove = (event: TouchEvent) => {
     event.preventDefault();
+    if (refSVG.current == null) {
+      return;
+    }
     //TODO
     // console.log("Touch Moved: ", event);
     // 各鍵盤のどの領域にあるのかを判定する。
     //// 現在の指の座標を取得する。
     const cord = { x: event.touches[0].clientX, y: event.touches[0].clientY };
     // console.log(cord);
-    //// すべての鍵を走査して指の座標があるかを調べる？ OR 計算でどのキー上にあるのかを求める
+    ////計算でどのキー上にあるのかを求める
     //////キーボードの上端と下端を取得する
-    if (refSVG.current == null) {
-      return;
-    }
     const keyBoardRect = refSVG.current.getBoundingClientRect();
     const topKeyboard = keyBoardRect.top;
     const bottomKeyboard = keyBoardRect.bottom;
@@ -66,6 +66,8 @@ const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
     const leftKeyboard = keyBoardRect.left;
     const rightKeyboard = keyBoardRect.right;
     //////キーボードの範囲内にないとき、早期リターン
+    console.log("Touch Pos:", cord.x, cord.y);
+    console.log("Keyboard Rect: ", topKeyboard, bottomKeyboard, leftKeyboard, rightKeyboard);
     if (
       cord.x < leftKeyboard ||
       cord.x > rightKeyboard ||
@@ -78,11 +80,15 @@ const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
 
     //////キーボードの範囲内にあるとき、キーの左から何番目にあるのかを取得する
     // console.log("Touch is in keyboard", cord, keyBoardRect);
-    const touchedKeyOrder = Math.floor(cord.x / KEY_WIDTH);
+    const scaledWhiteKeyWidth = keyBoardRect.width / naturalTones.length;
+    const touchedKeyOrder = Math.floor((cord.x - leftKeyboard) / scaledWhiteKeyWidth);
     const touchedTone = naturalTones[touchedKeyOrder];
-    startOscillator(touchedTone);
-    // 指がないのに鳴ってるキーがあったら止める。
-    stopOscillatorExcept(touchedTone);
+    // console.log(touchedTone);
+    if (touchedTone) {
+      startOscillator(touchedTone);
+      // 指がないのに鳴ってるキーがあったら止める。
+      stopOscillatorExcept(touchedTone);
+    }
   };
 
   const handleTouchStart = (event: TouchEvent) => {
@@ -101,9 +107,7 @@ const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
     document.addEventListener("mouseup", handleKeyReleased);
     //event.preventDefault()と{ passive: false }の組み合わせでスクロールも無効化できる。
     document.addEventListener("touchmove", handleTouchMove, { passive: false });
-    document.addEventListener("touchstart", handleTouchStart, {
-      passive: false,
-    });
+    document.addEventListener("touchstart", handleTouchStart, { passive: false });
     document.addEventListener("touchend", handleTouchEnd, { passive: false });
 
     return () => {
@@ -166,7 +170,7 @@ const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
   return (
     <svg
       width="100%"
-      height={SVG_HEIGHT}
+      height="100%"
       viewBox={"0 0 " + SVG_WIDTH + " " + SVG_HEIGHT}
       ref={refSVG}
     >
