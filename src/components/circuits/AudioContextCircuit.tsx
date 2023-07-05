@@ -4,6 +4,7 @@ import React, {
   useState,
   useReducer,
   useEffect,
+  useRef
 } from "react";
 
 import { SoundState, Tone } from "./TypeCircuit";
@@ -16,7 +17,12 @@ type SoundStateAction =
 const soundStateReducer = (state: SoundState[], action: SoundStateAction): SoundState[] => {
   switch (action.type) {
     case 'START':
-      return [...state, { tone: action.payload, isStarted: true }];
+      if (state.some(s => s.tone.name === action.payload.name)) {
+        //すでにstart済みの音階がある場合は、追加せず状態をそのまま返す
+        return state;
+      } else {
+        return [...state, { tone: action.payload, isStarted: true }];
+      }
     case 'STOP':
       return state.map(s =>
         s.tone.name === action.payload.name ? { ...s, isEnded: true } : s
@@ -55,18 +61,19 @@ const AudioContextContainer = createContext<AudioContextContainer>({
 });
 
 const AudioContextCircuit = ({ children }: Props) => {
+  const soundStatesRef = useRef<SoundState[]>([]);
   const [audioContext, setAudioContext] = useState<AudioContext | null>(null);
   const [gainNode, setGainNode] = useState<GainNode | null>(null);
   const [soundStates, dispatch] = useReducer(soundStateReducer, []);
-
+  soundStatesRef.current = soundStates;
   useEffect(() => {
     if (!audioContext || !gainNode) {
       return;
     }
 
-    for (const state of soundStates) {
+    for (const state of soundStatesRef.current) {
       if (state.isStarted && !state.isEnded && !state.oscillator) {
-        console.log("OSC START");
+        // console.log("OSC START");
         // Sound started but not stopped yet and oscillator not created
         const osc = audioContext.createOscillator();
         osc.frequency.value = state.tone.freq;
@@ -107,7 +114,7 @@ const AudioContextCircuit = ({ children }: Props) => {
       return;
     }
 
-    console.log("will sound: ", tone);
+    console.log("dispatch start: ", tone);
     dispatch({
       type: "START",
       payload: tone,
@@ -115,6 +122,7 @@ const AudioContextCircuit = ({ children }: Props) => {
   };
 
   const stopOscillator = (tone: Tone) => {
+    console.log("dispatch stop: ", tone);
     dispatch({ type: "STOP", payload: tone });
   };
 

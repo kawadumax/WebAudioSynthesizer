@@ -14,7 +14,7 @@ interface Props {
 }
 
 const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
-  const { startOscillator, stopOscillatorAll } = useAudioContextCircuit();
+  const { soundStates, startOscillator, stopOscillator } = useAudioContextCircuit();
   const keyboardContext = useKeyboardContext();
   const refSVG = useRef<SVGSVGElement>(null);
 
@@ -37,13 +37,11 @@ const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
 
   const handleKeyPressed = (event: MouseEvent | TouchEvent) => {
     event.preventDefault();
-    console.log("Pressed: ", event);
     setIsKeyPressed(true);
   };
 
   const handleKeyReleased = (event: MouseEvent | TouchEvent) => {
     event.preventDefault();
-    console.log("Released: ", event);
     setIsKeyPressed(false);
   };
 
@@ -75,16 +73,24 @@ const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
       cord.y > bottomKeyboard ||
       cord.y < topKeyboard
     ) {
-      // console.log("Touch is not in keyboard", cord, keyBoardRect);
+      console.log("Touch is not in keyboard", cord, keyBoardRect);
       return;
     }
+
+    const toBeStop = soundStates.filter(s => s.tone.name !== touchedTone.name);
+    console.log("want to stop: ", soundStates, toBeStop);
+    for (const state of toBeStop) {
+      stopOscillator(state.tone);
+    }
+
     //////キーボードの範囲内にあるとき、キーの左から何番目にあるのかを取得する
-    console.log("Touch is in keyboard", cord, keyBoardRect);
+    // console.log("Touch is in keyboard", cord, keyBoardRect);
     const touchedKeyOrder = Math.floor(cord.x / KEY_WIDTH);
-    // touchedKeyOrderを使ってref経由でKeyの要素を取得する
     const touchedTone = naturalTones[touchedKeyOrder];
     startOscillator(touchedTone);
     // 指がないのに鳴ってるキーがあったら止める。
+
+
   };
 
   const handleTouchStart = (event: TouchEvent) => {
@@ -94,7 +100,7 @@ const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
 
   const handleTouchEnd = (event: TouchEvent) => {
     event.preventDefault();
-    stopOscillatorAll();
+    // stopOscillator();
     console.log("Touch End: ", event);
   };
 
@@ -102,16 +108,16 @@ const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
     document.addEventListener("mousedown", handleKeyPressed);
     document.addEventListener("mouseup", handleKeyReleased);
     //event.preventDefault()と{ passive: false }の組み合わせでスクロールも無効化できる。
-    // document.addEventListener("touchmove", handleTouchMove, { passive: false });
-    // document.addEventListener("touchstart", handleTouchStart, { passive: false });
-    // document.addEventListener("touchend", handleTouchEnd, { passive: false });
+    document.addEventListener("touchmove", handleTouchMove, { passive: false });
+    document.addEventListener("touchstart", handleTouchStart, { passive: false });
+    document.addEventListener("touchend", handleTouchEnd, { passive: false });
 
     return () => {
       document.removeEventListener("mousedown", handleKeyPressed);
       document.removeEventListener("mouseup", handleKeyReleased);
-      // document.removeEventListener("touchmove", handleTouchMove);
-      // document.removeEventListener("touchstart", handleTouchStart);
-      // document.removeEventListener("touchend", handleTouchEnd);
+      document.removeEventListener("touchmove", handleTouchMove);
+      document.removeEventListener("touchstart", handleTouchStart);
+      document.removeEventListener("touchend", handleTouchEnd);
     };
   }, []);
 
