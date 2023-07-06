@@ -1,25 +1,48 @@
-import React, { createContext, useContext, useState, useReducer } from "react";
-import { SoundSource, Tone } from "./TypeCircuit";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useReducer,
+  useEffect,
+  // useRef
+} from "react";
 
-// 現在再生中のオシレータを格納し管理する配列
-type SoundSourceState = SoundSource[];
+import { SoundState, Tone } from "./TypeCircuit";
 
-type SoundSourceAction =
-  | { type: "ADD"; payload: SoundSource }
-  | { type: "REMOVE"; payload: Tone }
-  | { type: "DROP"; };
+type SoundStateAction =
+  | { type: "START"; payload: Tone }
+  | { type: "STOP"; payload: Tone }
+  | { type: "CLEAR"; payload: Tone }
+  | { type: "STOP_EXCEPT"; payload: Tone }
+  | { type: "STOP_ALL" };
 
-const soundSourceReducer = (
-  state: SoundSourceState,
-  action: SoundSourceAction
-): SoundSourceState => {
+const soundStateReducer = (
+  state: SoundState[],
+  action: SoundStateAction
+): SoundState[] => {
   switch (action.type) {
-    case "ADD":
-      return [...state, action.payload];
-    case "REMOVE":
-      return state.filter((ss) => ss.tone.name !== action.payload.name);
-    case "DROP":
-      return [];
+    case "START":
+      if (state.some((s) => s.tone.name === action.payload.name)) {
+        //すでにstart済みの音階がある場合は、追加せず状態をそのまま返す
+        return state;
+      } else {
+        return [...state, { tone: action.payload, isStarted: true }];
+      }
+    case "STOP":
+      return state.map((s) =>
+        s.tone.name === action.payload.name ? { ...s, isEnded: true } : s
+      );
+    case "STOP_EXCEPT":
+      // payloadに入っているtone以外全てのsoundStateにisEndedを付ける
+      return state.map((s) =>
+        s.tone.name !== action.payload.name ? { ...s, isEnded: true } : s
+      );
+    case "STOP_ALL":
+      return state.map((s) => {
+        return { ...s, isEnded: true };
+      });
+    case "CLEAR":
+      return state.filter((s) => s.tone.name !== action.payload.name);
     default:
       return state;
   }
@@ -32,29 +55,53 @@ interface Props {
 interface AudioContextContainer {
   audioContext: AudioContext | null;
   gainNode: GainNode | null;
-  soundSources: SoundSource[];
+  soundStates: SoundState[];
   createAudioContext: () => void;
   closeAudioContext: () => void;
   startOscillator: (tone: Tone) => void;
   stopOscillator: (tone: Tone) => void;
+  stopOscillatorExcept: (tone: Tone) => void;
   stopOscillatorAll: () => void;
 }
 
 const AudioContextContainer = createContext<AudioContextContainer>({
   audioContext: null,
   gainNode: null,
-  soundSources: [],
+  soundStates: [],
   createAudioContext: () => { },
   closeAudioContext: () => { },
   startOscillator: () => { },
   stopOscillator: () => { },
   stopOscillatorAll: () => { },
+  stopOscillatorExcept: () => { },
 });
 
 const AudioContextCircuit = ({ children }: Props) => {
   const [audioContext, setAudioContext] = useState<AudioContext | null>(null);
   const [gainNode, setGainNode] = useState<GainNode | null>(null);
-  const [soundSources, dispatch] = useReducer(soundSourceReducer, []);
+  const [soundStates, dispatch] = useReducer(soundStateReducer, []);
+  useEffect(() => {
+    if (!audioContext || !gainNode) {
+      return;
+    }
+
+    for (const state of soundStates) {
+      if (state.isStarted && !state.isEnded && !state.oscillator) {
+        // Sound started but not stopped yet and oscillator not created
+        const osc = audioContext.createOscillator();
+        osc.frequency.value = state.tone.freq;
+        osc.connect(audioContext.destination);
+        osc.start();
+        state.oscillator = osc;
+      } else if (state.isEnded && state.oscillator) {
+        // Sound stopped and oscillator created
+        state.oscillator.stop();
+        state.oscillator.disconnect();
+        state.oscillator = null;
+        dispatch({ type: "CLEAR", payload: state.tone });
+      }
+    }
+  }, [soundStates]);
 
   const createAudioContext = () => {
     const audioContext = new AudioContext();
@@ -76,49 +123,29 @@ const AudioContextCircuit = ({ children }: Props) => {
   const startOscillator = (tone: Tone) => {
     if (!audioContext || !gainNode) return;
     if (findSoundSource(tone)) {
-      console.log("already sounded: ", findSoundSource(tone))
-      return
-    }; //既に音が鳴っている場合は早期リターン
-
-    console.log("will sound: ", tone);
-    const oscillatorNode = audioContext.createOscillator();
-    oscillatorNode.connect(gainNode);
-    oscillatorNode.frequency.setValueAtTime(
-      tone.freq,
-      audioContext.currentTime
-    );
-    oscillatorNode.type = "sine";
-    oscillatorNode.start();
-    oscillatorNode.onended = () => {
-      oscillatorNode.disconnect(gainNode);
-    };
-    dispatch({
-      type: "ADD",
-      payload: { tone: tone, oscNode: oscillatorNode },
-    });
+      return;
+    }
+    console.log("dispatch start: ", tone);
+    dispatch({ type: "START", payload: tone });
   };
 
   const stopOscillator = (tone: Tone) => {
-    const target = soundSources.find(
-      (source) => source.tone.name === tone.name
-    );
-    if (target) {
-      target.oscNode.stop();
-      dispatch({ type: "REMOVE", payload: tone });
-    } else {
-      console.log("Don't match:", tone);
-    }
+    console.log("dispatch stop: ", tone);
+    dispatch({ type: "STOP", payload: tone });
+  };
+
+  const stopOscillatorExcept = (tone: Tone) => {
+    console.log("dispatch stop except for: ", tone);
+    dispatch({ type: "STOP_EXCEPT", payload: tone });
   };
 
   const stopOscillatorAll = () => {
-    for (const ss of soundSources) {
-      ss.oscNode.stop();
-      dispatch({ type: "REMOVE", payload: ss.tone })
-    }
+    console.log("dispatch stop all:");
+    dispatch({ type: "STOP_ALL" });
   };
 
   const findSoundSource = (tone: Tone) => {
-    return soundSources.find((ss) => ss.tone.name === tone.name);
+    return soundStates.find((ss) => ss.tone.name === tone.name);
   };
 
   return (
@@ -126,11 +153,12 @@ const AudioContextCircuit = ({ children }: Props) => {
       value={{
         audioContext,
         gainNode,
-        soundSources,
+        soundStates,
         createAudioContext,
         closeAudioContext,
         startOscillator,
         stopOscillator,
+        stopOscillatorExcept,
         stopOscillatorAll,
       }}
     >
