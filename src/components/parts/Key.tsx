@@ -37,8 +37,11 @@ const Key = ({
   const BLACK_HEIGHT = WHITE_HEIGHT / 2;
   //フォントサイズは鍵の横幅に合わせる
   const WHITE_FONT_SIZE = WHITE_WIDTH;
+  // クラス名が渡されてなかったら空文字にする
+  className = className ? className + " " : "";
 
   const transform = `translate(${x}, ${y})`;
+
 
   const handleMouseDown = (
     event: React.MouseEvent<SVGGElement, MouseEvent>
@@ -74,7 +77,7 @@ const Key = ({
       onMouseLeave={handleMouseLeave}
     >
       <rect
-        className={className + " " + keyColor}
+        className={className + keyColor}
         width={keyColor === "white" ? WHITE_WIDTH : BLACK_WIDTH}
         height={keyColor === "white" ? WHITE_HEIGHT : BLACK_HEIGHT}
       ></rect>
