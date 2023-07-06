@@ -1,4 +1,4 @@
-import React from "react";
+import React, { forwardRef } from "react";
 import { Tone } from "../circuits/TypeCircuit";
 import "@styles/Key.scss";
 import useKeyboardCircuit, {
@@ -15,7 +15,6 @@ interface Props {
   index: number;
   tone: Tone;
 }
-
 const Key = ({
   className,
   keyColor,
@@ -38,8 +37,11 @@ const Key = ({
   const BLACK_HEIGHT = WHITE_HEIGHT / 2;
   //フォントサイズは鍵の横幅に合わせる
   const WHITE_FONT_SIZE = WHITE_WIDTH;
+  // クラス名が渡されてなかったら空文字にする
+  className = className ? className + " " : "";
 
   const transform = `translate(${x}, ${y})`;
+
 
   const handleMouseDown = (
     event: React.MouseEvent<SVGGElement, MouseEvent>
@@ -53,22 +55,16 @@ const Key = ({
     handleStopSound(tone);
   };
 
-  // const handleTouchStart = (event: React.TouchEvent<SVGGElement>) => {
-  //   event.preventDefault();
-  //   if (onKeyPressed) onKeyPressed(tone);
-  // };
-
-  // const handleTouchEnd = (event: React.TouchEvent<SVGGElement>) => {
-  //   event.preventDefault();
-  //   if (onKeyReleased) onKeyReleased(tone);
-  // };
-
   const handleMouseEnter = () => {
-    if (isKeyPressed) handleStartSound(tone);
+    if (isKeyPressed) {
+      handleStartSound(tone);
+    }
   };
 
   const handleMouseLeave = () => {
-    if (isKeyPressed) handleStopSound(tone);
+    if (isKeyPressed) {
+      handleStopSound(tone);
+    }
   };
 
   return (
@@ -76,14 +72,12 @@ const Key = ({
       className="key"
       transform={transform}
       onMouseDown={handleMouseDown}
-      // onTouchStart={handleTouchStart}
-      // onTouchEnd={handleTouchEnd}
       onMouseUp={handleMouseUp}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
       <rect
-        className={className + " " + keyColor}
+        className={className + keyColor}
         width={keyColor === "white" ? WHITE_WIDTH : BLACK_WIDTH}
         height={keyColor === "white" ? WHITE_HEIGHT : BLACK_HEIGHT}
       ></rect>

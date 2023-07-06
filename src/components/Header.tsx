@@ -23,8 +23,6 @@ const Header = () => {
                 decoding="async"
                 src={githubIcon}
                 alt="GitHub Repository"
-              // width="24" // 必要に応じてサイズを調整
-              // height="24" // 必要に応じてサイズを調整
               />
             </a>
           </li>

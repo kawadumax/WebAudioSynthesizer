@@ -1,13 +1,12 @@
 @import "variables";
+
 .key {
-  text {
-    color: black;
-  }
 
   rect.black {
     fill: rgba(5, 5, 5, 0.9);
     filter: drop-shadow(0px 0px 3px rgba(0, 0, 0, 0.5));
   }
+
   rect.white {
     fill: white;
     filter: drop-shadow(0px 0px 2px rgba(0, 0, 0, 0.3));
@@ -18,6 +17,7 @@
       fill: $primary-color;
       filter: drop-shadow(1px 1px 5px rgba($primary-color, 0.9));
     }
+
     text {
       fill: white;
       filter: drop-shadow(0px 0px 5px rgba(white, 0.5));
@@ -27,5 +27,10 @@
   text {
     cursor: default;
     fill: rgba(0, 0, 0, 0.2);
+  }
+
+  text,
+  tspan {
+    pointer-events: none;
   }
 }

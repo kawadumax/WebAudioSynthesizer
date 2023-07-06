@@ -1,3 +1,4 @@
+
 import { Tone } from "../circuits/TypeCircuit";
 import Key from "./Key";
 
@@ -13,12 +14,12 @@ interface Props {
   onKeyReleased?: (tone: Tone) => void;
 }
 
-const WhiteKey = (props
-: Props) => {
+const WhiteKey = (props: Props) => {
   return (
     <Key
-    {...props}
-    keyColor="white"
+      {...props}
+      keyColor="white"
+
     ></Key>
   );
 };
