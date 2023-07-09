@@ -6,6 +6,7 @@ import useKeyboardCircuit, {
 import { Tone } from "../circuits/TypeCircuit";
 import { useEffect, useRef } from "react";
 import { useAudioContextCircuit } from "../circuits/AudioContextCircuit";
+import { containsPoint } from '@utils/DomUtils';
 
 interface Props {
   width?: number;
@@ -52,43 +53,26 @@ const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
       return;
     }
     // 各鍵盤のどの領域にあるのかを判定する。
-    //// 現在の指の座標を取得する。
-    const cord = { x: event.touches[0].clientX, y: event.touches[0].clientY };
+    //// 現在のタッチの座標を取得する。
+    const position = { x: event.touches[0].clientX, y: event.touches[0].clientY };
     ////計算でどのキー上にあるのかを求める
-    //////キーボードの上端と下端を取得する
     const keyBoardRect = refSVG.current.getBoundingClientRect();
-    const topKeyboard = keyBoardRect.top;
-    const bottomKeyboard = keyBoardRect.bottom;
-    //////キーボードの左端と右端を取得する
-    const leftKeyboard = keyBoardRect.left;
-    const rightKeyboard = keyBoardRect.right;
     //////キーボードの範囲内にないとき、早期リターン
-    if (
-      cord.x < leftKeyboard ||
-      cord.x > rightKeyboard ||
-      cord.y > bottomKeyboard ||
-      cord.y < topKeyboard
-    ) {
-      // console.log("Touch is not in keyboard", cord, keyBoardRect);
+    if (!containsPoint(keyBoardRect, position)) {
       stopOscillatorAll();
       return;
     }
 
     //////キーボードの範囲内にあるとき、キーの左から何番目にあるのかを取得する
     const keys = refSVG.current.children;
-    const keyWidthList = Array.from(keys).map((key) => key.getBoundingClientRect())
-    const blackKeyWidthList = keyWidthList.slice(naturalTones.length);
+    const keyRectList = Array.from(keys).map((key) => key.getBoundingClientRect())
+    const blackKeyRectList = keyRectList.slice(naturalTones.length);
     //最初に黒鍵に当てはまるのかを確かめる
-    if (cord.y <= blackKeyWidthList[0].bottom) {
+    if (position.y <= blackKeyRectList[0].bottom) {
       //タッチのy座標がキーボードの黒鍵の領域より上にあるとき
-      console.log("black key area");
-      const touchedKeyIndex = blackKeyWidthList.findIndex((w) => {
-        return cord.x >= w.left &&
-          cord.x <= w.right &&
-          cord.y <= w.bottom &&
-          cord.y >= w.top
+      const touchedKeyIndex = blackKeyRectList.findIndex((rect) => {
+        return containsPoint(rect, position)
       });
-      console.log("touchedKey Index: ", touchedKeyIndex);
       if (touchedKeyIndex >= 0) {
         const touchedTone = accidentalTones[touchedKeyIndex];
         startAndStopExcept(touchedTone);
@@ -99,7 +83,7 @@ const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
 
     //白鍵
     const scaledWhiteKeyWidth = keyBoardRect.width / naturalTones.length;
-    const touchedKeyOrder = Math.floor((cord.x - leftKeyboard) / scaledWhiteKeyWidth);
+    const touchedKeyOrder = Math.floor((position.x - keyBoardRect.left) / scaledWhiteKeyWidth);
     const touchedTone = naturalTones[touchedKeyOrder];
     startAndStopExcept(touchedTone);
 
