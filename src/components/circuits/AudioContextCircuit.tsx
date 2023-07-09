@@ -4,7 +4,6 @@ import React, {
   useState,
   useReducer,
   useEffect,
-  // useRef
 } from "react";
 
 import { SoundState, Tone } from "./TypeCircuit";

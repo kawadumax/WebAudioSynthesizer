@@ -14,7 +14,7 @@ interface KeyboardCircuitContext {
 const KeyboardContext = createContext<KeyboardCircuitContext | null>(null);
 
 const useKeyboardCircuit = () => {
-  const { startOscillator, stopOscillator } = useAudioContextCircuit();
+  const { startOscillator, stopOscillator, stopOscillatorExcept, stopOscillatorAll } = useAudioContextCircuit();
   const toneNumberToFreq = (tone: number) => {
     //1オクターブで周波数が2倍なので、半音上がると2の十二乗根倍になる。
     //これを元に、48番目の音階であるA4=440hzを基準として計算で周波数を求める。
@@ -95,12 +95,27 @@ const useKeyboardCircuit = () => {
     stopOscillator(tone);
   };
 
+  const handleStartAndStopExceptSound = (tone: Tone | undefined) => {
+    if (tone) {
+      startOscillator(tone);
+      stopOscillatorExcept(tone);
+    } else {
+      stopOscillatorAll();
+    }
+  };
+
+  const handleStopAllSound = () => {
+    stopOscillatorAll();
+  }
+
   return {
     isKeyPressed,
     setIsKeyPressed,
     makeSequencedKeys,
     handleStartSound,
     handleStopSound,
+    handleStopAllSound,
+    handleStartAndStopExceptSound,
   };
 };
 
