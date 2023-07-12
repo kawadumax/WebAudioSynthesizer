@@ -71,13 +71,13 @@ const AudioContextContainer = createContext<AudioContextContainer>({
   audioContext: null,
   gainNode: null,
   soundStates: [],
-  createAudioContext: () => {},
-  closeAudioContext: () => {},
-  startOscillator: () => {},
-  stopOscillator: () => {},
-  stopOscillatorAll: () => {},
-  stopOscillatorExcept: () => {},
-  stopOscillatorExcepts: () => {},
+  createAudioContext: () => { },
+  closeAudioContext: () => { },
+  startOscillator: () => { },
+  stopOscillator: () => { },
+  stopOscillatorAll: () => { },
+  stopOscillatorExcept: () => { },
+  stopOscillatorExcepts: () => { },
 });
 
 const AudioContextCircuit = ({ children }: Props) => {
@@ -168,6 +168,7 @@ const AudioContextCircuit = ({ children }: Props) => {
         startOscillator,
         stopOscillator,
         stopOscillatorExcept,
+        stopOscillatorExcepts,
         stopOscillatorAll,
       }}
     >

@@ -60,7 +60,6 @@ const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
     const keys = svg.children;
     const keyRects = Array.from(keys).map((key) => key.getBoundingClientRect());
     const blackKeyRects = keyRects.slice(naturalTones.length);
-    // 最初に黒鍵に当てはまるのかを確かめる
     if (position.y > blackKeyRects[0].bottom) {
       //タッチのy座標がキーボードの下半分にあるとき、早期リターン
       return;
