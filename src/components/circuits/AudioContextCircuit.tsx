@@ -11,9 +11,14 @@ import { SoundState, Tone } from "./TypeCircuit";
 type SoundStateAction =
   | { type: "START"; payload: Tone }
   | { type: "STOP"; payload: Tone }
-  | { type: "CLEAR"; payload: Tone }
   | { type: "STOP_EXCEPT"; payload: Tone }
-  | { type: "STOP_ALL" };
+  | { type: "STOP_EXCEPTS"; payload: Tone[] }
+  | { type: "STOP_ALL" }
+  | { type: "CLEAR"; payload: Tone };
+
+const markAsEnded =
+  (predicate: (s: SoundState) => boolean) => (s: SoundState) =>
+    predicate(s) ? { ...s, isEnded: true } : s;
 
 const soundStateReducer = (
   state: SoundState[],
@@ -28,18 +33,16 @@ const soundStateReducer = (
         return [...state, { tone: action.payload, isStarted: true }];
       }
     case "STOP":
-      return state.map((s) =>
-        s.tone.name === action.payload.name ? { ...s, isEnded: true } : s
-      );
+      return state.map(markAsEnded((s) => s.tone.name === action.payload.name));
     case "STOP_EXCEPT":
       // payloadに入っているtone以外全てのsoundStateにisEndedを付ける
-      return state.map((s) =>
-        s.tone.name !== action.payload.name ? { ...s, isEnded: true } : s
-      );
+      return state.map(markAsEnded((s) => s.tone.name !== action.payload.name));
+    case "STOP_EXCEPTS":
+      // payloadに入っている複数のtone以外全てのsoundStateにisEndedを付ける
+      const toneNames = action.payload.map((tone) => tone.name);
+      return state.map(markAsEnded((s) => !toneNames.includes(s.tone.name)));
     case "STOP_ALL":
-      return state.map((s) => {
-        return { ...s, isEnded: true };
-      });
+      return state.map(markAsEnded(() => true));
     case "CLEAR":
       return state.filter((s) => s.tone.name !== action.payload.name);
     default:
@@ -60,6 +63,7 @@ interface AudioContextContainer {
   startOscillator: (tone: Tone) => void;
   stopOscillator: (tone: Tone) => void;
   stopOscillatorExcept: (tone: Tone) => void;
+  stopOscillatorExcepts: (tones: Tone[]) => void;
   stopOscillatorAll: () => void;
 }
 
@@ -67,12 +71,13 @@ const AudioContextContainer = createContext<AudioContextContainer>({
   audioContext: null,
   gainNode: null,
   soundStates: [],
-  createAudioContext: () => { },
-  closeAudioContext: () => { },
-  startOscillator: () => { },
-  stopOscillator: () => { },
-  stopOscillatorAll: () => { },
-  stopOscillatorExcept: () => { },
+  createAudioContext: () => {},
+  closeAudioContext: () => {},
+  startOscillator: () => {},
+  stopOscillator: () => {},
+  stopOscillatorAll: () => {},
+  stopOscillatorExcept: () => {},
+  stopOscillatorExcepts: () => {},
 });
 
 const AudioContextCircuit = ({ children }: Props) => {
@@ -136,6 +141,11 @@ const AudioContextCircuit = ({ children }: Props) => {
   const stopOscillatorExcept = (tone: Tone) => {
     console.log("dispatch stop except for: ", tone);
     dispatch({ type: "STOP_EXCEPT", payload: tone });
+  };
+
+  const stopOscillatorExcepts = (tones: Tone[]) => {
+    console.log("dispatch stop except for: ", tones);
+    dispatch({ type: "STOP_EXCEPTS", payload: tones });
   };
 
   const stopOscillatorAll = () => {

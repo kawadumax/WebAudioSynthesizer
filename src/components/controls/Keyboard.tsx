@@ -5,7 +5,7 @@ import useKeyboardCircuit, {
 } from "../circuits/KeyboardCircuit";
 import { Tone } from "../circuits/TypeCircuit";
 import { useEffect, useRef } from "react";
-import { containsPoint, Point } from '@utils/DomUtils';
+import { containsPoint, Point } from "@utils/DomUtils";
 interface Props {
   width?: number;
   height?: number;
@@ -20,8 +20,14 @@ const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
     throw new Error("KeyboardContext is not provided.");
   }
   const { setIsKeyPressed } = keyboardContext;
-  const { makeSequencedKeys, handleStartSound, handleStopSound, handleStopAllSound, handleStartAndStopExceptSound } =
-    useKeyboardCircuit();
+  const {
+    makeSequencedKeys,
+    handleStartSound,
+    handleStopSound,
+    handleStopAllSound,
+    handleStopExcepts,
+    handleStartAndStopExceptSound,
+  } = useKeyboardCircuit();
   const startKey = 44;
   const endKey = startKey + numOfKeys;
   const { naturalTones, accidentalTones } = makeSequencedKeys(startKey, endKey);
@@ -35,16 +41,24 @@ const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
 
   const getTone = (position: Point): Tone | undefined => {
     const keyboardSVG = refSVG.current;
-    if (!keyboardSVG || !containsPoint(keyboardSVG.getBoundingClientRect(), position)) {
+    if (
+      !keyboardSVG ||
+      !containsPoint(keyboardSVG.getBoundingClientRect(), position)
+    ) {
       //////キーボードがない、またはキーボードの範囲内にポインタがないとき、早期リターン
       return;
     }
-    return getBlackTone(keyboardSVG, position) || getWhiteTone(keyboardSVG, position);
+    return (
+      getBlackTone(keyboardSVG, position) || getWhiteTone(keyboardSVG, position)
+    );
   };
 
-  const getBlackTone = (svg: SVGSVGElement, position: Point): Tone | undefined => {
+  const getBlackTone = (
+    svg: SVGSVGElement,
+    position: Point
+  ): Tone | undefined => {
     const keys = svg.children;
-    const keyRects = Array.from(keys).map((key) => key.getBoundingClientRect())
+    const keyRects = Array.from(keys).map((key) => key.getBoundingClientRect());
     const blackKeyRects = keyRects.slice(naturalTones.length);
     // 最初に黒鍵に当てはまるのかを確かめる
     if (position.y > blackKeyRects[0].bottom) {
@@ -52,25 +66,51 @@ const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
       return;
     }
     const touchedKeyIndex = blackKeyRects.findIndex((rect) => {
-      return containsPoint(rect, position)
+      return containsPoint(rect, position);
     });
 
     return accidentalTones[touchedKeyIndex];
-  }
+  };
 
-  const getWhiteTone = (svg: SVGSVGElement, position: Point): Tone | undefined => {
+  const getWhiteTone = (
+    svg: SVGSVGElement,
+    position: Point
+  ): Tone | undefined => {
     const keyboardRect = svg.getBoundingClientRect();
     const scaledWhiteKeyWidth = keyboardRect.width / naturalTones.length;
     // タッチの座標が各鍵盤のどの領域にあるのかを判定する。
-    const touchedKeyOrder = Math.floor((position.x - keyboardRect.left) / scaledWhiteKeyWidth);
+    const touchedKeyOrder = Math.floor(
+      (position.x - keyboardRect.left) / scaledWhiteKeyWidth
+    );
     return naturalTones[touchedKeyOrder];
-  }
+  };
 
   const processToneAtPoint = (event: TouchEvent) => {
     event.preventDefault();
-    const touchedTone = getTone({ x: event.touches[0].clientX, y: event.touches[0].clientY })
+    const touchedTone = getTone({
+      x: event.touches[0].clientX,
+      y: event.touches[0].clientY,
+    });
     if (touchedTone) {
       handleStartAndStopExceptSound(touchedTone);
+    } else {
+      handleStopAllSound();
+    }
+  };
+
+  const processToneAtPoints = (event: TouchEvent) => {
+    event.preventDefault();
+    const touches = Array.from(event.touches);
+    let touchedTones: Tone[] = [];
+    for (const t of touches) {
+      const tone = getTone({ x: t.clientX, y: t.clientY });
+      if (tone) {
+        touchedTones.push(tone);
+        handleStartSound(tone);
+      }
+    }
+    if (touchedTones.length > 0) {
+      handleStopExcepts(touchedTones);
     } else {
       handleStopAllSound();
     }
@@ -87,12 +127,12 @@ const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
   };
 
   const handleTouchStart = (event: TouchEvent) => {
-    processToneAtPoint(event);
+    processToneAtPoints(event);
   };
 
   const handleTouchMove = (event: TouchEvent) => {
-    processToneAtPoint(event);
-  }
+    processToneAtPoints(event);
+  };
 
   const handleTouchEnd = (event: TouchEvent) => {
     event.preventDefault();
@@ -104,7 +144,9 @@ const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
     document.addEventListener("mouseup", handleMouseReleased);
     //event.preventDefault()と{ passive: false }の組み合わせでスクロールも無効化できる。
     document.addEventListener("touchmove", handleTouchMove, { passive: false });
-    document.addEventListener("touchstart", handleTouchStart, { passive: false });
+    document.addEventListener("touchstart", handleTouchStart, {
+      passive: false,
+    });
     document.addEventListener("touchend", handleTouchEnd, { passive: false });
 
     return () => {
