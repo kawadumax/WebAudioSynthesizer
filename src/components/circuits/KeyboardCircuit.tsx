@@ -16,6 +16,7 @@ const KeyboardContext = createContext<KeyboardCircuitContext | null>(null);
 const useKeyboardCircuit = () => {
   const {
     startOscillator,
+    startOscillatorSome,
     stopOscillator,
     stopOscillatorExcept,
     stopOscillatorExcepts,
@@ -97,6 +98,10 @@ const useKeyboardCircuit = () => {
     startOscillator(tone);
   };
 
+  const handleStartSomeSounds = (tones: Tone[]) => {
+    startOscillatorSome(tones);
+  }
+
   const handleStopSound = (tone: Tone) => {
     stopOscillator(tone);
   };
@@ -123,6 +128,7 @@ const useKeyboardCircuit = () => {
     setIsKeyPressed,
     makeSequencedKeys,
     handleStartSound,
+    handleStartSomeSounds,
     handleStopSound,
     handleStopAllSound,
     handleStopExcepts,

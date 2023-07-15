@@ -10,6 +10,7 @@ import { SoundState, Tone } from "./TypeCircuit";
 
 type SoundStateAction =
   | { type: "START"; payload: Tone }
+  | { type: "START_SOME"; payload: Tone[] }
   | { type: "STOP"; payload: Tone }
   | { type: "STOP_EXCEPT"; payload: Tone }
   | { type: "STOP_EXCEPTS"; payload: Tone[] }
@@ -32,6 +33,17 @@ const soundStateReducer = (
       } else {
         return [...state, { tone: action.payload, isStarted: true }];
       }
+    case "START_SOME":
+      //action.payloadの配列全てを追加するが、ただし既にstartedがtrueであればそのままにする。
+      const newSounds = [];
+      for (const newTone of action.payload) {
+        if (state.some((s) => s.tone.name === newTone.name && s.isStarted && s.oscillator)) {
+          continue;
+        } else {
+          newSounds.push({ tone: newTone, isStarted: true });
+        }
+      }
+      return [...state, ...newSounds];
     case "STOP":
       return state.map(markAsEnded((s) => s.tone.name === action.payload.name));
     case "STOP_EXCEPT":
@@ -61,6 +73,7 @@ interface AudioContextContainer {
   createAudioContext: () => void;
   closeAudioContext: () => void;
   startOscillator: (tone: Tone) => void;
+  startOscillatorSome: (tones: Tone[]) => void;
   stopOscillator: (tone: Tone) => void;
   stopOscillatorExcept: (tone: Tone) => void;
   stopOscillatorExcepts: (tones: Tone[]) => void;
@@ -74,6 +87,7 @@ const AudioContextContainer = createContext<AudioContextContainer>({
   createAudioContext: () => { },
   closeAudioContext: () => { },
   startOscillator: () => { },
+  startOscillatorSome: () => { },
   stopOscillator: () => { },
   stopOscillatorAll: () => { },
   stopOscillatorExcept: () => { },
@@ -88,7 +102,7 @@ const AudioContextCircuit = ({ children }: Props) => {
     if (!audioContext || !gainNode) {
       return;
     }
-
+    console.log("onEffect: ", soundStates);
     for (const state of soundStates) {
       if (state.isStarted && !state.isEnded && !state.oscillator) {
         // Sound started but not stopped yet and oscillator not created
@@ -102,9 +116,11 @@ const AudioContextCircuit = ({ children }: Props) => {
         state.oscillator.stop();
         state.oscillator.disconnect();
         state.oscillator = null;
+        console.log("dispatch CLEAR", state.tone);
         dispatch({ type: "CLEAR", payload: state.tone });
       }
     }
+
   }, [soundStates]);
 
   const createAudioContext = () => {
@@ -131,6 +147,12 @@ const AudioContextCircuit = ({ children }: Props) => {
     }
     console.log("dispatch start: ", tone);
     dispatch({ type: "START", payload: tone });
+  };
+
+  const startOscillatorSome = (tones: Tone[]) => {
+    if (!audioContext || !gainNode) return;
+    console.log("dispatch start some: ", tones);
+    dispatch({ type: "START_SOME", payload: tones });
   };
 
   const stopOscillator = (tone: Tone) => {
@@ -166,6 +188,7 @@ const AudioContextCircuit = ({ children }: Props) => {
         createAudioContext,
         closeAudioContext,
         startOscillator,
+        startOscillatorSome,
         stopOscillator,
         stopOscillatorExcept,
         stopOscillatorExcepts,

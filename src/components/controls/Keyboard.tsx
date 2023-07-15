@@ -23,6 +23,7 @@ const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
   const {
     makeSequencedKeys,
     handleStartSound,
+    handleStartSomeSounds,
     handleStopSound,
     handleStopAllSound,
     handleStopExcepts,
@@ -99,16 +100,12 @@ const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
 
   const processToneAtPoints = (event: TouchEvent) => {
     event.preventDefault();
-    const touches = Array.from(event.touches);
-    let touchedTones: Tone[] = [];
-    for (const t of touches) {
-      const tone = getTone({ x: t.clientX, y: t.clientY });
-      if (tone) {
-        touchedTones.push(tone);
-        handleStartSound(tone);
-      }
-    }
+    const touchedTones = Array.from(event.touches)
+      .map((t) => getTone({ x: t.clientX, y: t.clientY }))
+      .filter(Boolean) as Tone[];
+
     if (touchedTones.length > 0) {
+      handleStartSomeSounds(touchedTones);
       handleStopExcepts(touchedTones);
     } else {
       handleStopAllSound();
