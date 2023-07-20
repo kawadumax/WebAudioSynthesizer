@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import "@styles/Synth.scss";
 import GainKnob from "@components/controls/GainKnob";
+import LFOKnob from "./controls/LFOKnob";
 import PowerToggle from "@components/controls/PowerToggle";
 import Keyboard from "@components/controls/Keyboard";
 import { useAudioContextCircuit } from "./circuits/AudioContextCircuit";
@@ -34,6 +35,7 @@ const Synth = () => {
       return (
         <>
           <GainKnob></GainKnob>
+          <LFOKnob></LFOKnob>
           <PowerToggle onPower={handlePowerChange}></PowerToggle>
           <KeyboardContextProvider>
             <Keyboard

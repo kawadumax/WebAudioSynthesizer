@@ -11,7 +11,7 @@ const GainKnob = () => {
     if (gainNode) {
       gainNode.gain.value = gain;
     }
-  }, [gain]);
+  }, [gain, gainNode]);
 
   const handleGainChange = (newGain: number) => {
     if (gainNode) {
