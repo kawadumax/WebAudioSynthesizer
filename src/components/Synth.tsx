@@ -43,7 +43,6 @@ const Synth = () => {
               <FXDepthKnob></FXDepthKnob>
             </div>
             <div id="global-unit">
-              <PowerToggle onPower={handlePowerChange}></PowerToggle>
               <GainKnob></GainKnob>
             </div>
           </div>

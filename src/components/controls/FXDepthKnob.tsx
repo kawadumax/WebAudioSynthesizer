@@ -3,8 +3,9 @@ import Knob from "@components/parts/Knob";
 import Display from "@components/parts/Display";
 import { useAudioContextCircuit } from "../circuits/AudioContextCircuit";
 import Label from "../parts/Label";
+import styles from "@styles/Knob.module.scss";
 
-const LFOFrequencyKnob = () => {
+const FXDepthKnob = () => {
   const [frequency, setFrequency] = useState(0.5);
   const { gainNode } = useAudioContextCircuit();
 
@@ -21,7 +22,7 @@ const LFOFrequencyKnob = () => {
   };
 
   return (
-    <div className="lfo-knob">
+    <div className={styles.knob}>
       <Label>Depth</Label>
       <Knob handleValueChange={handleLFOChange} defaultValue={0.5} />
       <Display parameter={frequency}></Display>
@@ -29,4 +30,4 @@ const LFOFrequencyKnob = () => {
   );
 };
 
-export default LFOFrequencyKnob;
+export default FXDepthKnob;

@@ -2,13 +2,13 @@ import React, { useState, useEffect, Component } from "react";
 import Led from "@components/parts/Led";
 import Toggle from "@components/parts/Toggle";
 import Label from "@components/parts/Label";
-import "@styles/PowerToggle.scss";
+import styles from "@styles/FXToggle.module.scss";
 
 interface Props {
   // onPower: (isToggled: boolean) => void;
 }
 
-const PowerToggle = ({ }: Props) => {
+const FXToggle = ({ }: Props) => {
   // const [power, setPower] = useState(false);
   // const handlePower = () => {
   //   setPower(!power);
@@ -19,12 +19,15 @@ const PowerToggle = ({ }: Props) => {
   // }, [power]);
 
   return (
-    <div className="fx-toggle">
-      <Label>Power</Label>
-      <Toggle></Toggle>
+    <div className={styles.FXToggle}>
+      <Label>Tremolo</Label>
+
       <Led className="fx-toggle-led" isActive={true}></Led>
+      <Toggle></Toggle>
+
+
     </div>
   );
 };
 
-export default PowerToggle;
+export default FXToggle;
