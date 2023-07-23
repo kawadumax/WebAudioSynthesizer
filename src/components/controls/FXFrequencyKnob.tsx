@@ -2,8 +2,9 @@ import React, { useState, useEffect } from "react";
 import Knob from "@components/parts/Knob";
 import Display from "@components/parts/Display";
 import { useAudioContextCircuit } from "../circuits/AudioContextCircuit";
+import Label from "../parts/Label";
 
-const LFOKnob = () => {
+const LFOFrequencyKnob = () => {
   const [frequency, setFrequency] = useState(0.5);
   const { gainNode } = useAudioContextCircuit();
 
@@ -21,10 +22,11 @@ const LFOKnob = () => {
 
   return (
     <div className="lfo-knob">
+      <Label>Frequency</Label>
       <Knob handleValueChange={handleLFOChange} defaultValue={0.5} />
       <Display parameter={frequency}></Display>
     </div>
   );
 };
 
-export default LFOKnob;
+export default LFOFrequencyKnob;

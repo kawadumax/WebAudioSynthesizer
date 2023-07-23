@@ -1,3 +1,15 @@
+@import "variables";
+
 #synth {
-  padding: 20px;
+  margin: 20px;
+
+  #synth-controls {
+    display: flex;
+    justify-content: space-between;
+
+    #toremolo-unit {
+      display: flex;
+    }
+  }
+
 }

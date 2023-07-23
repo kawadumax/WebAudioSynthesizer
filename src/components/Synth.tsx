@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import "@styles/Synth.scss";
 import GainKnob from "@components/controls/GainKnob";
-import LFOKnob from "./controls/LFOKnob";
+import FXFrequencyKnob from "./controls/FXFrequencyKnob";
+import FXDepthKnob from "./controls/FXDepthKnob";
+import FXToggle from "@components/controls/FXToggle";
 import PowerToggle from "@components/controls/PowerToggle";
 import Keyboard from "@components/controls/Keyboard";
 import { useAudioContextCircuit } from "./circuits/AudioContextCircuit";
@@ -34,9 +36,17 @@ const Synth = () => {
     if (audioContext) {
       return (
         <>
-          <GainKnob></GainKnob>
-          <LFOKnob></LFOKnob>
-          <PowerToggle onPower={handlePowerChange}></PowerToggle>
+          <div id="synth-controls">
+            <div id="toremolo-unit">
+              <FXToggle></FXToggle>
+              <FXFrequencyKnob></FXFrequencyKnob>
+              <FXDepthKnob></FXDepthKnob>
+            </div>
+            <div id="global-unit">
+              <PowerToggle onPower={handlePowerChange}></PowerToggle>
+              <GainKnob></GainKnob>
+            </div>
+          </div>
           <KeyboardContextProvider>
             <Keyboard
               numOfKeys={24}
@@ -47,7 +57,7 @@ const Synth = () => {
         </>
       );
     } else {
-      return <p>Can Not Initialize Audio Context.</p>;
+      return <p>Initialize Audio Context...</p>;
     }
   };
 
