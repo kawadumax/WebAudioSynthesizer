@@ -15,16 +15,6 @@ const Synth = () => {
   const { audioContext, createAudioContext, closeAudioContext } =
     useAudioContextCircuit();
 
-  useEffect(() => {
-    // ここにオーディオ関連の処理を記述します
-    createAudioContext();
-
-    // コンポーネントのクリーンアップ時にオーディオコンテキストを閉じます
-    return () => {
-      closeAudioContext();
-    };
-  }, []); // 空の依存配列を指定して、このエフェクトをコンポーネントのマウント時にのみ実行します
-
   const handlePowerChange = (power: boolean) => {
     if (audioContext === null) {
       return;

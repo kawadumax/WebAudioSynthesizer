@@ -6,14 +6,15 @@ import Label from "../parts/Label";
 import styles from "@styles/Knob.module.scss";
 
 const FXFrequencyKnob = () => {
+  //max:20, min:0.1でトレモロの周波数
   const [frequency, setFrequency] = useState(0.5);
-  const { gainNode } = useAudioContextCircuit();
+  const { gainNode, audioContext } = useAudioContextCircuit();
 
-  useEffect(() => {
-    if (gainNode) {
-      gainNode.gain.value = frequency;
-    }
-  }, [frequency, gainNode]);
+  // useEffect(() => {
+  //   if (gainNode) {
+  //     gainNode.gain.value = frequency;
+  //   }
+  // }, [frequency, gainNode]);
 
   const handleLFOChange = (freq: number) => {
     if (gainNode) {

@@ -108,7 +108,7 @@ const AudioContextCircuit = ({ children }: Props) => {
         // Sound started but not stopped yet and oscillator not created
         const osc = audioContext.createOscillator();
         osc.frequency.value = state.tone.freq;
-        osc.connect(audioContext.destination);
+        osc.connect(gainNode);
         osc.start();
         state.oscillator = osc;
       } else if (state.isEnded && state.oscillator) {
@@ -123,13 +123,38 @@ const AudioContextCircuit = ({ children }: Props) => {
 
   }, [soundStates]);
 
+  useEffect(() => {
+    const { audioContext, gainNode } = createAudioContext();
+
+    let animationFrameId: number;
+    const loop = () => {
+      // gainNode の value を時間によって変化させる関数を記述
+      gainNode.gain.value = updateGainNode(audioContext.currentTime);
+      animationFrameId = requestAnimationFrame(loop);
+    };
+    loop();
+
+    return () => {
+      cancelAnimationFrame(animationFrameId);
+      closeAudioContext();
+    }
+  }, []);
+
+  const updateGainNode = (currentTime: number) => {
+    const baseGain = 0.5;
+    const depth = 0.5;
+    const frequency = 0.5;
+    return baseGain * depth * Math.sin(2 * Math.PI * frequency * currentTime);
+  }
+
   const createAudioContext = () => {
     const audioContext = new AudioContext();
-    setAudioContext(audioContext);
     const gainNode = audioContext.createGain();
     gainNode.gain.setValueAtTime(0.5, audioContext.currentTime);
     gainNode.connect(audioContext.destination);
     setGainNode(gainNode);
+    setAudioContext(audioContext);
+    return { audioContext, gainNode }
   };
 
   const closeAudioContext = () => {
