@@ -98,6 +98,24 @@ const AudioContextCircuit = ({ children }: Props) => {
   const [audioContext, setAudioContext] = useState<AudioContext | null>(null);
   const [gainNode, setGainNode] = useState<GainNode | null>(null);
   const [soundStates, dispatch] = useReducer(soundStateReducer, []);
+  const [fxStates] = useFX();
+  useEffect(() => {
+    const { audioContext, gainNode } = createAudioContext();
+
+    let animationFrameId: number;
+    const loop = () => {
+      // gainNode の value を時間によって変化させる関数を記述
+      gainNode.gain.value = updateGainNode(audioContext.currentTime);
+      animationFrameId = requestAnimationFrame(loop);
+    };
+    loop();
+
+    return () => {
+      cancelAnimationFrame(animationFrameId);
+      closeAudioContext();
+    }
+  }, []);
+
   useEffect(() => {
     if (!audioContext || !gainNode) {
       return;
@@ -122,23 +140,6 @@ const AudioContextCircuit = ({ children }: Props) => {
     }
 
   }, [soundStates]);
-
-  useEffect(() => {
-    const { audioContext, gainNode } = createAudioContext();
-
-    let animationFrameId: number;
-    const loop = () => {
-      // gainNode の value を時間によって変化させる関数を記述
-      gainNode.gain.value = updateGainNode(audioContext.currentTime);
-      animationFrameId = requestAnimationFrame(loop);
-    };
-    loop();
-
-    return () => {
-      cancelAnimationFrame(animationFrameId);
-      closeAudioContext();
-    }
-  }, []);
 
   const updateGainNode = (currentTime: number) => {
     const baseGain = 0.5;
