@@ -1,16 +1,18 @@
 import "@styles/Toggle.scss";
-import React, { useState, useRef, useEffect } from "react";
+import React from "react";
 
 interface ToggleProps {
   onToggle?: (isChecked: boolean) => void;
 }
 
 const Toggle = ({ onToggle }: ToggleProps) => {
-  const [isChecked, setIsChecked] = useState(true);
-  const animateRef = useRef<SVGAnimateElement>(null);
+  const [isChecked, setIsChecked] = React.useState(true);
+  const animateRef = React.useRef<SVGAnimateElement>(null);
 
-  useEffect(() => {
-    animateRef.current?.beginElement();
+  React.useEffect(() => {
+    if (animateRef.current) {
+      animateRef.current.beginElement();
+    }
   }, [isChecked]);
 
   const handleClick = () => {
