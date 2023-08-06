@@ -1,0 +1,12 @@
+.FXToggle {
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    align-items: center;
+
+    i,
+    label {
+        margin: 10px;
+    }
+
+}
