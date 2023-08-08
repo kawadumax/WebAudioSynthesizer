@@ -7,7 +7,7 @@ import React, {
 } from "react";
 
 import { SoundState, Tone } from "./TypeCircuit";
-
+import useFX from "./FXManagerCircuit";
 type SoundStateAction =
   | { type: "START"; payload: Tone }
   | { type: "START_SOME"; payload: Tone[] }
@@ -98,7 +98,7 @@ const AudioContextCircuit = ({ children }: Props) => {
   const [audioContext, setAudioContext] = useState<AudioContext | null>(null);
   const [gainNode, setGainNode] = useState<GainNode | null>(null);
   const [soundStates, dispatch] = useReducer(soundStateReducer, []);
-  const [fxStates] = useFX();
+  const fxStates = useFX();
   useEffect(() => {
     const { audioContext, gainNode } = createAudioContext();
 
