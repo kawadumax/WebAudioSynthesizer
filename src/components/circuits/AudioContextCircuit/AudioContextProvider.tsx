@@ -1,22 +1,8 @@
-import React, {
-  createContext,
-  useContext,
-  useState,
-  useReducer,
-  useEffect,
-} from "react";
+import React, { createContext, useContext, useState, useReducer } from "react";
 
-import { SoundState, Tone } from "../TypeCircuit";
+import { SoundState, SoundStateAction, Tone } from "../TypeCircuit";
 import useFX from "./FXManagerCircuit";
-import { useInitAudioContext } from "./AudioEffect";
-type SoundStateAction =
-  | { type: "START"; payload: Tone }
-  | { type: "START_SOME"; payload: Tone[] }
-  | { type: "STOP"; payload: Tone }
-  | { type: "STOP_EXCEPT"; payload: Tone }
-  | { type: "STOP_EXCEPTS"; payload: Tone[] }
-  | { type: "STOP_ALL" }
-  | { type: "CLEAR"; payload: Tone };
+import { useInitAudioContext, useSoundStatesEffect } from "./AudioEffect";
 
 const markAsEnded =
   (predicate: (s: SoundState) => boolean) => (s: SoundState) =>
@@ -38,7 +24,11 @@ const soundStateReducer = (
       //action.payloadの配列全てを追加するが、ただし既にstartedがtrueであればそのままにする。
       const newSounds = [];
       for (const newTone of action.payload) {
-        if (state.some((s) => s.tone.name === newTone.name && s.isStarted && s.oscillator)) {
+        if (
+          state.some(
+            (s) => s.tone.name === newTone.name && s.isStarted && s.oscillator
+          )
+        ) {
           continue;
         } else {
           newSounds.push({ tone: newTone, isStarted: true });
@@ -85,14 +75,14 @@ const AudioContextContainer = createContext<AudioContextContainer>({
   audioContext: null,
   gainNode: null,
   soundStates: [],
-  createAudioContext: () => { },
-  closeAudioContext: () => { },
-  startOscillator: () => { },
-  startOscillatorSome: () => { },
-  stopOscillator: () => { },
-  stopOscillatorAll: () => { },
-  stopOscillatorExcept: () => { },
-  stopOscillatorExcepts: () => { },
+  createAudioContext: () => {},
+  closeAudioContext: () => {},
+  startOscillator: () => {},
+  startOscillatorSome: () => {},
+  stopOscillator: () => {},
+  stopOscillatorAll: () => {},
+  stopOscillatorExcept: () => {},
+  stopOscillatorExcepts: () => {},
 });
 
 const AudioContextCircuit = ({ children }: Props) => {
@@ -108,7 +98,7 @@ const AudioContextCircuit = ({ children }: Props) => {
     gainNode.connect(audioContext.destination);
     setGainNode(gainNode);
     setAudioContext(audioContext);
-    return { audioContext, gainNode }
+    return { audioContext, gainNode };
   };
 
   const closeAudioContext = () => {
@@ -120,6 +110,7 @@ const AudioContextCircuit = ({ children }: Props) => {
   };
 
   useInitAudioContext(createAudioContext, closeAudioContext);
+  useSoundStatesEffect(audioContext, gainNode, soundStates, dispatch);
 
   const startOscillator = (tone: Tone) => {
     if (!audioContext || !gainNode) return;
