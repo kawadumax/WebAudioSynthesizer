@@ -1,7 +1,7 @@
 import { useEffect, Dispatch } from "react";
 import { SoundState, SoundStateAction } from "../TypeCircuit";
 
-export const useInitAudioContext = (
+export const useAudioContextInitEffect = (
   createAudioContext: () => {
     audioContext: AudioContext;
     gainNode: GainNode;

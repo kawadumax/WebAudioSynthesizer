@@ -4,11 +4,11 @@ import FXFrequencyKnob from "./controls/FXFrequencyKnob";
 import FXDepthKnob from "./controls/FXDepthKnob";
 import FXToggle from "@components/controls/FXToggle";
 import Keyboard from "@components/controls/Keyboard";
-import { useAudioContextCircuit } from "./circuits/AudioContextCircuit/AudioContextProvider";
-import { KeyboardContextProvider } from "./circuits/KeyboardCircuit";
+import { useAudioContextProvider } from "@circuits/AudioContextCircuit/AudioContextProvider";
+import { KeyboardContextProvider } from "@circuits/KeyboardCircuit";
 
 const Synth = () => {
-  const { audioContext } = useAudioContextCircuit();
+  const { audioContext } = useAudioContextProvider();
   const renderSynth = (audioContext: AudioContext | null) => {
     if (audioContext) {
       return (

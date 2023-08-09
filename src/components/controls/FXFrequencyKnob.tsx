@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from "react";
 import Knob from "@parts/Knob";
 import Display from "@parts/Display";
-import { useAudioContextCircuit } from "../circuits/AudioContextCircuit/AudioContextProvider";
+import { useAudioContextProvider } from "../circuits/AudioContextCircuit/AudioContextProvider";
 import Label from "../parts/Label";
 import styles from "@styles/Knob.module.scss";
 
 const FXFrequencyKnob = () => {
   //max:20, min:0.1でトレモロの周波数
   const [frequency, setFrequency] = useState(0.5);
-  const { gainNode, audioContext } = useAudioContextCircuit();
+  const { gainNode, audioContext } = useAudioContextProvider();
 
   // useEffect(() => {
   //   if (gainNode) {

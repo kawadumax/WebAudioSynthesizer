@@ -1,6 +1,6 @@
 import { renderHook, act } from "@testing-library/react";
 import AudioContextCircuit, {
-  useAudioContextCircuit,
+  useAudioContextProvider,
 } from "@components/circuits/AudioContextCircuit";
 
 describe("AudioContextCircuit", () => {
