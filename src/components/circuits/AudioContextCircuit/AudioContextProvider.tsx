@@ -1,7 +1,7 @@
 import { ReactNode, createContext, useContext, useState } from "react";
-import { SoundState, Tone } from "@circuits/TypeCircuit";
+import { Tone } from "@circuits/TypeCircuit";
 import useFX from "./FXManagerCircuit";
-import { useAudioContextInitEffect, useSoundStatesEffect } from "./AudioEffect";
+import { useAudioContextInitEffect } from "./AudioEffect";
 import { useSoundStatesReducer } from "./SoundStateReducer";
 
 interface Props {
@@ -11,7 +11,6 @@ interface Props {
 interface AudioContextState {
   audioContext: AudioContext | null;
   gainNode: GainNode | null;
-  soundStates: SoundState[];
   startOscillator: (tone: Tone) => void;
   startOscillatorSome: (tones: Tone[]) => void;
   stopOscillator: (tone: Tone) => void;
@@ -23,7 +22,6 @@ interface AudioContextState {
 const AudioContextState = createContext<AudioContextState>({
   audioContext: null,
   gainNode: null,
-  soundStates: [],
   startOscillator: () => {},
   startOscillatorSome: () => {},
   stopOscillator: () => {},
@@ -56,16 +54,14 @@ const AudioContextProvider = ({ children }: Props) => {
   };
 
   useAudioContextInitEffect(createAudioContext, closeAudioContext);
-  const { soundStates, dispatch, ...dispatcher } = useSoundStatesReducer();
-  useSoundStatesEffect(audioContext, gainNode, soundStates, dispatch);
+  const dispatchers = useSoundStatesReducer(audioContext, gainNode);
 
   return (
     <AudioContextState.Provider
       value={{
         audioContext,
         gainNode,
-        soundStates,
-        ...dispatcher,
+        ...dispatchers,
       }}
     >
       {children}

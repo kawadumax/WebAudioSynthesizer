@@ -1,5 +1,6 @@
 import { useReducer } from "react";
 import { SoundState, SoundStateAction, Tone } from "../TypeCircuit";
+import { useSoundStatesEffect } from "./AudioEffect";
 
 const markAsEnded =
   (predicate: (s: SoundState) => boolean) => (s: SoundState) =>
@@ -50,12 +51,17 @@ const soundStateReducer = (
   }
 };
 
-export const useSoundStatesReducer = () => {
+export const useSoundStatesReducer = (
+  audioContext: AudioContext | null,
+  gainNode: GainNode | null
+) => {
   const [soundStates, dispatch] = useReducer(soundStateReducer, []);
 
   const findSoundSource = (tone: Tone) => {
     return soundStates.find((ss) => ss.tone.name === tone.name);
   };
+
+  useSoundStatesEffect(audioContext, gainNode, soundStates, dispatch);
 
   const startOscillator = (tone: Tone) => {
     // if (!audioContext || !gainNode) return;
@@ -93,8 +99,6 @@ export const useSoundStatesReducer = () => {
   };
 
   return {
-    soundStates,
-    dispatch,
     startOscillator,
     startOscillatorSome,
     stopOscillator,

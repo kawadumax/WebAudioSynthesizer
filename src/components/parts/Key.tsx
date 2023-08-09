@@ -1,9 +1,9 @@
-import React, { forwardRef } from "react";
-import { Tone } from "../circuits/TypeCircuit";
+import React from "react";
+import { Tone } from "@circuits/TypeCircuit";
 import "@styles/Key.scss";
 import useKeyboardCircuit, {
   useKeyboardContext,
-} from "../circuits/KeyboardCircuit";
+} from "@circuits/KeyboardCircuit";
 
 interface Props {
   className?: string;
@@ -15,16 +15,7 @@ interface Props {
   index: number;
   tone: Tone;
 }
-const Key = ({
-  className,
-  keyColor,
-  x,
-  y,
-  width,
-  height,
-  tone,
-}:
-  Props) => {
+const Key = ({ className, keyColor, x, y, width, height, tone }: Props) => {
   const { handleStartSound, handleStopSound } = useKeyboardCircuit();
   const keyboardContext = useKeyboardContext();
   if (!keyboardContext) {
@@ -41,7 +32,6 @@ const Key = ({
   className = className ? className + " " : "";
 
   const transform = `translate(${x}, ${y})`;
-
 
   const handleMouseDown = (
     event: React.MouseEvent<SVGGElement, MouseEvent>
