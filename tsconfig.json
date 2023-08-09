@@ -10,6 +10,9 @@
     "paths": {
       "@/*": ["src/*"],
       "@components/*": ["src/components/*"],
+      "@circuits/*": ["src/components/circuits/*"],
+      "@parts/*": ["src/components/parts/*"],
+      "@controls/*":["src/components/controls/*"],
       "@utils/*": ["src/utils/*"],
       "@styles/*": ["src/styles/*"],
       "@assets/*": ["src/assets/*"],

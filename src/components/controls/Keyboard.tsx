@@ -1,5 +1,5 @@
-import BlackKey from "@components/parts/BlackKey";
-import WhiteKey from "@components/parts/WhiteKey";
+import BlackKey from "@parts/BlackKey";
+import WhiteKey from "@parts/WhiteKey";
 import useKeyboardCircuit, {
   useKeyboardContext,
 } from "../circuits/KeyboardCircuit";

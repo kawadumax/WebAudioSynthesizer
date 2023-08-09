@@ -42,7 +42,7 @@ export const useSoundStatesEffect = (
     if (!audioContext || !gainNode) {
       return;
     }
-    console.log("onEffect: ", soundStates);
+    // console.log("onEffect: ", soundStates);
     for (const state of soundStates) {
       if (state.isStarted && !state.isEnded && !state.oscillator) {
         // Sound started but not stopped yet and oscillator not created

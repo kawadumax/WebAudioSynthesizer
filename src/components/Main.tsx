@@ -2,13 +2,13 @@ import React from "react";
 import "@styles/Main.scss";
 import Synth from "@components/Synth";
 import About from "@components/About";
-import AudioContextCircuit from "./circuits/AudioContextCircuit/AudioContextProvider";
+import AudioContextProvider from "@circuits/AudioContextCircuit/AudioContextProvider";
 function Main() {
   return (
     <main>
-      <AudioContextCircuit>
+      <AudioContextProvider>
         <Synth></Synth>
-      </AudioContextCircuit>
+      </AudioContextProvider>
       <About></About>
     </main>
   );

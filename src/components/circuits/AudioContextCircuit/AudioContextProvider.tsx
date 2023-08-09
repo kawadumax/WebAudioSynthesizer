@@ -1,6 +1,12 @@
-import React, { createContext, useContext, useState, useReducer } from "react";
+import {
+  ReactNode,
+  createContext,
+  useContext,
+  useState,
+  useReducer,
+} from "react";
 
-import { SoundState, SoundStateAction, Tone } from "../TypeCircuit";
+import { SoundState, SoundStateAction, Tone } from "@circuits/TypeCircuit";
 import useFX from "./FXManagerCircuit";
 import { useInitAudioContext, useSoundStatesEffect } from "./AudioEffect";
 
@@ -54,15 +60,13 @@ const soundStateReducer = (
 };
 
 interface Props {
-  children: React.ReactNode;
+  children: ReactNode;
 }
 
-interface AudioContextContainer {
+interface AudioContextState {
   audioContext: AudioContext | null;
   gainNode: GainNode | null;
   soundStates: SoundState[];
-  createAudioContext: () => void;
-  closeAudioContext: () => void;
   startOscillator: (tone: Tone) => void;
   startOscillatorSome: (tones: Tone[]) => void;
   stopOscillator: (tone: Tone) => void;
@@ -71,12 +75,10 @@ interface AudioContextContainer {
   stopOscillatorAll: () => void;
 }
 
-const AudioContextContainer = createContext<AudioContextContainer>({
+const AudioContextState = createContext<AudioContextState>({
   audioContext: null,
   gainNode: null,
   soundStates: [],
-  createAudioContext: () => {},
-  closeAudioContext: () => {},
   startOscillator: () => {},
   startOscillatorSome: () => {},
   stopOscillator: () => {},
@@ -85,7 +87,7 @@ const AudioContextContainer = createContext<AudioContextContainer>({
   stopOscillatorExcepts: () => {},
 });
 
-const AudioContextCircuit = ({ children }: Props) => {
+const AudioContextProvider = ({ children }: Props) => {
   const [audioContext, setAudioContext] = useState<AudioContext | null>(null);
   const [gainNode, setGainNode] = useState<GainNode | null>(null);
   const [soundStates, dispatch] = useReducer(soundStateReducer, []);
@@ -152,13 +154,11 @@ const AudioContextCircuit = ({ children }: Props) => {
   };
 
   return (
-    <AudioContextContainer.Provider
+    <AudioContextState.Provider
       value={{
         audioContext,
         gainNode,
         soundStates,
-        createAudioContext,
-        closeAudioContext,
         startOscillator,
         startOscillatorSome,
         stopOscillator,
@@ -168,10 +168,9 @@ const AudioContextCircuit = ({ children }: Props) => {
       }}
     >
       {children}
-    </AudioContextContainer.Provider>
+    </AudioContextState.Provider>
   );
 };
 
-export const useAudioContextCircuit = () => useContext(AudioContextContainer);
-
-export default AudioContextCircuit;
+export const useAudioContextCircuit = () => useContext(AudioContextState);
+export default AudioContextProvider;

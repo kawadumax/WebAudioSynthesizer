@@ -1,27 +1,14 @@
-import { useEffect, useState } from "react";
 import "@styles/Synth.scss";
 import GainKnob from "@components/controls/GainKnob";
 import FXFrequencyKnob from "./controls/FXFrequencyKnob";
 import FXDepthKnob from "./controls/FXDepthKnob";
 import FXToggle from "@components/controls/FXToggle";
-import PowerToggle from "@components/controls/PowerToggle";
 import Keyboard from "@components/controls/Keyboard";
 import { useAudioContextCircuit } from "./circuits/AudioContextCircuit/AudioContextProvider";
-import { KeyboardContextProvider } from './circuits/KeyboardCircuit';
+import { KeyboardContextProvider } from "./circuits/KeyboardCircuit";
 
 const Synth = () => {
-  // オーディオコンテキストの初期化
-  const [synthEnabled, setSynthEnabled] = useState(false);
-  const { audioContext, createAudioContext, closeAudioContext } =
-    useAudioContextCircuit();
-
-  const handlePowerChange = (power: boolean) => {
-    if (audioContext === null) {
-      return;
-    }
-    setSynthEnabled(power);
-  };
-
+  const { audioContext } = useAudioContextCircuit();
   const renderSynth = (audioContext: AudioContext | null) => {
     if (audioContext) {
       return (
@@ -37,11 +24,7 @@ const Synth = () => {
             </div>
           </div>
           <KeyboardContextProvider>
-            <Keyboard
-              numOfKeys={24}
-              width={1200}
-              height={300}
-            ></Keyboard>
+            <Keyboard numOfKeys={24} width={1200} height={300}></Keyboard>
           </KeyboardContextProvider>
         </>
       );
