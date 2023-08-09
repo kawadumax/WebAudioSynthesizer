@@ -6,8 +6,9 @@ import React, {
   useEffect,
 } from "react";
 
-import { SoundState, Tone } from "./TypeCircuit";
+import { SoundState, Tone } from "../TypeCircuit";
 import useFX from "./FXManagerCircuit";
+import { useInitAudioContext } from "./AudioEffect";
 type SoundStateAction =
   | { type: "START"; payload: Tone }
   | { type: "START_SOME"; payload: Tone[] }
@@ -99,54 +100,6 @@ const AudioContextCircuit = ({ children }: Props) => {
   const [gainNode, setGainNode] = useState<GainNode | null>(null);
   const [soundStates, dispatch] = useReducer(soundStateReducer, []);
   const fxStates = useFX();
-  useEffect(() => {
-    const { audioContext, gainNode } = createAudioContext();
-
-    let animationFrameId: number;
-    const loop = () => {
-      // gainNode の value を時間によって変化させる関数を記述
-      gainNode.gain.value = updateGainNode(audioContext.currentTime);
-      animationFrameId = requestAnimationFrame(loop);
-    };
-    loop();
-
-    return () => {
-      cancelAnimationFrame(animationFrameId);
-      closeAudioContext();
-    }
-  }, []);
-
-  useEffect(() => {
-    if (!audioContext || !gainNode) {
-      return;
-    }
-    console.log("onEffect: ", soundStates);
-    for (const state of soundStates) {
-      if (state.isStarted && !state.isEnded && !state.oscillator) {
-        // Sound started but not stopped yet and oscillator not created
-        const osc = audioContext.createOscillator();
-        osc.frequency.value = state.tone.freq;
-        osc.connect(gainNode);
-        osc.start();
-        state.oscillator = osc;
-      } else if (state.isEnded && state.oscillator) {
-        // Sound stopped and oscillator created
-        state.oscillator.stop();
-        state.oscillator.disconnect();
-        state.oscillator = null;
-        console.log("dispatch CLEAR", state.tone);
-        dispatch({ type: "CLEAR", payload: state.tone });
-      }
-    }
-
-  }, [soundStates]);
-
-  const updateGainNode = (currentTime: number) => {
-    const baseGain = 0.5;
-    const depth = 0.5;
-    const frequency = 0.5;
-    return baseGain * depth * Math.sin(2 * Math.PI * frequency * currentTime);
-  }
 
   const createAudioContext = () => {
     const audioContext = new AudioContext();
@@ -165,6 +118,8 @@ const AudioContextCircuit = ({ children }: Props) => {
       setGainNode(null);
     }
   };
+
+  useInitAudioContext(createAudioContext, closeAudioContext);
 
   const startOscillator = (tone: Tone) => {
     if (!audioContext || !gainNode) return;

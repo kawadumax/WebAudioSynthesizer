@@ -6,7 +6,7 @@ import FXDepthKnob from "./controls/FXDepthKnob";
 import FXToggle from "@components/controls/FXToggle";
 import PowerToggle from "@components/controls/PowerToggle";
 import Keyboard from "@components/controls/Keyboard";
-import { useAudioContextCircuit } from "./circuits/AudioContextCircuit";
+import { useAudioContextCircuit } from "./circuits/AudioContextCircuit/AudioContextProvider";
 import { KeyboardContextProvider } from './circuits/KeyboardCircuit';
 
 const Synth = () => {

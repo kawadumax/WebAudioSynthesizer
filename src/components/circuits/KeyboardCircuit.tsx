@@ -1,6 +1,6 @@
 import { useContext, useState, createContext } from "react";
 import { Tone } from "./TypeCircuit";
-import { useAudioContextCircuit } from "../circuits/AudioContextCircuit";
+import { useAudioContextCircuit } from "./AudioContextCircuit/AudioContextProvider";
 
 interface Props {
   children: React.ReactNode;
