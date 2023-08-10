@@ -17,16 +17,16 @@ export const useAudioContextInitEffect = (
   useEffect(() => {
     const { audioContext, gainNode } = createAudioContext();
 
-    let animationFrameId: number;
-    const loop = () => {
-      // gainNode の value を時間によって変化させる関数を記述
-      gainNode.gain.value = updateGainNode(audioContext.currentTime);
-      animationFrameId = requestAnimationFrame(loop);
-    };
-    loop();
+    // let animationFrameId: number;
+    // const loop = () => {
+    //   // gainNode の value を時間によって変化させる関数を記述
+    //   gainNode.gain.value = updateGainNode(audioContext.currentTime);
+    //   animationFrameId = requestAnimationFrame(loop);
+    // };
+    // loop();
 
     return () => {
-      cancelAnimationFrame(animationFrameId);
+      // cancelAnimationFrame(animationFrameId);
       closeAudioContext();
     };
   }, []);

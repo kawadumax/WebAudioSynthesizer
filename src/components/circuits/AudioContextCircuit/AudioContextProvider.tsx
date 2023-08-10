@@ -8,26 +8,31 @@ interface Props {
   children: ReactNode;
 }
 
-interface AudioContextState {
-  audioContext: AudioContext | null;
-  gainNode: GainNode | null;
+type SoundStateActionDispatchers = {
   startOscillator: (tone: Tone) => void;
   startOscillatorSome: (tones: Tone[]) => void;
   stopOscillator: (tone: Tone) => void;
   stopOscillatorExcept: (tone: Tone) => void;
   stopOscillatorExcepts: (tones: Tone[]) => void;
   stopOscillatorAll: () => void;
-}
+};
+
+type AudioContextProperties = {
+  audioContext: AudioContext | null;
+  gainNode: GainNode | null;
+};
+
+type AudioContextState = SoundStateActionDispatchers & AudioContextProperties;
 
 const AudioContextState = createContext<AudioContextState>({
   audioContext: null,
   gainNode: null,
-  startOscillator: () => {},
-  startOscillatorSome: () => {},
-  stopOscillator: () => {},
-  stopOscillatorAll: () => {},
-  stopOscillatorExcept: () => {},
-  stopOscillatorExcepts: () => {},
+  startOscillator: () => { },
+  startOscillatorSome: () => { },
+  stopOscillator: () => { },
+  stopOscillatorAll: () => { },
+  stopOscillatorExcept: () => { },
+  stopOscillatorExcepts: () => { },
 });
 
 const AudioContextProvider = ({ children }: Props) => {
