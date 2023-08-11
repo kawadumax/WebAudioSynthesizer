@@ -59,7 +59,7 @@ const AudioContextProvider = ({ children }: Props) => {
   };
 
   useAudioContextInitEffect(createAudioContext, closeAudioContext);
-  const dispatchers = useSoundStatesReducer(audioContext, gainNode);
+  const dispatchers: SoundStateActionDispatchers = useSoundStatesReducer(audioContext, gainNode);
 
   return (
     <AudioContextState.Provider
