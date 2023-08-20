@@ -6,7 +6,7 @@ const markAsEnded =
   (predicate: (s: SoundState) => boolean) => (s: SoundState) =>
     predicate(s) ? { ...s, isEnded: true } : s;
 
-const soundStateReducer = (
+export const soundStateReducer = (
   state: SoundState[],
   action: SoundStateAction
 ): SoundState[] => {
