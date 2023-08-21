@@ -91,18 +91,41 @@ describe("AudioContextCircuit", () => {
   })
 
   describe("useSoundStatesReducer", () => {
-    it("dispatch経由でsoundReducerを実行してsoundStatesがどう変わるか", () => {
-      const hookResult = renderHook(() => useReducer(soundStateReducer, []));
-      // console.log(hookResult.result.current[0]);
-      let [soundStates, dispatch] = hookResult.result.current;
-      expect(soundStates).toHaveLength(0);
-      act(() => {
-        dispatch({ type: "START", payload: testTone });
-        hookResult.rerender();
-      });
-      // console.log(hookResult.result.current);
-      expect(hookResult.result.current[0]).toHaveLength(1);
+    describe("dispatch経由でsoundReducerを実行してsoundStatesがどう変わるか", () => {
+      it("START", () => {
+        const hookResult = renderHook(() => useReducer(soundStateReducer, []));
+        // console.log(hookResult.result.current[0]);
+        let [soundStates, dispatch] = hookResult.result.current;
+        expect(soundStates).toHaveLength(0);
+        act(() => {
+          dispatch({ type: "START", payload: testTone });
+          hookResult.rerender();
+        });
+        // console.log(hookResult.result.current);
+        expect(hookResult.result.current[0]).toHaveLength(1);
+      })
 
+      it("START_SOME", () => {
+        const hookResult = renderHook(() => useReducer(soundStateReducer, []));
+        // console.log(hookResult.result.current[0]);
+        let [soundStates, dispatch] = hookResult.result.current;
+        expect(soundStates).toHaveLength(0);
+        const tones = [
+          { freq: 440, name: "A4" },
+          { freq: 493.8833012561241, name: "B4" }
+        ]
+        act(() => {
+          dispatch({ type: "START_SOME", payload: tones });
+          hookResult.rerender();
+        });
+        // console.log(hookResult.result.current);
+        expect(hookResult.result.current[0]).toHaveLength(2);
+      })
+      it.todo("STOP")
+      it.todo("STOP_EXCEPT")
+      it.todo("STOP_EXCEPTS")
+      it.todo("STOP_ALL")
+      it.todo("CLEAR")
     })
   })
 
