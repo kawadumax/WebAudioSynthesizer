@@ -183,7 +183,17 @@ describe("AudioContextCircuit", () => {
         expect(getSoundState(1).isEnded).toBeTruthy();
         expect(getSoundState(2).isEnded).toBeTruthy();
       });
-      it.todo("CLEAR");
+      it("CLEAR", () => {
+        const testTones = [
+          testTone,
+          { freq: 493.8833012561241, name: "B4" },
+          { freq: 880, name: "A5" }
+        ];
+        act(dispatchAndRerender({ type: "START_SOME", payload: testTones }));
+        expect(getSoundStates()).toHaveLength(3);
+        act(dispatchAndRerender({ type: "CLEAR", payload: testTones[0] }));
+        expect(getSoundStates()).toHaveLength(2);
+      });
     });
   });
 });
