@@ -4,12 +4,6 @@ import { soundStateReducer } from "@circuits/AudioContextCircuit/SoundStateReduc
 import { SoundState, SoundStateAction, Tone } from "@circuits/TypeCircuit";
 import React, { Dispatch, useReducer } from "react";
 
-describe("jest SandBox", () => {
-  it("true = truthy", () => {
-    expect(true).toBeFalsy;
-  })
-})
-
 describe("AudioContextCircuit", () => {
   const testTone = { name: "A4", freq: 440 };
 
@@ -105,71 +99,76 @@ describe("AudioContextCircuit", () => {
         testTone,
         { freq: 493.8833012561241, name: "B4" },
       ];
+      let renderedHook: ReturnType<typeof runRenderHook>;
+      let current: [SoundState[], React.Dispatch<SoundStateAction>];
+      let soundStates: SoundState[];
+      let dispatch: React.Dispatch<SoundStateAction>;
 
+      const runRenderHook = () => {
+        const ret = renderHook(() => useReducer(soundStateReducer, []));
+        current = ret.result.current;
+        [soundStates, dispatch] = current;
+        return ret;
+      }
+
+      const getSoundStates = () => renderedHook.result.current[0];
+      const getSoundState = (n: number) => renderedHook.result.current[0][n];
+      const dispatchAndRerender = (param: SoundStateAction) => {
+        return () => {
+          dispatch(param);
+          renderedHook.rerender();
+        }
+      };
+      beforeEach(() => {
+        renderedHook = runRenderHook();
+        expect(soundStates).toHaveLength(0);
+      })
 
       it("START", () => {
-        const hookResult = renderHook(() => useReducer(soundStateReducer, []));
-        // console.log(hookResult.result.current[0]);
-        let [soundStates, dispatch] = hookResult.result.current;
-        expect(soundStates).toHaveLength(0);
-        act(() => {
-          dispatch({ type: "START", payload: testTone });
-          hookResult.rerender();
-        });
-        // console.log(hookResult.result.current);
-        expect(hookResult.result.current[0]).toHaveLength(1);
+        act(dispatchAndRerender({ type: "START", payload: testTone }));
+        expect(getSoundStates()).toHaveLength(1);
       });
 
       it("START_SOME", () => {
-        const hookResult = renderHook(() => useReducer(soundStateReducer, []));
-        // console.log(hookResult.result.current[0]);
-        let [soundStates, dispatch] = hookResult.result.current;
-        expect(soundStates).toHaveLength(0);
-
-        act(() => {
-          dispatch({ type: "START_SOME", payload: testTones });
-          hookResult.rerender();
-        });
-        // console.log(hookResult.result.current);
-        expect(hookResult.result.current[0]).toHaveLength(2);
+        act(dispatchAndRerender({ type: "START_SOME", payload: testTones }));
+        expect(getSoundStates()).toHaveLength(2);
       });
 
       it("STOP", () => {
-        const hookResult = renderHook(() => useReducer(soundStateReducer, []));
-        let [soundStates, dispatch] = hookResult.result.current;
-        expect(soundStates).toHaveLength(0);
-        act(() => {
-          dispatch({ type: "START", payload: testTone });
-          hookResult.rerender();
-        });
-        expect(hookResult.result.current[0]).toHaveLength(1);
-        act(() => {
-          dispatch({ type: "STOP", payload: testTone });
-          hookResult.rerender();
-        });
-        expect(hookResult.result.current[0]).toHaveLength(1);
-        // console.log(hookResult.result.current[0]);
-        expect(hookResult.result.current[0][0].isEnded).toBeTruthy();
+        act(dispatchAndRerender({ type: "START", payload: testTone }));
+        expect(getSoundStates()).toHaveLength(1);
+        expect(getSoundState(0).isEnded).toBeFalsy();
+        act(dispatchAndRerender({ type: "STOP", payload: testTone }));
+        expect(getSoundStates()).toHaveLength(1);
+        expect(getSoundState(0).isEnded).toBeTruthy();
       });
+
       it("STOP_EXCEPT", () => {
-        const hookResult = renderHook(() => useReducer(soundStateReducer, []));
-        let [soundStates, dispatch] = hookResult.result.current;
-        expect(soundStates).toHaveLength(0);
-        act(() => {
-          dispatch({ type: "START_SOME", payload: testTones });
-          hookResult.rerender();
-        });
-        expect(hookResult.result.current[0]).toHaveLength(2);
-        act(() => {
-          dispatch({ type: "STOP_EXCEPT", payload: testTone });
-          hookResult.rerender();
-        });
-        expect(hookResult.result.current[0]).toHaveLength(2);
-        // console.log(hookResult.result.current[0]);
-        expect(hookResult.result.current[0][0].isEnded).toBeFalsy();
-        expect(hookResult.result.current[0][1].isEnded).toBeTruthy();
+        act(dispatchAndRerender({ type: "START_SOME", payload: testTones }));
+        expect(getSoundStates()).toHaveLength(2);
+        act(dispatchAndRerender({ type: "STOP_EXCEPT", payload: testTone }));
+        expect(getSoundStates()).toHaveLength(2);
+        expect(getSoundState(0).isEnded).toBeFalsy();
+        expect(getSoundState(1).isEnded).toBeTruthy();
       });
-      it.todo("STOP_EXCEPTS");
+
+      it("STOP_EXCEPTS", () => {
+        const testTones = [
+          testTone,
+          { freq: 493.8833012561241, name: "B4" },
+          { freq: 880, name: "A5" }
+        ];
+        const stopTones = [
+          testTones[0], testTones[1]
+        ]
+        act(dispatchAndRerender({ type: "START_SOME", payload: testTones }));
+        expect(getSoundStates()).toHaveLength(3);
+        act(dispatchAndRerender({ type: "STOP_EXCEPTS", payload: stopTones }));
+        expect(getSoundStates()).toHaveLength(3);
+        expect(getSoundState(0).isEnded).toBeFalsy();
+        expect(getSoundState(1).isEnded).toBeFalsy();
+        expect(getSoundState(2).isEnded).toBeTruthy();
+      });
       it.todo("STOP_ALL");
       it.todo("CLEAR");
     });
