@@ -4,6 +4,12 @@ import { soundStateReducer } from "@circuits/AudioContextCircuit/SoundStateReduc
 import { SoundState, SoundStateAction, Tone } from "@circuits/TypeCircuit";
 import React, { Dispatch, useReducer } from "react";
 
+describe("jest SandBox", () => {
+  it("true = truthy", () => {
+    expect(true).toBeFalsy;
+  })
+})
+
 describe("AudioContextCircuit", () => {
   const testTone = { name: "A4", freq: 440 };
 
@@ -62,7 +68,7 @@ describe("AudioContextCircuit", () => {
         hookResult.rerender(soundStatesMock);
       });
       expect(audioContextMock.createOscillator).toBeCalledTimes(1);
-      expect(soundStatesMock[0]?.oscillator).toBeTruthy;
+      expect(soundStatesMock[0]?.oscillator).toBeTruthy();
     });
 
     it("オシレータが追加されたあと、isEndedをtrueにするとオシレータが削除される", () => {
@@ -77,7 +83,7 @@ describe("AudioContextCircuit", () => {
         hookResult.rerender(soundStatesMock);
       });
       expect(audioContextMock.createOscillator).toBeCalledTimes(1);
-      expect(soundStatesMock[0]?.oscillator).toBeTruthy;
+      expect(soundStatesMock[0]?.oscillator).toBeTruthy();
       act(() => {
         if (soundStatesMock[0]) {
           soundStatesMock[0].isEnded = true;
@@ -88,12 +94,19 @@ describe("AudioContextCircuit", () => {
       expect(audioContextMock.createOscillator).toBeCalledTimes(1);
       expect(dispatchMock).toBeCalledTimes(1);
       expect(soundStatesMock).toHaveLength(1);
-      expect(soundStatesMock[0]?.oscillator).toBeFalsy;
+      expect(soundStatesMock[0]?.oscillator).toBeFalsy();
     });
   });
 
   describe("useSoundStatesReducer", () => {
     describe("dispatch経由でsoundReducerを実行してsoundStatesがどう変わるか", () => {
+      const testTone = { freq: 440, name: "A4" };
+      const testTones = [
+        testTone,
+        { freq: 493.8833012561241, name: "B4" },
+      ];
+
+
       it("START", () => {
         const hookResult = renderHook(() => useReducer(soundStateReducer, []));
         // console.log(hookResult.result.current[0]);
@@ -112,17 +125,15 @@ describe("AudioContextCircuit", () => {
         // console.log(hookResult.result.current[0]);
         let [soundStates, dispatch] = hookResult.result.current;
         expect(soundStates).toHaveLength(0);
-        const tones = [
-          { freq: 440, name: "A4" },
-          { freq: 493.8833012561241, name: "B4" },
-        ];
+
         act(() => {
-          dispatch({ type: "START_SOME", payload: tones });
+          dispatch({ type: "START_SOME", payload: testTones });
           hookResult.rerender();
         });
         // console.log(hookResult.result.current);
         expect(hookResult.result.current[0]).toHaveLength(2);
       });
+
       it("STOP", () => {
         const hookResult = renderHook(() => useReducer(soundStateReducer, []));
         let [soundStates, dispatch] = hookResult.result.current;
@@ -138,9 +149,26 @@ describe("AudioContextCircuit", () => {
         });
         expect(hookResult.result.current[0]).toHaveLength(1);
         // console.log(hookResult.result.current[0]);
-        expect(hookResult.result.current[0][0].isEnded).toBeTruthy;
+        expect(hookResult.result.current[0][0].isEnded).toBeTruthy();
       });
-      it.todo("STOP_EXCEPT");
+      it("STOP_EXCEPT", () => {
+        const hookResult = renderHook(() => useReducer(soundStateReducer, []));
+        let [soundStates, dispatch] = hookResult.result.current;
+        expect(soundStates).toHaveLength(0);
+        act(() => {
+          dispatch({ type: "START_SOME", payload: testTones });
+          hookResult.rerender();
+        });
+        expect(hookResult.result.current[0]).toHaveLength(2);
+        act(() => {
+          dispatch({ type: "STOP_EXCEPT", payload: testTone });
+          hookResult.rerender();
+        });
+        expect(hookResult.result.current[0]).toHaveLength(2);
+        // console.log(hookResult.result.current[0]);
+        expect(hookResult.result.current[0][0].isEnded).toBeFalsy();
+        expect(hookResult.result.current[0][1].isEnded).toBeTruthy();
+      });
       it.todo("STOP_EXCEPTS");
       it.todo("STOP_ALL");
       it.todo("CLEAR");
