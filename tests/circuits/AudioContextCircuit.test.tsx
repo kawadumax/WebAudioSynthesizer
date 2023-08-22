@@ -169,7 +169,20 @@ describe("AudioContextCircuit", () => {
         expect(getSoundState(1).isEnded).toBeFalsy();
         expect(getSoundState(2).isEnded).toBeTruthy();
       });
-      it.todo("STOP_ALL");
+      it("STOP_ALL", () => {
+        const testTones = [
+          testTone,
+          { freq: 493.8833012561241, name: "B4" },
+          { freq: 880, name: "A5" }
+        ];
+        act(dispatchAndRerender({ type: "START_SOME", payload: testTones }));
+        expect(getSoundStates()).toHaveLength(3);
+        act(dispatchAndRerender({ type: "STOP_ALL" }));
+        expect(getSoundStates()).toHaveLength(3);
+        expect(getSoundState(0).isEnded).toBeTruthy();
+        expect(getSoundState(1).isEnded).toBeTruthy();
+        expect(getSoundState(2).isEnded).toBeTruthy();
+      });
       it.todo("CLEAR");
     });
   });
