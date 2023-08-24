@@ -63,6 +63,7 @@ describe("AudioContextCircuit", () => {
       });
       expect(audioContextMock.createOscillator).toBeCalledTimes(1);
       expect(soundStatesMock[0]?.oscillator).toBeTruthy();
+      // console.log(soundStatesMock[0]);
     });
 
     it("オシレータが追加されたあと、isEndedをtrueにするとオシレータが削除される", () => {
@@ -169,6 +170,7 @@ describe("AudioContextCircuit", () => {
         expect(getSoundState(1).isEnded).toBeFalsy();
         expect(getSoundState(2).isEnded).toBeTruthy();
       });
+
       it("STOP_ALL", () => {
         const testTones = [
           testTone,
@@ -196,4 +198,75 @@ describe("AudioContextCircuit", () => {
       });
     });
   });
+
+  describe("Check SoundStates with Reducer And Effect", () => {
+
+    //useReducerの初期設定
+    const testTone = { freq: 440, name: "A4" };
+    const testTones = [
+      testTone,
+      { freq: 493.8833012561241, name: "B4" },
+    ];
+    let renderedReducerHook: ReturnType<typeof runRenderReducerHook>;
+    let current: [SoundState[], React.Dispatch<SoundStateAction>];
+    let soundStates: SoundState[] = [];
+    let dispatch: React.Dispatch<SoundStateAction>;
+
+    const runRenderReducerHook = () => {
+      const ret = renderHook(() => useReducer(soundStateReducer, []));
+      current = ret.result.current;
+      [soundStates, dispatch] = current;
+      return ret;
+    }
+
+    //useEffectの初期設定
+    let renderedEffectHook: ReturnType<typeof runRenderEffectHook>;
+    function runRenderEffectHook() {
+      let audioContextMock: Partial<AudioContext> = {
+        // 必要に応じてメソッドやプロパティをモックする
+        createOscillator: jest.fn().mockImplementation(() => {
+          return {
+            connect: jest.fn(),
+            disconnect: jest.fn(),
+            start: jest.fn(),
+            stop: jest.fn(),
+            frequency: {
+              value: undefined,
+            } as Partial<AudioParam>,
+          } as Partial<OscillatorNode>;
+        }),
+      };
+      let gainNodeMock: Partial<GainNode> = {};
+      return renderHook(
+        (soundState) =>
+          useSoundStatesEffect(
+            audioContextMock as AudioContext,
+            gainNodeMock as GainNode,
+            soundState as SoundState[],
+            dispatch as Dispatch<SoundStateAction>
+          ),
+        { initialProps: soundStates }
+      );
+    }
+    const getSoundStates = () => renderedReducerHook.result.current[0];
+    const getSoundState = (n: number) => renderedReducerHook.result.current[0][n];
+    const dispatchAndRerender = (param: SoundStateAction) => {
+      return () => {
+        dispatch(param);
+        renderedReducerHook.rerender();
+      }
+    };
+    it("reducerで変化させたsoundStateに対してEffectが反応するか", () => {
+      renderedEffectHook = runRenderEffectHook();
+      renderedReducerHook = runRenderReducerHook();
+      expect(getSoundStates()).toHaveLength(0);
+      act(dispatchAndRerender({ type: "START", payload: testTone }));
+      expect(getSoundStates()).toHaveLength(1);
+      expect(getSoundState(0).oscillator).toBeFalsy();
+      act(() => {
+        renderedEffectHook.rerender(getSoundStates());
+      });
+      expect(getSoundState(0).oscillator).toBeTruthy();
+    })
+  })
 });
