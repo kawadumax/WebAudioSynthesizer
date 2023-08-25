@@ -267,6 +267,29 @@ describe("AudioContextCircuit", () => {
         renderedEffectHook.rerender(getSoundStates());
       });
       expect(getSoundState(0).oscillator).toBeTruthy();
+      act(dispatchAndRerender({ type: "STOP", payload: testTone }));
+      expect(getSoundStates()).toHaveLength(1);
+      expect(getSoundState(0).isEnded).toBeTruthy();
+      console.log(getSoundStates());
+      act(() => {
+        renderedEffectHook.rerender(getSoundStates());
+      });
+      expect(getSoundStates()).toHaveLength(1);
+      expect(getSoundState(0).oscillator).toBeFalsy();
     })
+
+    // it("reducerで変化させたsoundStateに対してEffectが反応するか再放送", () => {
+    //   renderedEffectHook = runRenderEffectHook();
+    //   renderedReducerHook = runRenderReducerHook();
+    //   console.log(getSoundStates());
+    //   expect(getSoundStates()).toHaveLength(0);
+    //   act(dispatchAndRerender({ type: "START", payload: testTone }));
+    //   expect(getSoundStates()).toHaveLength(1);
+    //   expect(getSoundState(0).oscillator).toBeFalsy();
+    //   act(() => {
+    //     renderedEffectHook.rerender(getSoundStates());
+    //   });
+    //   expect(getSoundState(0).oscillator).toBeTruthy();
+    // })
   })
 });
