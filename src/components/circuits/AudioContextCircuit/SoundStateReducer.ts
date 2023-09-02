@@ -22,11 +22,7 @@ export const soundStateReducer = (
       //action.payloadの配列全てを追加するが、ただし既にstartedがtrueであればそのままにする。
       const newSounds = [];
       for (const newTone of action.payload) {
-        if (
-          state.some(
-            (s) => s.tone.name === newTone.name && s.isStarted && s.oscillator
-          )
-        ) {
+        if (state.some((s) => s.tone.name === newTone.name )) {
           continue;
         } else {
           newSounds.push({ tone: newTone, isStarted: true });
