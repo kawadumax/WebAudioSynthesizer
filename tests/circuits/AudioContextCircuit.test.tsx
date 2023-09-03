@@ -227,6 +227,8 @@ describe("AudioContextCircuit", () => {
 
     //useEffectの初期設定
     let renderedEffectHook: ReturnType<typeof runRenderEffectHook>;
+    let startMock = jest.fn();
+    let stopMock = jest.fn();
     function runRenderEffectHook() {
       let audioContextMock: Partial<AudioContext> = {
         // 必要に応じてメソッドやプロパティをモックする
@@ -234,8 +236,8 @@ describe("AudioContextCircuit", () => {
           return {
             connect: jest.fn(),
             disconnect: jest.fn(),
-            start: jest.fn(),
-            stop: jest.fn(),
+            start: startMock,
+            stop: stopMock,
             frequency: {
               value: undefined,
             } as Partial<AudioParam>,
@@ -277,13 +279,56 @@ describe("AudioContextCircuit", () => {
       expect(getSoundStates()).toHaveLength(1);
       expect(getSoundState(0).isEnded).toBeTruthy();
       // stop すると isEndedがtrueになり、その後すぐにCLEARが発行されてしまう
+      act(() => {
+        renderedEffectHook.rerender(getSoundStates());
+      });
       // console.log(getSoundStates());
-      // act(() => {
-      //   renderedEffectHook.rerender(getSoundStates());
-      // });
-      // 
-      // expect(getSoundStates()).toHaveLength(1);
-      // expect(getSoundState(0).oscillator).toBeFalsy();
+      //CLEARまで発行されて実行されるので、soundStatesは0
+      expect(getSoundStates()).toHaveLength(0);
+    })
+
+    it("dispatchを何度かやったあと、オシレータのstartとstopが同じ回数呼ばれているか", () => {
+      const testTones = [
+        { freq: 440, name: "A4" },
+        { freq: 493.8833012561241, name: "B4" },
+      ];
+      const testTonesNext = [
+        { freq: 493.8833012561241, name: "B4" },
+        { freq: 880, name: "A5" },
+      ];
+      renderedEffectHook = runRenderEffectHook();
+      renderedReducerHook = runRenderReducerHook();
+      expect(getSoundStates()).toHaveLength(0);
+      act(() => {
+        dispatch({ type: "START_SOME", payload: testTones });
+        dispatch({ type: "START_SOME", payload: testTonesNext });
+      });
+      expect(getSoundStates()).toHaveLength(3);
+      expect(getSoundState(0).oscillator).toBeFalsy();
+      expect(getSoundState(1).oscillator).toBeFalsy();
+      expect(startMock).toBeCalledTimes(0);
+      expect(stopMock).toBeCalledTimes(0);
+      act(() => {
+        renderedEffectHook.rerender(getSoundStates());
+      });
+
+      expect(startMock).toBeCalledTimes(3);
+      expect(stopMock).toBeCalledTimes(0);
+      act(() => {
+        dispatch({ type: "STOP_EXCEPTS", payload: testTones })
+      })
+      expect(stopMock).toBeCalledTimes(0);
+      expect(getSoundState(2).isEnded).toBeTruthy();
+      act(() => {
+        dispatch({ type: "STOP_ALL" });
+      })
+      act(() => {
+        renderedEffectHook.rerender(getSoundStates());
+      })
+      console.log(getSoundStates());
+      expect(getSoundStates()).toHaveLength(0);
+      expect(startMock).toBeCalledTimes(3);
+      expect(stopMock).toBeCalledTimes(3);
     })
   })
 });
