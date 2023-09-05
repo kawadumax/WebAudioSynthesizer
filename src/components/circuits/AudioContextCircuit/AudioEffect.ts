@@ -1,5 +1,10 @@
-import { useEffect, Dispatch } from "react";
-import { SoundState, SoundStateAction } from "../TypeCircuit";
+import { useEffect, Dispatch, useState } from "react";
+import {
+  OscillatorStates,
+  SoundState,
+  SoundStateAction,
+  Tone,
+} from "../TypeCircuit";
 
 export const useAudioContextInitEffect = (
   createAudioContext: () => {
@@ -35,30 +40,45 @@ export const useAudioContextInitEffect = (
 export const useSoundStatesEffect = (
   audioContext: AudioContext | null,
   gainNode: GainNode | null,
-  soundStates: SoundState[],
-  dispatch: Dispatch<SoundStateAction>
+  soundStates: SoundState[]
+  // dispatch: Dispatch<SoundStateAction>
 ) => {
+  const [oscillatorStates] = useState<OscillatorStates>([]);
+  const createOscillator = (tone: Tone) => {
+    if (!audioContext || !gainNode) {
+      return;
+    }
+    const osc = audioContext.createOscillator();
+    osc.frequency.value = tone.freq;
+    osc.connect(gainNode);
+    osc.start();
+    oscillatorStates.push({ tone: tone, oscillator: osc });
+  };
+  const removeOscillator = (tone: Tone) => {
+    console.log("remove");
+    let index = oscillatorStates.findIndex((s) => tone.name === s.tone.name);
+    oscillatorStates[index].oscillator.stop();
+    oscillatorStates[index].oscillator.disconnect();
+    oscillatorStates.splice(index, 1);
+  };
+
   useEffect(() => {
     if (!audioContext || !gainNode) {
       return;
     }
-    // console.log("onEffect: ", soundStates);
-    for (const state of soundStates) {
-      if (state.isStarted && !state.isEnded && !state.oscillator) {
-        // Sound started but not stopped yet and oscillator not created
-        const osc = audioContext.createOscillator();
-        osc.frequency.value = state.tone.freq;
-        osc.connect(gainNode);
-        osc.start();
-        state.oscillator = osc;
-      } else if (state.isEnded && state.oscillator) {
-        // Sound stopped and oscillator created
-        state.oscillator.stop();
-        state.oscillator.disconnect();
-        state.oscillator = null;
-        console.log("dispatch CLEAR", state.tone);
-        dispatch({ type: "CLEAR", payload: state.tone });
-      }
+
+    //oscillatorStatesとsoundStatesの差集合を取る
+    const ssToneMap = soundStates.map((s) => s.tone);
+    const oscToneMap = oscillatorStates.map((s) => s.tone);
+
+    const tonesToBeStop = oscToneMap.filter((s) => !ssToneMap.includes(s));
+    const tonesToBeStart = ssToneMap.filter((s) => !oscToneMap.includes(s));
+
+    for (const tone of tonesToBeStop) {
+      removeOscillator(tone);
+    }
+    for (const tone of tonesToBeStart) {
+      createOscillator(tone);
     }
   }, [soundStates]);
 };

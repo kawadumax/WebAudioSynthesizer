@@ -6,6 +6,8 @@ const markAsEnded =
   (predicate: (s: SoundState) => boolean) => (s: SoundState) =>
     predicate(s) ? { ...s, isEnded: true } : s;
 
+//stop時にはsoundStateを削除
+//start時には追加。既にあればそのまま。
 export const soundStateReducer = (
   state: SoundState[],
   action: SoundStateAction
@@ -19,10 +21,9 @@ export const soundStateReducer = (
         return [...state, { tone: action.payload, isStarted: true }];
       }
     case "START_SOME":
-      //action.payloadの配列全てを追加するが、ただし既にstartedがtrueであればそのままにする。
       const newSounds = [];
       for (const newTone of action.payload) {
-        if (state.some((s) => s.tone.name === newTone.name )) {
+        if (state.some((s) => s.tone.name === newTone.name)) {
           continue;
         } else {
           newSounds.push({ tone: newTone, isStarted: true });
@@ -30,18 +31,16 @@ export const soundStateReducer = (
       }
       return [...state, ...newSounds];
     case "STOP":
-      return state.map(markAsEnded((s) => s.tone.name === action.payload.name));
-    case "STOP_EXCEPT":
-      // payloadに入っているtone以外全てのsoundStateにisEndedを付ける
-      return state.map(markAsEnded((s) => s.tone.name !== action.payload.name));
-    case "STOP_EXCEPTS":
-      // payloadに入っている複数のtone以外全てのsoundStateにisEndedを付ける
-      const toneNames = action.payload.map((tone) => tone.name);
-      return state.map(markAsEnded((s) => !toneNames.includes(s.tone.name)));
-    case "STOP_ALL":
-      return state.map(markAsEnded(() => true));
-    case "CLEAR":
       return state.filter((s) => s.tone.name !== action.payload.name);
+    case "STOP_EXCEPT":
+      return state.filter((s) => s.tone.name === action.payload.name);
+    case "STOP_EXCEPTS":
+      const toneNames = action.payload.map((tone) => tone.name);
+      return state.filter((s) => toneNames.includes(s.tone.name));
+    case "STOP_ALL":
+      return [];
+    // case "CLEAR":
+    //   return state.filter((s) => s.tone.name !== action.payload.name);
     default:
       return state;
   }
@@ -57,19 +56,14 @@ export const useSoundStatesReducer = (
     return soundStates.find((ss) => ss.tone.name === tone.name);
   };
 
-  useSoundStatesEffect(audioContext, gainNode, soundStates, dispatch);
+  useSoundStatesEffect(audioContext, gainNode, soundStates);
 
   const startOscillator = (tone: Tone) => {
-    // if (!audioContext || !gainNode) return;
-    if (findSoundSource(tone)) {
-      return;
-    }
     console.log("dispatch start: ", tone);
     dispatch({ type: "START", payload: tone });
   };
 
   const startOscillatorSome = (tones: Tone[]) => {
-    // if (!audioContext || !gainNode) return;
     console.log("dispatch start some: ", tones);
     dispatch({ type: "START_SOME", payload: tones });
   };
