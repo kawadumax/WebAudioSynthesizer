@@ -1,14 +1,14 @@
 import React, { useState, useEffect, Component } from "react";
-import Led from "@components/parts/Led";
-import Toggle from "@components/parts/Toggle";
-import Label from "@components/parts/Label";
+import Led from "@parts/Led";
+import Toggle from "@parts/Toggle";
+import Label from "@parts/Label";
 import styles from "@styles/FXToggle.module.scss";
 
 interface Props {
   // onPower: (isToggled: boolean) => void;
 }
 
-const FXToggle = ({ }: Props) => {
+const FXToggle = ({}: Props) => {
   // const [power, setPower] = useState(false);
   // const handlePower = () => {
   //   setPower(!power);
@@ -24,8 +24,6 @@ const FXToggle = ({ }: Props) => {
 
       <Led className="fx-toggle-led" isActive={true}></Led>
       <Toggle></Toggle>
-
-
     </div>
   );
 };

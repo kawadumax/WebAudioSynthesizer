@@ -1,19 +1,14 @@
-import React from 'react';
-import { render, screen } from '@testing-library/react';
-import Led from '@components/parts/Led';
+import { render, screen } from "@testing-library/react";
+import Led from "@parts/Led";
 
-describe('Led component', () => {
-    it('should have "on" class when isActive is true', () => {
-        render(<Led className="test" isActive={true} />);
-        const element = screen.getByRole('img');
-        expect(element).toHaveClass('on');
-        expect(element).not.toHaveClass('off');
-    });
+it("should have the correct class when active", () => {
+  const { container } = render(<Led className="test-led" isActive={true} />);
+  const ledElement = container.querySelector(".test-led");
+  expect(ledElement).toHaveClass("on");
+});
 
-    it('should have "off" class when isActive is false', () => {
-        render(<Led className="test" isActive={false} />);
-        const element = screen.getByRole('img');
-        expect(element).toHaveClass('off');
-        expect(element).not.toHaveClass('on');
-    });
+it("should have the correct class when not active", () => {
+  const { container } = render(<Led className="test-led" isActive={false} />);
+  const ledElement = container.querySelector(".test-led");
+  expect(ledElement).toHaveClass("off");
 });

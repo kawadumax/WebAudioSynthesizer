@@ -1,7 +1,7 @@
 import React, { useState, useEffect, Component } from "react";
-import Led from "@components/parts/Led";
-import Toggle from "@components/parts/Toggle";
-import Label from "@components/parts/Label";
+import Led from "@parts/Led";
+import Toggle from "@parts/Toggle";
+import Label from "@parts/Label";
 import "@styles/PowerToggle.scss";
 
 interface Props {

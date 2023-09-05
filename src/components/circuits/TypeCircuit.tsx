@@ -32,3 +32,12 @@ export type SoundState = {
   isStarted: boolean;
   isEnded?: boolean;
 };
+
+export type SoundStateAction =
+  | { type: "START"; payload: Tone }
+  | { type: "START_SOME"; payload: Tone[] }
+  | { type: "STOP"; payload: Tone }
+  | { type: "STOP_EXCEPT"; payload: Tone }
+  | { type: "STOP_EXCEPTS"; payload: Tone[] }
+  | { type: "STOP_ALL" }
+  | { type: "CLEAR"; payload: Tone };
