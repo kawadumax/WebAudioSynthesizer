@@ -48,6 +48,9 @@
   "jest": {
     "moduleNameMapper": {
       "^@components(/.*)$": "<rootDir>/src/components$1",
+      "^@parts(/.*)$": "<rootDir>/src/components/parts$1",
+      "^@circuits(/.*)$": "<rootDir>/src/components/circuits$1",
+      "^@controls(/.*)$": "<rootDir>/src/components/controls$1",
       "^@utils(/.*)$": "<rootDir>/src/utils$1",
       "^@styles(/.*)$": "<rootDir>/src/styles$1",
       "^@assets(/.*)$": "<rootDir>/src/assets$1",

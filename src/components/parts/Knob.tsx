@@ -30,8 +30,6 @@ const Knob = ({
   const minAngle = -120;
   const maxAngle = 120;
 
-  // handleValueChange(defaultValue);
-
   useEffect(() => {
     if (isDragging) {
       const oldAngle = angle;

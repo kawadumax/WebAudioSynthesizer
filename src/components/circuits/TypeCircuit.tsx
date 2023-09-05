@@ -28,7 +28,23 @@ export interface Tone {
  */
 export type SoundState = {
   tone: Tone;
-  oscillator?: OscillatorNode | null;
+  // oscillator?: OscillatorNode | null;
   isStarted: boolean;
   isEnded?: boolean;
 };
+
+export type OscillatorState = {
+  tone: Tone;
+  oscillator: OscillatorNode;
+}
+
+export type OscillatorStates = OscillatorState[];
+
+export type SoundStateAction =
+  | { type: "START"; payload: Tone }
+  | { type: "START_SOME"; payload: Tone[] }
+  | { type: "STOP"; payload: Tone }
+  | { type: "STOP_EXCEPT"; payload: Tone }
+  | { type: "STOP_EXCEPTS"; payload: Tone[] }
+  | { type: "STOP_ALL" }
+  // | { type: "CLEAR"; payload: Tone };

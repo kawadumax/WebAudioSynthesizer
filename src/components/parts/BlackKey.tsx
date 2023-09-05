@@ -1,4 +1,4 @@
-import { Tone } from "../circuits/TypeCircuit";
+import { Tone } from "@circuits/TypeCircuit";
 import Key from "./Key";
 
 interface Props {
@@ -13,14 +13,8 @@ interface Props {
   onKeyReleased?: (tone: Tone) => void;
 }
 
-const BlackKey = (props
-: Props) => {
-  return (
-    <Key
-    {...props}
-    keyColor="black"
-    ></Key>
-  );
+const BlackKey = (props: Props) => {
+  return <Key {...props} keyColor="black"></Key>;
 };
 
 export default BlackKey;
