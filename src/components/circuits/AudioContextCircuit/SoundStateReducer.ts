@@ -2,12 +2,9 @@ import { useReducer } from "react";
 import { SoundState, SoundStateAction, Tone } from "../TypeCircuit";
 import { useSoundStatesEffect } from "./AudioEffect";
 
-const markAsEnded =
-  (predicate: (s: SoundState) => boolean) => (s: SoundState) =>
-    predicate(s) ? { ...s, isEnded: true } : s;
-
 //stop時にはsoundStateを削除
 //start時には追加。既にあればそのまま。
+
 export const soundStateReducer = (
   state: SoundState[],
   action: SoundStateAction
@@ -15,7 +12,6 @@ export const soundStateReducer = (
   switch (action.type) {
     case "START":
       if (state.some((s) => s.tone.name === action.payload.name)) {
-        //すでにstart済みの音階がある場合は、追加せず状態をそのまま返す
         return state;
       } else {
         return [...state, { tone: action.payload, isStarted: true }];
@@ -39,8 +35,6 @@ export const soundStateReducer = (
       return state.filter((s) => toneNames.includes(s.tone.name));
     case "STOP_ALL":
       return [];
-    // case "CLEAR":
-    //   return state.filter((s) => s.tone.name !== action.payload.name);
     default:
       return state;
   }
