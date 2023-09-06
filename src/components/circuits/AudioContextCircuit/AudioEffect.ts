@@ -41,7 +41,6 @@ export const useSoundStatesEffect = (
   audioContext: AudioContext | null,
   gainNode: GainNode | null,
   soundStates: SoundState[]
-  // dispatch: Dispatch<SoundStateAction>
 ) => {
   const [oscillatorStates] = useState<OscillatorStates>([]);
   const createOscillator = (tone: Tone) => {
@@ -55,7 +54,6 @@ export const useSoundStatesEffect = (
     oscillatorStates.push({ tone: tone, oscillator: osc });
   };
   const removeOscillator = (tone: Tone) => {
-    console.log("remove");
     let index = oscillatorStates.findIndex((s) => tone.name === s.tone.name);
     oscillatorStates[index].oscillator.stop();
     oscillatorStates[index].oscillator.disconnect();

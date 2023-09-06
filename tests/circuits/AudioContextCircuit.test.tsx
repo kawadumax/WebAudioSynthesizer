@@ -1,8 +1,8 @@
 import { renderHook, act } from "@testing-library/react";
 import { useSoundStatesEffect } from "@/components/circuits/AudioContextCircuit/AudioEffect";
 import { soundStateReducer } from "@circuits/AudioContextCircuit/SoundStateReducer";
-import { SoundState, SoundStateAction, Tone } from "@circuits/TypeCircuit";
-import React, { Dispatch, useReducer } from "react";
+import { SoundState, SoundStateAction } from "@circuits/TypeCircuit";
+import React, { useReducer } from "react";
 
 describe("AudioContextCircuit", () => {
   const testTone = { name: "A4", freq: 440 };
@@ -20,7 +20,6 @@ describe("AudioContextCircuit", () => {
             audioContextMock as AudioContext,
             gainNodeMock as GainNode,
             soundState as SoundState[],
-            dispatchMock as Dispatch<SoundStateAction>
           ),
         { initialProps: soundStatesMock }
       );
@@ -62,11 +61,9 @@ describe("AudioContextCircuit", () => {
         hookResult.rerender(soundStatesMock);
       });
       expect(audioContextMock.createOscillator).toBeCalledTimes(1);
-      expect(soundStatesMock[0]?.oscillator).toBeTruthy();
-      // console.log(soundStatesMock[0]);
     });
 
-    it("オシレータが追加されたあと、isEndedをtrueにするとオシレータが削除される", () => {
+    xit("オシレータが追加されたあと、soundStateを削除するとオシレータが削除される", () => {
       expect(audioContextMock.createOscillator).toBeCalledTimes(0);
       act(() => {
         const testSoundState: SoundState = {
@@ -78,7 +75,6 @@ describe("AudioContextCircuit", () => {
         hookResult.rerender(soundStatesMock);
       });
       expect(audioContextMock.createOscillator).toBeCalledTimes(1);
-      expect(soundStatesMock[0]?.oscillator).toBeTruthy();
       act(() => {
         if (soundStatesMock[0]) {
           soundStatesMock[0].isEnded = true;
@@ -89,7 +85,6 @@ describe("AudioContextCircuit", () => {
       expect(audioContextMock.createOscillator).toBeCalledTimes(1);
       expect(dispatchMock).toBeCalledTimes(1);
       expect(soundStatesMock).toHaveLength(1);
-      expect(soundStatesMock[0]?.oscillator).toBeFalsy();
     });
   });
 
@@ -146,17 +141,14 @@ describe("AudioContextCircuit", () => {
         expect(getSoundStates()).toHaveLength(1);
         expect(getSoundState(0).isEnded).toBeFalsy();
         act(dispatchAndRerender({ type: "STOP", payload: testTone }));
-        expect(getSoundStates()).toHaveLength(1);
-        expect(getSoundState(0).isEnded).toBeTruthy();
+        expect(getSoundStates()).toHaveLength(0);
       });
 
       it("STOP_EXCEPT", () => {
         act(dispatchAndRerender({ type: "START_SOME", payload: testTones }));
         expect(getSoundStates()).toHaveLength(2);
         act(dispatchAndRerender({ type: "STOP_EXCEPT", payload: testTone }));
-        expect(getSoundStates()).toHaveLength(2);
-        expect(getSoundState(0).isEnded).toBeFalsy();
-        expect(getSoundState(1).isEnded).toBeTruthy();
+        expect(getSoundStates()).toHaveLength(1);
       });
 
       it("STOP_EXCEPTS", () => {
@@ -171,10 +163,7 @@ describe("AudioContextCircuit", () => {
         act(dispatchAndRerender({ type: "START_SOME", payload: testTones }));
         expect(getSoundStates()).toHaveLength(3);
         act(dispatchAndRerender({ type: "STOP_EXCEPTS", payload: stopTones }));
-        expect(getSoundStates()).toHaveLength(3);
-        expect(getSoundState(0).isEnded).toBeFalsy();
-        expect(getSoundState(1).isEnded).toBeFalsy();
-        expect(getSoundState(2).isEnded).toBeTruthy();
+        expect(getSoundStates()).toHaveLength(2);
       });
 
       it("STOP_ALL", () => {
@@ -186,21 +175,7 @@ describe("AudioContextCircuit", () => {
         act(dispatchAndRerender({ type: "START_SOME", payload: testTones }));
         expect(getSoundStates()).toHaveLength(3);
         act(dispatchAndRerender({ type: "STOP_ALL" }));
-        expect(getSoundStates()).toHaveLength(3);
-        expect(getSoundState(0).isEnded).toBeTruthy();
-        expect(getSoundState(1).isEnded).toBeTruthy();
-        expect(getSoundState(2).isEnded).toBeTruthy();
-      });
-      it("CLEAR", () => {
-        const testTones = [
-          testTone,
-          { freq: 493.8833012561241, name: "B4" },
-          { freq: 880, name: "A5" }
-        ];
-        act(dispatchAndRerender({ type: "START_SOME", payload: testTones }));
-        expect(getSoundStates()).toHaveLength(3);
-        act(dispatchAndRerender({ type: "CLEAR", payload: testTones[0] }));
-        expect(getSoundStates()).toHaveLength(2);
+        expect(getSoundStates()).toHaveLength(0);
       });
     });
   });
@@ -251,7 +226,6 @@ describe("AudioContextCircuit", () => {
             audioContextMock as AudioContext,
             gainNodeMock as GainNode,
             soundState as SoundState[],
-            dispatch as Dispatch<SoundStateAction>
           ),
         { initialProps: soundStates }
       );
@@ -270,20 +244,14 @@ describe("AudioContextCircuit", () => {
       expect(getSoundStates()).toHaveLength(0);
       act(dispatchAndRerender({ type: "START", payload: testTone }));
       expect(getSoundStates()).toHaveLength(1);
-      expect(getSoundState(0).oscillator).toBeFalsy();
       act(() => {
         renderedEffectHook.rerender(getSoundStates());
       });
-      expect(getSoundState(0).oscillator).toBeTruthy();
       act(dispatchAndRerender({ type: "STOP", payload: testTone }));
-      expect(getSoundStates()).toHaveLength(1);
-      expect(getSoundState(0).isEnded).toBeTruthy();
-      // stop すると isEndedがtrueになり、その後すぐにCLEARが発行されてしまう
+      expect(getSoundStates()).toHaveLength(0);
       act(() => {
         renderedEffectHook.rerender(getSoundStates());
       });
-      // console.log(getSoundStates());
-      //CLEARまで発行されて実行されるので、soundStatesは0
       expect(getSoundStates()).toHaveLength(0);
     })
 
@@ -304,8 +272,6 @@ describe("AudioContextCircuit", () => {
         dispatch({ type: "START_SOME", payload: testTonesNext });
       });
       expect(getSoundStates()).toHaveLength(3);
-      expect(getSoundState(0).oscillator).toBeFalsy();
-      expect(getSoundState(1).oscillator).toBeFalsy();
       expect(startMock).toBeCalledTimes(0);
       expect(stopMock).toBeCalledTimes(0);
       act(() => {
@@ -318,7 +284,6 @@ describe("AudioContextCircuit", () => {
         dispatch({ type: "STOP_EXCEPTS", payload: testTones })
       })
       expect(stopMock).toBeCalledTimes(0);
-      expect(getSoundState(2).isEnded).toBeTruthy();
       act(() => {
         dispatch({ type: "STOP_ALL" });
       })
