@@ -1,8 +1,8 @@
 import "@styles/Synth.scss";
-import GainKnob from "@components/controls/GainKnob";
-import FXFrequencyKnob from "./controls/FXFrequencyKnob";
-import FXDepthKnob from "./controls/FXDepthKnob";
-import FXToggle from "@components/controls/FXToggle";
+import MasterVolumeKnob from "@/components/controls/MasterVolumeKnob";
+import TremoloFrequencyKnob from "./controls/TremoloFrequencyKnob";
+import TremoloDepthKnob from "./controls/TremoloDepthKnob";
+import TremoloToggle from "@components/controls/TremoloToggle";
 import Keyboard from "@components/controls/Keyboard";
 import { useAudioContextProvider } from "@circuits/AudioContextCircuit/AudioContextProvider";
 import { KeyboardContextProvider } from "@circuits/KeyboardCircuit";
@@ -15,12 +15,12 @@ const Synth = () => {
         <>
           <div id="synth-controls">
             <div id="toremolo-unit">
-              <FXToggle></FXToggle>
-              <FXFrequencyKnob></FXFrequencyKnob>
-              <FXDepthKnob></FXDepthKnob>
+              <TremoloToggle></TremoloToggle>
+              <TremoloFrequencyKnob></TremoloFrequencyKnob>
+              <TremoloDepthKnob></TremoloDepthKnob>
             </div>
             <div id="global-unit">
-              <GainKnob></GainKnob>
+              <MasterVolumeKnob></MasterVolumeKnob>
             </div>
           </div>
           <KeyboardContextProvider>

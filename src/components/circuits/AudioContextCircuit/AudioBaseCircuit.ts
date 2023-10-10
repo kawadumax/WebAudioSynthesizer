@@ -1,37 +1,16 @@
-import { useEffect, Dispatch, useState } from "react";
-import {
-  OscillatorStates,
-  SoundState,
-  SoundStateAction,
-  Tone,
-} from "../TypeCircuit";
+import { useEffect, useState } from "react";
+import { OscillatorStates, SoundState, Tone } from "../TypeCircuit";
 
 export const useAudioContextInitEffect = (
   createAudioContext: () => {
     audioContext: AudioContext;
-    gainNode: GainNode;
+    masterVolume: GainNode;
   },
   closeAudioContext: () => void
 ) => {
-  const updateGainNode = (currentTime: number) => {
-    const baseGain = 0.5;
-    const depth = 0.5;
-    const frequency = 0.5;
-    return baseGain * depth * Math.sin(2 * Math.PI * frequency * currentTime);
-  };
   useEffect(() => {
-    const { audioContext, gainNode } = createAudioContext();
-
-    // let animationFrameId: number;
-    // const loop = () => {
-    //   // gainNode の value を時間によって変化させる関数を記述
-    //   gainNode.gain.value = updateGainNode(audioContext.currentTime);
-    //   animationFrameId = requestAnimationFrame(loop);
-    // };
-    // loop();
-
+    createAudioContext();
     return () => {
-      // cancelAnimationFrame(animationFrameId);
       closeAudioContext();
     };
   }, []);
@@ -39,17 +18,17 @@ export const useAudioContextInitEffect = (
 
 export const useSoundStatesEffect = (
   audioContext: AudioContext | null,
-  gainNode: GainNode | null,
+  amplitude: GainNode | null,
   soundStates: SoundState[]
 ) => {
   const [oscillatorStates] = useState<OscillatorStates>([]);
   const createOscillator = (tone: Tone) => {
-    if (!audioContext || !gainNode) {
+    if (!audioContext || !amplitude) {
       return;
     }
     const osc = audioContext.createOscillator();
     osc.frequency.value = tone.freq;
-    osc.connect(gainNode);
+    osc.connect(amplitude);
     osc.start();
     oscillatorStates.push({ tone: tone, oscillator: osc });
   };
@@ -61,7 +40,7 @@ export const useSoundStatesEffect = (
   };
 
   useEffect(() => {
-    if (!audioContext || !gainNode) {
+    if (!audioContext || !amplitude) {
       return;
     }
 

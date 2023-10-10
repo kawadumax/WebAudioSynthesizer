@@ -1,7 +1,7 @@
 import { ReactNode, createContext, useContext, useState } from "react";
 import { Tone } from "@circuits/TypeCircuit";
-import useFX from "./FXManagerCircuit";
-import { useAudioContextInitEffect } from "./AudioEffect";
+import useTremoloEffect from "./TremoloEffectCircuit";
+import { useAudioContextInitEffect } from "./AudioBaseCircuit";
 import { useSoundStatesReducer } from "./SoundStateReducer";
 
 interface Props {
@@ -19,14 +19,16 @@ type SoundStateActionDispatchers = {
 
 type AudioContextProperties = {
   audioContext: AudioContext | null;
-  gainNode: GainNode | null;
+  masterVolume: GainNode | null;
+  tremolo: { depth: GainNode, lfo: OscillatorNode } | null;
 };
 
 type AudioContextState = SoundStateActionDispatchers & AudioContextProperties;
 
 const AudioContextState = createContext<AudioContextState>({
   audioContext: null,
-  gainNode: null,
+  masterVolume: null,
+  tremolo: null,
   startOscillator: () => { },
   startOscillatorSome: () => { },
   stopOscillator: () => { },
@@ -37,35 +39,36 @@ const AudioContextState = createContext<AudioContextState>({
 
 const AudioContextProvider = ({ children }: Props) => {
   const [audioContext, setAudioContext] = useState<AudioContext | null>(null);
-  const [gainNode, setGainNode] = useState<GainNode | null>(null);
-  const fxStates = useFX();
+  const [masterVolume, setMasterVolume] = useState<GainNode | null>(null);
 
   const createAudioContext = () => {
     const audioContext = new AudioContext();
-    const gainNode = audioContext.createGain();
-    gainNode.gain.setValueAtTime(0.5, audioContext.currentTime);
-    gainNode.connect(audioContext.destination);
-    setGainNode(gainNode);
+    const masterVolume = audioContext.createGain();
+    masterVolume.gain.setValueAtTime(0.5, audioContext.currentTime);
+    masterVolume.connect(audioContext.destination);
+    setMasterVolume(masterVolume);
     setAudioContext(audioContext);
-    return { audioContext, gainNode };
+    return { audioContext, masterVolume };
   };
 
   const closeAudioContext = () => {
     if (audioContext) {
       audioContext.close();
       setAudioContext(null);
-      setGainNode(null);
+      setMasterVolume(null);
     }
   };
 
   useAudioContextInitEffect(createAudioContext, closeAudioContext);
-  const dispatchers: SoundStateActionDispatchers = useSoundStatesReducer(audioContext, gainNode);
+  const tremolo = useTremoloEffect(audioContext, masterVolume);
+  const dispatchers: SoundStateActionDispatchers = useSoundStatesReducer(audioContext, masterVolume);
 
   return (
     <AudioContextState.Provider
       value={{
         audioContext,
-        gainNode,
+        masterVolume,
+        tremolo,
         ...dispatchers,
       }}
     >

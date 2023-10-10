@@ -1,6 +1,6 @@
 import { useReducer } from "react";
 import { SoundState, SoundStateAction, Tone } from "../TypeCircuit";
-import { useSoundStatesEffect } from "./AudioEffect";
+import { useSoundStatesEffect } from "./AudioBaseCircuit";
 
 //stop時にはsoundStateを削除
 //start時には追加。既にあればそのまま。
@@ -42,15 +42,10 @@ export const soundStateReducer = (
 
 export const useSoundStatesReducer = (
   audioContext: AudioContext | null,
-  gainNode: GainNode | null
+  amplitude: GainNode | null
 ) => {
   const [soundStates, dispatch] = useReducer(soundStateReducer, []);
-
-  const findSoundSource = (tone: Tone) => {
-    return soundStates.find((ss) => ss.tone.name === tone.name);
-  };
-
-  useSoundStatesEffect(audioContext, gainNode, soundStates);
+  useSoundStatesEffect(audioContext, amplitude, soundStates);
 
   const startOscillator = (tone: Tone) => {
     console.log("dispatch start: ", tone);

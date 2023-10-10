@@ -1,33 +1,33 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import Knob from "@parts/Knob";
 import Display from "@parts/Display";
 import { useAudioContextProvider } from "../circuits/AudioContextCircuit/AudioContextProvider";
-import Label from "../parts/Label";
+import Label from "@parts/Label";
 import styles from "@styles/Knob.module.scss";
 
-const GainKnob = () => {
+const MasterVolumeKnob = () => {
   const [gain, setGain] = useState(0.5);
-  const { gainNode } = useAudioContextProvider();
+  const { masterVolume } = useAudioContextProvider();
 
   useEffect(() => {
-    if (gainNode) {
-      gainNode.gain.value = gain;
+    if (masterVolume) {
+      masterVolume.gain.value = gain;
     }
-  }, [gain, gainNode]);
+  }, [gain, masterVolume]);
 
   const handleGainChange = (newGain: number) => {
-    if (gainNode) {
+    if (masterVolume) {
       setGain(newGain);
     }
   };
 
   return (
     <div className={styles.knob}>
-      <Label>Gain</Label>
+      <Label>MasterVolume</Label>
       <Knob handleValueChange={handleGainChange} defaultValue={0.5} />
       <Display parameter={gain}></Display>
     </div>
   );
 };
 
-export default GainKnob;
+export default MasterVolumeKnob;
