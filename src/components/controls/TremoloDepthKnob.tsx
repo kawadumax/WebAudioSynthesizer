@@ -8,24 +8,24 @@ import styles from "@styles/Knob.module.scss";
 const FXDepthKnob = () => {
   //max:1, min:0でトレモロの深さを指定する変数
   const [depth, setDepth] = useState(0.5);
-  // const { gainNode } = useAudioContextProvider();
+  const { audioContext, tremolo } = useAudioContextProvider();
 
-  // useEffect(() => {
-  //   if (gainNode) {
-  //     gainNode.gain.value = frequency;
-  //   }
-  // }, [frequency, gainNode]);
+  useEffect(() => {
+    if (audioContext && tremolo) {
+      tremolo.depth.gain.linearRampToValueAtTime(depth, audioContext.currentTime + 1);
+    }
+  }, [depth, tremolo?.depth]);
 
-  const handleLFOChange = (freq: number) => {
-    // if (gainNode) {
-    //   setFrequency(freq);
-    // }
+  const handleDepthChange = (depth: number) => {
+    if (tremolo) {
+      setDepth(depth);
+    }
   };
 
   return (
     <div className={styles.knob}>
       <Label>Depth</Label>
-      <Knob handleValueChange={handleLFOChange} defaultValue={0.5} />
+      <Knob handleValueChange={handleDepthChange} defaultValue={0.5} />
       <Display parameter={depth}></Display>
     </div>
   );

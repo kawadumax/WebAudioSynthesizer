@@ -29,12 +29,11 @@ const useTremoloEffect = (audioContext: AudioContext | null, amplitude: GainNode
   const lfo = audioContext.createOscillator();
   const depth = audioContext.createGain();
 
-  // lfo.frequency.value = 1;
-  // depth.gain.value = 0.5;
-  // lfo.connect(depth);
-  // depth.connect(amplitude.gain);
-  // lfo.start();
-
+  lfo.frequency.value = 1;
+  depth.gain.value = 0.5;
+  lfo.connect(depth);
+  depth.connect(amplitude.gain);
+  lfo.start();
 
   return { depth, lfo };
 };

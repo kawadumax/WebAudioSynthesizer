@@ -9,14 +9,6 @@ interface Props {
 }
 
 const TremoloToggle = ({ }: Props) => {
-  // const [power, setPower] = useState(false);
-  // const handlePower = () => {
-  //   setPower(!power);
-  // };
-
-  // useEffect(() => {
-  //   onPower(power);
-  // }, [power]);
 
   return (
     <div className={styles.TremoloToggle}>

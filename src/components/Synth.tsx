@@ -15,7 +15,7 @@ const Synth = () => {
         <>
           <div id="synth-controls">
             <div id="toremolo-unit">
-              <TremoloToggle></TremoloToggle>
+              {/* <TremoloToggle></TremoloToggle> */}
               <TremoloFrequencyKnob></TremoloFrequencyKnob>
               <TremoloDepthKnob></TremoloDepthKnob>
             </div>

@@ -23,7 +23,7 @@ const MasterVolumeKnob = () => {
 
   return (
     <div className={styles.knob}>
-      <Label>MasterVolume</Label>
+      <Label>Master</Label>
       <Knob handleValueChange={handleGainChange} defaultValue={0.5} />
       <Display parameter={gain}></Display>
     </div>
