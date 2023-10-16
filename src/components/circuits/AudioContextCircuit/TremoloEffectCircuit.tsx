@@ -1,10 +1,9 @@
+
 /** 
  * @fileoverview
  * useTremoloEffectというカスタムフックを作成する
  * このフックでは frequencyとdepthを設定できる関数を提供する
  **/
-
-import { useState } from 'react';
 
 /**
  * FXSettings - 周波数と深さの設定を表現する型。
@@ -21,7 +20,7 @@ interface FXSettings {
  * useTremoloEffect - 効果の周波数と深さを制御するためのカスタムフック。
  * @returns {Object} - 現在の周波数と深さの設定、およびそれらの設定を行う関数を含むオブジェクト。
  */
-const useTremoloEffect = (audioContext: AudioContext | null, amplitude: GainNode | null) => {
+const initTremoloEffect = (audioContext: AudioContext | null, amplitude: GainNode | null) => {
   if (!audioContext || !amplitude) {
     return null;
   }
@@ -38,4 +37,4 @@ const useTremoloEffect = (audioContext: AudioContext | null, amplitude: GainNode
   return { depth, lfo };
 };
 
-export default useTremoloEffect;
+export default initTremoloEffect;

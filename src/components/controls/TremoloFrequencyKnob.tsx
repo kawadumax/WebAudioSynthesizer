@@ -10,18 +10,18 @@ const TremoloFrequencyKnob = () => {
   //max:20, min:0でトレモロのlfoを指定する変数
   const MAX_VALUE = 20;
   const MIN_VALUE = 0;
-  const DEFAULT_VALUE = 0.5
+  const DEFAULT_VALUE = 1;
   const [frequency, setFrequency] = useState(DEFAULT_VALUE);
-  const { audioContext, tremolo } = useAudioContextProvider();
+  const { audioContext, lfo } = useAudioContextProvider();
 
   useEffect(() => {
-    if (audioContext && tremolo) {
-      tremolo.lfo.frequency.linearRampToValueAtTime(frequency, audioContext.currentTime + 1);
+    if (audioContext && lfo) {
+      lfo.frequency.linearRampToValueAtTime(frequency, audioContext.currentTime + 1);
     }
-  }, [frequency, tremolo?.lfo]);
+  }, [frequency]);
 
   const handleLFOChange = (frequency: number) => {
-    if (tremolo) {
+    if (frequency) {
       setFrequency(frequency);
     }
   };
