@@ -29,7 +29,7 @@ const TremoloFrequencyKnob = () => {
   return (
     <div className={styles.knob}>
       <Label>LFO</Label>
-      <Knob handleValueChange={handleLFOChange} defaultValue={DEFAULT_VALUE} maxValue={MAX_VALUE} minValue={MIN_VALUE} />
+      <Knob onChange={handleLFOChange} defaultValue={DEFAULT_VALUE} maxValue={MAX_VALUE} minValue={MIN_VALUE} />
       <Display parameter={frequency}></Display>
     </div>
   );

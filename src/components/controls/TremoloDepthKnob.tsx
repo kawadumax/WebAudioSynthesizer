@@ -17,15 +17,13 @@ const FXDepthKnob = () => {
   }, [value]);
 
   const handleValueChange = (value: number) => {
-    if (depth) {
-      setValue(value);
-    }
+    setValue(value);
   };
 
   return (
     <div className={styles.knob}>
       <Label>Depth</Label>
-      <Knob handleValueChange={handleValueChange} defaultValue={0.5} />
+      <Knob onChange={handleValueChange} defaultValue={0.5} />
       <Display parameter={value}></Display>
     </div>
   );

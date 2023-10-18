@@ -24,7 +24,7 @@ const MasterVolumeKnob = () => {
   return (
     <div className={styles.knob}>
       <Label>Master</Label>
-      <Knob handleValueChange={handleGainChange} defaultValue={0.5} />
+      <Knob onChange={handleGainChange} defaultValue={0.5} />
       <Display parameter={gain}></Display>
     </div>
   );
