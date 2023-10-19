@@ -23,6 +23,7 @@ type AudioContextProperties = {
   masterVolume: GainNode | null;
   depth: GainNode | null;
   lfo: OscillatorNode | null;
+  analyzer: AnalyserNode | null;
 };
 
 type AudioContextState = SoundStateActionDispatchers & AudioContextProperties;
@@ -33,6 +34,7 @@ const AudioContextState = createContext<AudioContextState>({
   amplitude: null,
   depth: null,
   lfo: null,
+  analyzer: null,
   startOscillator: () => { },
   startOscillatorSome: () => { },
   stopOscillator: () => { },
@@ -47,6 +49,7 @@ const AudioContextProvider = ({ children }: Props) => {
   const [amplitude, setAmplitude] = useState<GainNode | null>(null);
   const [depth, setDepth] = useState<GainNode | null>(null);
   const [lfo, setLfo] = useState<OscillatorNode | null>(null);
+  const [analyzer, setAnalyzer] = useState<AnalyserNode | null>(null);
 
   const createAudioContext = () => {
     const audioContext = new AudioContext();
@@ -55,9 +58,12 @@ const AudioContextProvider = ({ children }: Props) => {
     masterVolume.gain.setValueAtTime(0.5, audioContext.currentTime);
     masterVolume.connect(audioContext.destination);
 
+    const analyzerNode = audioContext.createAnalyser();
+    analyzerNode.connect(masterVolume);
+
     const amplitude = audioContext.createGain();
     amplitude.gain.setValueAtTime(0.5, audioContext.currentTime);
-    amplitude.connect(masterVolume);
+    amplitude.connect(analyzerNode);
 
     const tremolo = initTremoloEffect(audioContext, amplitude);
     if (tremolo) {
@@ -67,6 +73,7 @@ const AudioContextProvider = ({ children }: Props) => {
     setMasterVolume(masterVolume);
     setAmplitude(amplitude);
     setAudioContext(audioContext);
+    setAnalyzer(analyzerNode);
 
     return { audioContext, masterVolume, amplitude };
   };
@@ -79,6 +86,7 @@ const AudioContextProvider = ({ children }: Props) => {
       setAmplitude(null);
       setDepth(null);
       setLfo(null);
+      setAnalyzer(null);
     }
   };
 
@@ -93,6 +101,7 @@ const AudioContextProvider = ({ children }: Props) => {
         masterVolume,
         depth,
         lfo,
+        analyzer,
         ...dispatchers,
       }}
     >
