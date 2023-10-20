@@ -1,29 +1,30 @@
 import React, { useEffect, useRef } from "react";
+import { useAudioContextProvider } from "../circuits/AudioContextCircuit/AudioContextProvider";
 import "@styles/Oscilloscope.scss";
 
 interface Props {
   className?: string;
-  audioContext: AudioContext;
 }
 
-const Oscilloscope = ({ audioContext, className }: Props) => {
+const Oscilloscope = ({ className }: Props) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const { audioContext, analyser } = useAudioContextProvider();
 
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
+    if (!canvas || !analyser) return;
 
     const canvasContext = canvas.getContext("2d");
     if (!canvasContext) return;
 
-    const analyserNode = audioContext.createAnalyser();
-    analyserNode.fftSize = 2048;
-    const bufferLength = analyserNode.frequencyBinCount;
+
+    analyser.fftSize = 2048;
+    const bufferLength = analyser.frequencyBinCount;
     const dataArray = new Uint8Array(bufferLength);
 
     const updateFrame = () => {
       requestAnimationFrame(updateFrame);
-      analyserNode.getByteTimeDomainData(dataArray);
+      analyser.getByteTimeDomainData(dataArray);
 
       canvasContext.fillStyle = "#ffffff";
       canvasContext.fillRect(0, 0, canvas.width, canvas.height);
@@ -54,7 +55,6 @@ const Oscilloscope = ({ audioContext, className }: Props) => {
 
     // コンポーネントがアンマウントされたらオーディオ解析ノードを解放する
     return () => {
-      analyserNode.disconnect();
     };
   }, [audioContext, canvasRef]);
 

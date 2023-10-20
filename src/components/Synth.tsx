@@ -2,10 +2,10 @@ import "@styles/Synth.scss";
 import MasterVolumeKnob from "@/components/controls/MasterVolumeKnob";
 import TremoloFrequencyKnob from "./controls/TremoloFrequencyKnob";
 import TremoloDepthKnob from "./controls/TremoloDepthKnob";
-import TremoloToggle from "@components/controls/TremoloToggle";
 import Keyboard from "@components/controls/Keyboard";
 import { useAudioContextProvider } from "@circuits/AudioContextCircuit/AudioContextProvider";
 import { KeyboardContextProvider } from "@circuits/KeyboardCircuit";
+import Oscilloscope from "./controls/Oscilloscope";
 
 const Synth = () => {
   const { audioContext } = useAudioContextProvider();
@@ -20,6 +20,7 @@ const Synth = () => {
               <TremoloDepthKnob></TremoloDepthKnob>
             </div>
             <div id="global-unit">
+              <Oscilloscope></Oscilloscope>
               <MasterVolumeKnob></MasterVolumeKnob>
             </div>
           </div>
