@@ -19,8 +19,10 @@ const Synth = () => {
               <TremoloFrequencyKnob></TremoloFrequencyKnob>
               <TremoloDepthKnob></TremoloDepthKnob>
             </div>
-            <div id="global-unit">
+            <div id="oscilloscope-unit">
               <Oscilloscope></Oscilloscope>
+            </div>
+            <div id="global-unit">
               <MasterVolumeKnob></MasterVolumeKnob>
             </div>
           </div>
