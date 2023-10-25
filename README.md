@@ -25,5 +25,5 @@ Tailwind ではなく SCSS を使うことでコンポーネントの可読性�
 ルートディレクトリで下記のコマンドを実行してください。
 
 ```shell
-npm start
+npm run start
 ```

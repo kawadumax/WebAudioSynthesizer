@@ -14,7 +14,7 @@ const Dropdown: React.FC<Props> = ({ options }) => {
     return (
         <div className="dropdown">
             <button onClick={toggleDropdown} className="dropdown-toggle">
-                Select an option
+                Select Waveform
             </button>
             {isOpen && (
                 <ul className="dropdown-menu">
