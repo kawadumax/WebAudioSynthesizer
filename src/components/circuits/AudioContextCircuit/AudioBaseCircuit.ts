@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { OscillatorStates, SoundState, Tone } from "../TypeCircuit";
+import { useAudioContextProvider } from "./AudioContextProvider";
 
 export const useAudioContextInitEffect = (
   createAudioContext: () => {
@@ -23,11 +24,14 @@ export const useSoundStatesEffect = (
 ) => {
   const [oscillatorStates] = useState<OscillatorStates>([]);
   const createOscillator = (tone: Tone) => {
+    const { waveform } = useAudioContextProvider();
     if (!audioContext || !amplitude) {
       return;
     }
     const osc = audioContext.createOscillator();
     osc.frequency.value = tone.freq;
+    console.log(waveform);
+    if (waveform) osc.type = waveform;
     osc.connect(amplitude);
     osc.start();
     oscillatorStates.push({ tone: tone, oscillator: osc });

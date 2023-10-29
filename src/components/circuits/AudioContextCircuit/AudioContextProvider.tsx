@@ -1,5 +1,5 @@
 import { ReactNode, createContext, useContext, useState } from "react";
-import { Tone } from "@circuits/TypeCircuit";
+import { Tone, Waveform } from "@circuits/TypeCircuit";
 import initTremoloEffect from "./TremoloEffectCircuit";
 import { useAudioContextInitEffect } from "./AudioBaseCircuit";
 import { useSoundStatesReducer } from "./SoundStateReducer";
@@ -24,6 +24,8 @@ type AudioContextProperties = {
   depth: GainNode | null;
   lfo: OscillatorNode | null;
   analyser: AnalyserNode | null;
+  waveform: Waveform | null;
+  setWaveform: React.Dispatch<React.SetStateAction<Waveform | null>> | null;
 };
 
 type AudioContextState = SoundStateActionDispatchers & AudioContextProperties;
@@ -35,6 +37,8 @@ const AudioContextState = createContext<AudioContextState>({
   depth: null,
   lfo: null,
   analyser: null,
+  waveform: null,
+  setWaveform: null,
   startOscillator: () => { },
   startOscillatorSome: () => { },
   stopOscillator: () => { },
@@ -50,6 +54,7 @@ const AudioContextProvider = ({ children }: Props) => {
   const [depth, setDepth] = useState<GainNode | null>(null);
   const [lfo, setLfo] = useState<OscillatorNode | null>(null);
   const [analyser, setAnalyzer] = useState<AnalyserNode | null>(null);
+  const [waveform, setWaveform] = useState<Waveform | null>(null);
 
   const createAudioContext = () => {
     const audioContext = new AudioContext();
@@ -70,6 +75,10 @@ const AudioContextProvider = ({ children }: Props) => {
       setDepth(tremolo.depth);
       setLfo(tremolo.lfo);
     }
+    if (setWaveform) {
+      setWaveform('sine');
+    }
+
     setMasterVolume(masterVolume);
     setAmplitude(amplitude);
     setAudioContext(audioContext);
@@ -87,6 +96,7 @@ const AudioContextProvider = ({ children }: Props) => {
       setDepth(null);
       setLfo(null);
       setAnalyzer(null);
+      setWaveform(null);
     }
   };
 
@@ -102,6 +112,8 @@ const AudioContextProvider = ({ children }: Props) => {
         depth,
         lfo,
         analyser,
+        waveform,
+        setWaveform,
         ...dispatchers,
       }}
     >

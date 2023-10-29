@@ -2,10 +2,11 @@
 
 import React, { useState, useEffect, LiHTMLAttributes } from 'react';
 import '@styles/Dropdown.scss';
+import { Waveform } from '../circuits/TypeCircuit';
 
 interface Props {
-    options: string[];
-    onChange: (value: string) => void;
+    options: Waveform[];
+    onChange: (value: Waveform) => void;
 }
 
 const Dropdown: React.FC<Props> = ({
@@ -21,7 +22,7 @@ const Dropdown: React.FC<Props> = ({
     }, [value]);
 
     const selectOptionHandler = (e: React.MouseEvent<HTMLLIElement>) => {
-        setValue(e.currentTarget.getAttribute("data-value") as string);
+        setValue(e.currentTarget.getAttribute("data-value") as Waveform);
     }
 
     return (

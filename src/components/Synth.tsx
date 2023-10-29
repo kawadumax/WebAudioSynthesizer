@@ -6,7 +6,7 @@ import Keyboard from "@components/controls/Keyboard";
 import { useAudioContextProvider } from "@circuits/AudioContextCircuit/AudioContextProvider";
 import { KeyboardContextProvider } from "@circuits/KeyboardCircuit";
 import Oscilloscope from "./controls/Oscilloscope";
-import WaveFormSelector from "./controls/WaveFormSelector";
+import WaveformSelector from "./controls/WaveformSelector";
 
 const Synth = () => {
   const { audioContext } = useAudioContextProvider();
@@ -21,7 +21,7 @@ const Synth = () => {
               <TremoloDepthKnob></TremoloDepthKnob>
             </div>
             <div id="oscilloscope-unit">
-              <WaveFormSelector></WaveFormSelector>
+              <WaveformSelector></WaveformSelector>
               <Oscilloscope></Oscilloscope>
             </div>
             <div id="global-unit">
