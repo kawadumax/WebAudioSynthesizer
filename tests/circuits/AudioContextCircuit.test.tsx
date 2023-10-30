@@ -1,10 +1,10 @@
 import { renderHook, act } from "@testing-library/react";
-import { useSoundStatesEffect } from "@/components/circuits/AudioContextCircuit/AudioBaseCircuit";
-import { soundStateReducer } from "@circuits/AudioContextCircuit/SoundStateReducer";
+import { useSoundStatesEffect } from "@/components/circuits/AudioCircuit/AudioBaseCircuit";
+import { soundStateReducer } from "@circuits/AudioCircuit/SoundStateReducer";
 import { SoundState, SoundStateAction } from "@/modules/Type";
 import React, { useReducer } from "react";
 
-describe("AudioContextCircuit", () => {
+describe("AudioCircuit", () => {
   const testTone = { name: "A4", freq: 440 };
 
   describe("useSoundStatesEffect", () => {

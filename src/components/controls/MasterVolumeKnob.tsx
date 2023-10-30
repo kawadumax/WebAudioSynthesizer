@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import Knob from "@parts/Knob";
 import Display from "@parts/Display";
-import { useApplicationContext } from "../circuits/AudioContextCircuit/ApplicationContextProvider";
+import { useApplicationContext } from "../circuits/AudioCircuit/ApplicationContextProvider";
 import Label from "@parts/Label";
 import styles from "@styles/Knob.module.scss";
 

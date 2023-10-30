@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from "react";
-import { useApplicationContext } from "../circuits/AudioContextCircuit/ApplicationContextProvider";
+import { useApplicationContext } from "../circuits/AudioCircuit/ApplicationContextProvider";
 import "@styles/Oscilloscope.scss";
 
 interface Props {
