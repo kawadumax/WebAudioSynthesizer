@@ -1,13 +1,13 @@
 import { useState, useEffect } from "react";
 import Knob from "@parts/Knob";
 import Display from "@parts/Display";
-import { useAudioContextProvider } from "../circuits/AudioContextCircuit/AudioContextProvider";
+import { useApplicationContext } from "../circuits/AudioContextCircuit/ApplicationContextProvider";
 import Label from "@parts/Label";
 import styles from "@styles/Knob.module.scss";
 
 const MasterVolumeKnob = () => {
   const [gain, setGain] = useState(0.5);
-  const { masterVolume } = useAudioContextProvider();
+  const { masterVolume } = useApplicationContext();
 
   useEffect(() => {
     if (masterVolume) {

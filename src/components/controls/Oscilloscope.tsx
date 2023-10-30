@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from "react";
-import { useAudioContextProvider } from "../circuits/AudioContextCircuit/AudioContextProvider";
+import { useApplicationContext } from "../circuits/AudioContextCircuit/ApplicationContextProvider";
 import "@styles/Oscilloscope.scss";
 
 interface Props {
@@ -7,10 +7,10 @@ interface Props {
 }
 
 const drawGrid = (ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement) => {
-  ctx.strokeStyle = "rgba(255, 255, 255, 0.4)";  // 薄い白色の罫線
+  ctx.strokeStyle = "rgba(255, 255, 255, 0.4)"; // 薄い白色の罫線
   ctx.lineWidth = 0.5;
 
-  const gridSpacing = 25;  // 罫線の間隔
+  const gridSpacing = 25; // 罫線の間隔
 
   // 横罫線
   for (let y = gridSpacing; y < canvas.height; y += gridSpacing) {
@@ -29,27 +29,30 @@ const drawGrid = (ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement) => {
   }
 };
 
-const drawInsetShadow = (ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement) => {
+const drawInsetShadow = (
+  ctx: CanvasRenderingContext2D,
+  canvas: HTMLCanvasElement
+) => {
   ctx.save();
 
   // シャドウプロパティを設定
   ctx.shadowOffsetX = 4;
   ctx.shadowOffsetY = 4;
   ctx.shadowBlur = 30;
-  ctx.shadowColor = 'rgba(0, 0, 0, 0.9)';
+  ctx.shadowColor = "rgba(0, 0, 0, 0.9)";
 
   // 外向きのシャドウを持つ矩形を描画
-  ctx.fillStyle = 'black';
+  ctx.fillStyle = "black";
   ctx.fillRect(-canvas.width, 0, canvas.width, canvas.height);
-  ctx.fillRect(-canvas.width, - canvas.height, canvas.width, canvas.height);
-  ctx.fillRect(0, - canvas.height, canvas.width, canvas.height);
+  ctx.fillRect(-canvas.width, -canvas.height, canvas.width, canvas.height);
+  ctx.fillRect(0, -canvas.height, canvas.width, canvas.height);
 
   ctx.restore();
 };
 
 const Oscilloscope = ({ className }: Props) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const { audioContext, analyser } = useAudioContextProvider();
+  const { audioContext, analyser } = useApplicationContext();
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -57,7 +60,6 @@ const Oscilloscope = ({ className }: Props) => {
 
     const canvasContext = canvas.getContext("2d");
     if (!canvasContext) return;
-
 
     analyser.fftSize = 2048;
     const bufferLength = analyser.frequencyBinCount;
@@ -98,8 +100,7 @@ const Oscilloscope = ({ className }: Props) => {
     updateFrame();
 
     // コンポーネントがアンマウントされたらオーディオ解析ノードを解放する
-    return () => {
-    };
+    return () => {};
   }, [audioContext, canvasRef]);
 
   return (

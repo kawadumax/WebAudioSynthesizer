@@ -3,13 +3,13 @@ import MasterVolumeKnob from "@/components/controls/MasterVolumeKnob";
 import TremoloFrequencyKnob from "./controls/TremoloFrequencyKnob";
 import TremoloDepthKnob from "./controls/TremoloDepthKnob";
 import Keyboard from "@components/controls/Keyboard";
-import { useAudioContextProvider } from "@circuits/AudioContextCircuit/AudioContextProvider";
+import { useApplicationContext } from "@circuits/AudioContextCircuit/ApplicationContextProvider";
 import { KeyboardContextProvider } from "@circuits/KeyboardCircuit";
 import Oscilloscope from "./controls/Oscilloscope";
 import WaveformSelector from "./controls/WaveformSelector";
 
 const Synth = () => {
-  const { audioContext } = useAudioContextProvider();
+  const { audioContext } = useApplicationContext();
   const renderSynth = (audioContext: AudioContext | null) => {
     if (audioContext) {
       return (

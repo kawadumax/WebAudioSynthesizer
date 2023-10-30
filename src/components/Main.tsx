@@ -2,7 +2,7 @@ import React from "react";
 import "@styles/Main.scss";
 import Synth from "@components/Synth";
 import About from "@components/About";
-import AudioContextProvider from "@circuits/AudioContextCircuit/AudioContextProvider";
+import AudioContextProvider from "@circuits/AudioContextCircuit/ApplicationContextProvider";
 function Main() {
   return (
     <main>

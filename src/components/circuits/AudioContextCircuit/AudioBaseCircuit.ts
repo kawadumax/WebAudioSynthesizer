@@ -1,21 +1,21 @@
 import { useEffect, useState } from "react";
 import { OscillatorStates, SoundState, Tone } from "@/modules/Type";
-import { useAudioContextProvider } from "./AudioContextProvider";
+import { useApplicationContext } from "./ApplicationContextProvider";
 
-export const useAudioContextInitEffect = (
-  createAudioContext: () => {
-    audioContext: AudioContext;
-    masterVolume: GainNode;
-  },
-  closeAudioContext: () => void
-) => {
-  useEffect(() => {
-    createAudioContext();
-    return () => {
-      closeAudioContext();
-    };
-  }, []);
-};
+// export const useAudioContextEffect = (
+//   // createAudioContext: () => {
+//   //   audioContext: AudioContext;
+//   //   masterVolume: GainNode;
+//   // },
+//   closeAudioContext: () => void
+// ) => {
+//   useEffect(() => {
+//     // createAudioContext();
+//     return () => {
+//       closeAudioContext();
+//     };
+//   }, []);
+// };
 
 export const useSoundStatesEffect = (
   audioContext: AudioContext | null,
@@ -24,14 +24,13 @@ export const useSoundStatesEffect = (
 ) => {
   const [oscillatorStates] = useState<OscillatorStates>([]);
   const createOscillator = (tone: Tone) => {
-    const { waveform } = useAudioContextProvider();
+    const { waveform } = useApplicationContext();
     if (!audioContext || !amplitude) {
       return;
     }
     const osc = audioContext.createOscillator();
     osc.frequency.value = tone.freq;
-    console.log(waveform);
-    if (waveform) osc.type = waveform;
+    osc.type = waveform;
     osc.connect(amplitude);
     osc.start();
     oscillatorStates.push({ tone: tone, oscillator: osc });
