@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { OscillatorStates, SoundState, Tone } from "../TypeCircuit";
+import { OscillatorStates, SoundState, Tone } from "@/modules/Type";
 import { useAudioContextProvider } from "./AudioContextProvider";
 
 export const useAudioContextInitEffect = (

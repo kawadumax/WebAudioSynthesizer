@@ -1,5 +1,5 @@
 import React from "react";
-import { Tone } from "@circuits/TypeCircuit";
+import { Tone } from "@/modules/Type";
 import "@styles/Key.scss";
 import useKeyboardCircuit, {
   useKeyboardContext,

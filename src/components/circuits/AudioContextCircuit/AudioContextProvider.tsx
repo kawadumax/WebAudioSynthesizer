@@ -1,6 +1,6 @@
 import { ReactNode, createContext, useContext, useState } from "react";
-import { Tone, Waveform } from "@circuits/TypeCircuit";
-import initTremoloEffect from "./TremoloEffectCircuit";
+import { Tone, Waveform } from "@/modules/Type";
+import initTremoloEffect from "@/modules/Tremolo";
 import { useAudioContextInitEffect } from "./AudioBaseCircuit";
 import { useSoundStatesReducer } from "./SoundStateReducer";
 

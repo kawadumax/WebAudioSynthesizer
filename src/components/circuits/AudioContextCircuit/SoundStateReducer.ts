@@ -1,5 +1,5 @@
 import { useReducer } from "react";
-import { SoundState, SoundStateAction, Tone } from "../TypeCircuit";
+import { SoundState, SoundStateAction, Tone } from "@/modules/Type";
 import { useSoundStatesEffect } from "./AudioBaseCircuit";
 
 //stop時にはsoundStateを削除

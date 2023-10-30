@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, LiHTMLAttributes } from 'react';
 import '@styles/Dropdown.scss';
-import { Waveform } from '../circuits/TypeCircuit';
+import { Waveform } from '@/modules/Type';
 
 interface Props {
     options: Waveform[];

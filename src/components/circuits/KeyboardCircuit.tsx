@@ -1,5 +1,5 @@
 import { useContext, useState, createContext } from "react";
-import { Tone } from "./TypeCircuit";
+import { Tone } from "@/modules/Type";
 import { useAudioContextProvider } from "./AudioContextCircuit/AudioContextProvider";
 
 interface Props {

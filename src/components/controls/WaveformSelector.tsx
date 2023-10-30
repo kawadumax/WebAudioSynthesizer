@@ -5,7 +5,7 @@ import Dropdown from '@parts/Dropdown';
 import Display from '@parts/Display';
 import styles from "@styles/WaveformSelector.module.scss";
 import { useAudioContextProvider } from '../circuits/AudioContextCircuit/AudioContextProvider';
-import { Waveform } from '../circuits/TypeCircuit';
+import { Waveform } from '@/modules/Type';
 
 const options: Waveform[] = ["sine", "square", "sawtooth", "triangle"];
 
