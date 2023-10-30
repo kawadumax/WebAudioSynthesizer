@@ -4,99 +4,105 @@ import {
   useContext,
   useEffect,
   useState,
+  useReducer
 } from "react";
-import { Tone, Waveform } from "@/modules/Type";
-import { useSoundStatesReducer } from "./SoundStateReducer";
+import { Tone, Waveform, OscillatorStates, ApplicationContextType } from "@/modules/Type";
+import { createOscillator, removeOscillator } from "@/modules/utils/WebAudioUtils";
+import SoundStateReducer from "./SoundStateReducer";
+import * as soundStateActions from "./SoundStateActions";
+
+
+const ApplicationContext = createContext<ApplicationContextType | undefined>(undefined);
 
 interface Props {
-  children: ReactNode;
+  children: ReactNode
 }
 
-type SoundStateActionDispatchers = {
-  startOscillator: (tone: Tone) => void;
-  startOscillatorSome: (tones: Tone[]) => void;
-  stopOscillator: (tone: Tone) => void;
-  stopOscillatorExcept: (tone: Tone) => void;
-  stopOscillatorExcepts: (tones: Tone[]) => void;
-  stopOscillatorAll: () => void;
-};
+const ApplicationContextProvider = ({ children }: Props) => {
 
-type AudioContextProperties = {
-  audioContext: AudioContext;
-  amplitude: GainNode;
-  masterVolume: GainNode;
-  depth: GainNode;
-  lfo: OscillatorNode;
-  analyser: AnalyserNode;
-  waveform: Waveform;
-  setWaveform: React.Dispatch<React.SetStateAction<Waveform>>;
-};
-
-type ApplicationContextType = SoundStateActionDispatchers &
-  AudioContextProperties;
-
-const initializeApplicationContext = (): ApplicationContextType => {
-  const [audioContext, setAudioContext] = useState(new AudioContext());
-  const [masterVolume, setMasterVolume] = useState(audioContext.createGain());
-  masterVolume.gain.setValueAtTime(0.5, audioContext.currentTime);
-  masterVolume.connect(audioContext.destination);
-
-  const [analyser, setAnalyzer] = useState(audioContext.createAnalyser());
-  analyser.connect(masterVolume);
-
-  const [amplitude, setAmplitude] = useState(audioContext.createGain());
-  amplitude.gain.setValueAtTime(0.5, audioContext.currentTime);
-  amplitude.connect(analyser);
-
-  const [depth, setDepth] = useState(audioContext.createGain());
-  const [lfo, setLfo] = useState(audioContext.createOscillator());
-
-  lfo.frequency.value = 1;
-  depth.gain.value = 0.5;
-  lfo.connect(depth);
-  depth.connect(amplitude.gain);
-  lfo.start();
-
+  const [audioContext, setAudioContext] = useState<AudioContext | null>(null);
+  const [masterVolume, setMasterVolume] = useState<GainNode | null>(null);
+  const [analyser, setAnalyzer] = useState<AnalyserNode | null>(null);
+  const [amplitude, setAmplitude] = useState<GainNode | null>(null);
+  const [depth, setDepth] = useState<GainNode | null>(null);
+  const [lfo, setLfo] = useState<OscillatorNode | null>(null);
   const [waveform, setWaveform] = useState<Waveform>("sine");
 
-  return {
-    audioContext,
-    masterVolume,
-    amplitude,
-    depth,
-    lfo,
-    analyser,
-    waveform,
-    setWaveform,
+  const [soundStates, dispatch] = useReducer(SoundStateReducer, []);
+  const [oscillatorStates] = useState<OscillatorStates>([]);
+
+  useEffect(() => {
+    const ac = new AudioContext();
+    setAudioContext(ac);
+
+    const mv = ac.createGain();
+    mv.gain.setValueAtTime(0.5, ac.currentTime);
+    mv.connect(ac.destination);
+    setMasterVolume(mv);
+
+    const an = ac.createAnalyser();
+    an.connect(mv);
+    setAnalyzer(an);
+
+    const amp = ac.createGain();
+    amp.gain.setValueAtTime(0.5, ac.currentTime);
+    amp.connect(an);
+    setAmplitude(amp);
+
+    const depth = ac.createGain();
+    setDepth(depth);
+
+    const lfo = ac.createOscillator();
+    lfo.frequency.value = 1;
+    depth.gain.value = 0.5;
+    lfo.connect(depth);
+    depth.connect(amp.gain);
+    lfo.start();
+    setLfo(lfo);
+
+    return () => {
+      lfo.stop();
+      ac.close();
+    };
+  }, []);
+
+  useEffect(() => {
+    //oscillatorStatesとsoundStatesの差集合を取る
+    const ssToneMap = soundStates.map((s) => s.tone);
+    const oscToneMap = oscillatorStates.map((s) => s.tone);
+
+    const tonesToBeStop = oscToneMap.filter((s) => !ssToneMap.includes(s));
+    const tonesToBeStart = ssToneMap.filter((s) => !oscToneMap.includes(s));
+
+    for (const tone of tonesToBeStop) {
+      removeOscillator(tone, oscillatorStates);
+    }
+    for (const tone of tonesToBeStart) {
+      createOscillator(tone, oscillatorStates, audioContext, amplitude, waveform);
+    }
+  }, [soundStates]);
+
+  const boundActions = {
+    startOscillator: (tone: Tone) => soundStateActions.startOscillator(dispatch, tone),
+    startOscillatorSome: (tones: Tone[]) => soundStateActions.startOscillatorSome(dispatch, tones),
+    stopOscillator: (tone: Tone) => soundStateActions.stopOscillator(dispatch, tone),
+    stopOscillatorAll: () => soundStateActions.stopOscillatorAll(dispatch),
+    stopOscillatorExcept: (tone: Tone) => soundStateActions.stopOscillatorExcept(dispatch, tone),
+    stopOscillatorExcepts: (tones: Tone[]) => soundStateActions.stopOscillatorExcepts(dispatch, tones),
   };
-};
-
-const initialValues = useInitializeApplicationContext();
-const ApplicationContext = createContext<ApplicationContextType>(initialValues);
-
-const ApplicationContextProvider = ({ children }: Props) => {
-  // const closeAudioContext = () => {
-  //   audioContext.close();
-  //   setAudioContext(null);
-  //   setMasterVolume(null);
-  //   setAmplitude(null);
-  //   setDepth(null);
-  //   setLfo(null);
-  //   setAnalyzer(null);
-  //   setWaveform(null);
-  // };
-
-  // useAudioContextInitEffect(createAudioContext, closeAudioContext);
-  const dispatchers: SoundStateActionDispatchers = useSoundStatesReducer(
-    initialValues.audioContext,
-    initialValues.amplitude
-  );
 
   return (
     <ApplicationContext.Provider
       value={{
-        ...initialValues,
-        ...dispatchers,
+        audioContext: audioContext!,
+        masterVolume: masterVolume!,
+        analyser: analyser!,
+        amplitude: amplitude!,
+        depth: depth!,
+        lfo: lfo!,
+        waveform,
+        setWaveform,
+        ...boundActions
       }}
     >
       {children}
@@ -104,5 +110,12 @@ const ApplicationContextProvider = ({ children }: Props) => {
   );
 };
 
-export const useApplicationContext = () => useContext(ApplicationContext);
+export const useApplicationContext = () => {
+  const context = useContext(ApplicationContext);
+  if (!context) {
+    throw new Error("ApplicationContext Error.")
+  }
+  return context;
+};
+
 export default ApplicationContextProvider;

@@ -5,7 +5,7 @@ import useKeyboardCircuit, {
 } from "../circuits/KeyboardCircuit";
 import { Tone } from "@/modules/Type";
 import { useEffect, useRef } from "react";
-import { containsPoint, Point } from "@utils/DomUtils";
+import { containsPoint, Point } from "@/modules/utils/DomUtils";
 interface Props {
   width?: number;
   height?: number;

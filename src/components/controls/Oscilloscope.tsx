@@ -100,7 +100,7 @@ const Oscilloscope = ({ className }: Props) => {
     updateFrame();
 
     // コンポーネントがアンマウントされたらオーディオ解析ノードを解放する
-    return () => {};
+    return () => { };
   }, [audioContext, canvasRef]);
 
   return (

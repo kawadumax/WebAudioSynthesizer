@@ -1,11 +1,6 @@
-import { useReducer } from "react";
-import { SoundState, SoundStateAction, Tone } from "@/modules/Type";
-import { useSoundStatesEffect } from "./AudioBaseCircuit";
+import { SoundState, SoundStateAction } from "@/modules/Type";
 
-//stop時にはsoundStateを削除
-//start時には追加。既にあればそのまま。
-
-export const soundStateReducer = (
+const SoundStateReducer = (
   state: SoundState[],
   action: SoundStateAction
 ): SoundState[] => {
@@ -40,49 +35,4 @@ export const soundStateReducer = (
   }
 };
 
-export const useSoundStatesReducer = (
-  audioContext: AudioContext | null,
-  amplitude: GainNode | null
-) => {
-  const [soundStates, dispatch] = useReducer(soundStateReducer, []);
-  useSoundStatesEffect(audioContext, amplitude, soundStates);
-
-  const startOscillator = (tone: Tone) => {
-    console.log("dispatch start: ", tone);
-    dispatch({ type: "START", payload: tone });
-  };
-
-  const startOscillatorSome = (tones: Tone[]) => {
-    console.log("dispatch start some: ", tones);
-    dispatch({ type: "START_SOME", payload: tones });
-  };
-
-  const stopOscillator = (tone: Tone) => {
-    console.log("dispatch stop: ", tone);
-    dispatch({ type: "STOP", payload: tone });
-  };
-
-  const stopOscillatorExcept = (tone: Tone) => {
-    console.log("dispatch stop except for: ", tone);
-    dispatch({ type: "STOP_EXCEPT", payload: tone });
-  };
-
-  const stopOscillatorExcepts = (tones: Tone[]) => {
-    console.log("dispatch stop except for: ", tones);
-    dispatch({ type: "STOP_EXCEPTS", payload: tones });
-  };
-
-  const stopOscillatorAll = () => {
-    console.log("dispatch stop all:");
-    dispatch({ type: "STOP_ALL" });
-  };
-
-  return {
-    startOscillator,
-    startOscillatorSome,
-    stopOscillator,
-    stopOscillatorExcept,
-    stopOscillatorExcepts,
-    stopOscillatorAll,
-  };
-};
+export default SoundStateReducer;
