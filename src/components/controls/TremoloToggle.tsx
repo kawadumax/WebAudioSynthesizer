@@ -2,24 +2,16 @@ import React, { useState, useEffect, Component } from "react";
 import Led from "@parts/Led";
 import Toggle from "@parts/Toggle";
 import Label from "@parts/Label";
-import styles from "@styles/FXToggle.module.scss";
+import styles from "@styles/TremoloToggle.module.scss";
 
 interface Props {
   // onPower: (isToggled: boolean) => void;
 }
 
-const FXToggle = ({}: Props) => {
-  // const [power, setPower] = useState(false);
-  // const handlePower = () => {
-  //   setPower(!power);
-  // };
-
-  // useEffect(() => {
-  //   onPower(power);
-  // }, [power]);
+const TremoloToggle = ({ }: Props) => {
 
   return (
-    <div className={styles.FXToggle}>
+    <div className={styles.TremoloToggle}>
       <Label>Tremolo</Label>
 
       <Led className="fx-toggle-led" isActive={true}></Led>
@@ -28,4 +20,4 @@ const FXToggle = ({}: Props) => {
   );
 };
 
-export default FXToggle;
+export default TremoloToggle;

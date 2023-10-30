@@ -7,14 +7,14 @@ interface Position {
 }
 
 interface Props {
-  handleValueChange: (value: number) => void;
+  onChange: (value: number) => void;
   defaultValue?: number;
   maxValue?: number;
   minValue?: number;
 }
 
 const Knob = ({
-  handleValueChange,
+  onChange,
   defaultValue = 0.5,
   maxValue = 1,
   minValue = 0,
@@ -27,8 +27,16 @@ const Knob = ({
 
   const knobRef = useRef<SVGSVGElement>(null);
 
-  const minAngle = -120;
-  const maxAngle = 120;
+  const MIN_ANGLE = -120;
+  const MAX_ANGLE = 120;
+
+  useEffect(() => {
+    // defaut valueが何%に当たるかを計算する
+    const rate = (defaultValue - minValue) / (maxValue - minValue);
+    // その%がどれぐらいのangleに相当するか計算する
+    const newAngle = MIN_ANGLE + rate * (MAX_ANGLE - MIN_ANGLE);
+    setAngle(newAngle);
+  }, []);
 
   useEffect(() => {
     if (isDragging) {
@@ -36,7 +44,7 @@ const Knob = ({
       const newAngle = getAngle(currentPos);
       setAngle(newAngle);
       const newValue = getValue();
-      handleValueChange(newValue);
+      onChange(newValue);
     }
   }, [isDragging, angle, currentPos]);
 
@@ -87,15 +95,15 @@ const Knob = ({
       angle = Math.atan2(dx, -dy) * (180 / Math.PI);
     }
     // angleは-120 - 120の範囲とし、それを超える場合は上限値、下限値とする。
-    angle = angle >= maxAngle ? maxAngle : angle;
-    angle = angle <= minAngle ? minAngle : angle;
+    angle = angle >= MAX_ANGLE ? MAX_ANGLE : angle;
+    angle = angle <= MIN_ANGLE ? MIN_ANGLE : angle;
     return angle;
   };
 
   const getValue = () => {
     // 角度に応じてValueを返す。
     // 現在のAngleの重みを計算
-    const rateAngle = (angle - minAngle) / (maxAngle - minAngle);
+    const rateAngle = (angle - MIN_ANGLE) / (MAX_ANGLE - MIN_ANGLE);
     //重みを元に現在のvalueを計算
     const value = (maxValue - minValue) * rateAngle + minValue;
     return value;

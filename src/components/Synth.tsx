@@ -1,26 +1,31 @@
 import "@styles/Synth.scss";
-import GainKnob from "@components/controls/GainKnob";
-import FXFrequencyKnob from "./controls/FXFrequencyKnob";
-import FXDepthKnob from "./controls/FXDepthKnob";
-import FXToggle from "@components/controls/FXToggle";
+import MasterVolumeKnob from "@/components/controls/MasterVolumeKnob";
+import TremoloFrequencyKnob from "./controls/TremoloFrequencyKnob";
+import TremoloDepthKnob from "./controls/TremoloDepthKnob";
 import Keyboard from "@components/controls/Keyboard";
-import { useAudioContextProvider } from "@circuits/AudioContextCircuit/AudioContextProvider";
+import { useApplicationContext } from "@circuits/AudioCircuit/ApplicationContextProvider";
 import { KeyboardContextProvider } from "@circuits/KeyboardCircuit";
+import Oscilloscope from "./controls/Oscilloscope";
+import WaveformSelector from "./controls/WaveformSelector";
 
 const Synth = () => {
-  const { audioContext } = useAudioContextProvider();
+  const { audioContext } = useApplicationContext();
   const renderSynth = (audioContext: AudioContext | null) => {
     if (audioContext) {
       return (
         <>
           <div id="synth-controls">
             <div id="toremolo-unit">
-              <FXToggle></FXToggle>
-              <FXFrequencyKnob></FXFrequencyKnob>
-              <FXDepthKnob></FXDepthKnob>
+              {/* <TremoloToggle></TremoloToggle> */}
+              <TremoloFrequencyKnob></TremoloFrequencyKnob>
+              <TremoloDepthKnob></TremoloDepthKnob>
+            </div>
+            <div id="oscilloscope-unit">
+              <WaveformSelector></WaveformSelector>
+              <Oscilloscope></Oscilloscope>
             </div>
             <div id="global-unit">
-              <GainKnob></GainKnob>
+              <MasterVolumeKnob></MasterVolumeKnob>
             </div>
           </div>
           <KeyboardContextProvider>

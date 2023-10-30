@@ -3,9 +3,9 @@ import WhiteKey from "@parts/WhiteKey";
 import useKeyboardCircuit, {
   useKeyboardContext,
 } from "../circuits/KeyboardCircuit";
-import { Tone } from "../circuits/TypeCircuit";
+import { Tone } from "@/modules/Type";
 import { useEffect, useRef } from "react";
-import { containsPoint, Point } from "@utils/DomUtils";
+import { containsPoint, Point } from "@/modules/utils/DomUtils";
 interface Props {
   width?: number;
   height?: number;

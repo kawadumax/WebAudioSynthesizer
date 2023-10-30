@@ -1,6 +1,6 @@
 import { useContext, useState, createContext } from "react";
-import { Tone } from "./TypeCircuit";
-import { useAudioContextProvider } from "./AudioContextCircuit/AudioContextProvider";
+import { Tone } from "@/modules/Type";
+import { useApplicationContext } from "./AudioCircuit/ApplicationContextProvider";
 
 interface Props {
   children: React.ReactNode;
@@ -21,7 +21,7 @@ const useKeyboardCircuit = () => {
     stopOscillatorExcept,
     stopOscillatorExcepts,
     stopOscillatorAll,
-  } = useAudioContextProvider();
+  } = useApplicationContext();
   const toneNumberToFreq = (tone: number) => {
     //1オクターブで周波数が2倍なので、半音上がると2の十二乗根倍になる。
     //これを元に、48番目の音階であるA4=440hzを基準として計算で周波数を求める。

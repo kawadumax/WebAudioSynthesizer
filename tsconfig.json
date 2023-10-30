@@ -13,7 +13,7 @@
       "@circuits/*": ["src/components/circuits/*"],
       "@parts/*": ["src/components/parts/*"],
       "@controls/*":["src/components/controls/*"],
-      "@utils/*": ["src/utils/*"],
+      "@utils/*": ["src/modules/utils/*"],
       "@styles/*": ["src/styles/*"],
       "@assets/*": ["src/assets/*"],
     },

@@ -11,6 +11,8 @@ export interface Tone {
    * トーンの周波数
    */
   freq: number;
+
+  // type: Waveform;
 }
 
 /**
@@ -21,14 +23,11 @@ export interface Tone {
  * 一緒に格納するために使用されます。具体的には、以下のプロパティを持っています:
  *
  * - `tone`: {@link Tone} この音源の Tone
- * - `oscNode`: {@link OscillatorNode} 発音中の OscillatorNode
  *
  * @property tone この音源の Tone
- * @property oscillator 発音中の OscillatorNode
  */
 export type SoundState = {
   tone: Tone;
-  // oscillator?: OscillatorNode | null;
   isStarted: boolean;
   isEnded?: boolean;
 };
@@ -36,7 +35,7 @@ export type SoundState = {
 export type OscillatorState = {
   tone: Tone;
   oscillator: OscillatorNode;
-}
+};
 
 export type OscillatorStates = OscillatorState[];
 
@@ -46,5 +45,30 @@ export type SoundStateAction =
   | { type: "STOP"; payload: Tone }
   | { type: "STOP_EXCEPT"; payload: Tone }
   | { type: "STOP_EXCEPTS"; payload: Tone[] }
-  | { type: "STOP_ALL" }
-  // | { type: "CLEAR"; payload: Tone };
+  | { type: "STOP_ALL" };
+// | { type: "CLEAR"; payload: Tone };
+
+export type Waveform = "sine" | "square" | "sawtooth" | "triangle";
+
+export type SoundStateActionDispatchers = {
+  startOscillator: (tone: Tone) => void;
+  startOscillatorSome: (tones: Tone[]) => void;
+  stopOscillator: (tone: Tone) => void;
+  stopOscillatorExcept: (tone: Tone) => void;
+  stopOscillatorExcepts: (tones: Tone[]) => void;
+  stopOscillatorAll: () => void;
+};
+
+export type ApplicationContextProperties = {
+  audioContext: AudioContext;
+  amplitude: GainNode;
+  masterVolume: GainNode;
+  depth: GainNode;
+  lfo: OscillatorNode;
+  analyser: AnalyserNode;
+  waveform: Waveform;
+  setWaveform: React.Dispatch<React.SetStateAction<Waveform>>;
+};
+
+export type ApplicationContextType = SoundStateActionDispatchers &
+  ApplicationContextProperties;

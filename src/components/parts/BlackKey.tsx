@@ -1,4 +1,4 @@
-import { Tone } from "@circuits/TypeCircuit";
+import { Tone } from "@/modules/Type";
 import Key from "./Key";
 
 interface Props {
