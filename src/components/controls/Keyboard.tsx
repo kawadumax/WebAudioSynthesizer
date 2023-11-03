@@ -85,7 +85,7 @@ const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
     return naturalTones[touchedKeyOrder];
   };
 
-  const processToneAtPoint = (event: TouchEvent) => {
+  const processToneAtPoint = (event: React.TouchEvent) => {
     event.preventDefault();
     const touchedTone = getTone({
       x: event.touches[0].clientX,
@@ -98,7 +98,7 @@ const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
     }
   };
 
-  const processToneAtPoints = (event: TouchEvent) => {
+  const processToneAtPoints = (event: React.TouchEvent) => {
     event.preventDefault();
     const touchedTones = Array.from(event.touches)
       .map((t) => getTone({ x: t.clientX, y: t.clientY }))
@@ -112,47 +112,70 @@ const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
     }
   };
 
-  const handleMousePressed = (event: MouseEvent | TouchEvent) => {
+  // const handleMousePressed = (event: MouseEvent | TouchEvent) => {
+  //   event.preventDefault();
+  //   setIsKeyPressed(true);
+  // };
+
+  // const handleMouseReleased = (event: MouseEvent | TouchEvent) => {
+  //   event.preventDefault();
+  //   setIsKeyPressed(false);
+  // };
+
+  // const handleTouchStart = (event: TouchEvent) => {
+  //   processToneAtPoints(event);
+  // };
+
+  // const handleTouchMove = (event: TouchEvent) => {
+  //   processToneAtPoints(event);
+  // };
+
+  // const handleTouchEnd = (event: TouchEvent) => {
+  //   event.preventDefault();
+  //   handleStopAllSound();
+  // };
+
+  const handleMousePressed = (event: React.MouseEvent | React.TouchEvent) => {
     event.preventDefault();
     setIsKeyPressed(true);
   };
 
-  const handleMouseReleased = (event: MouseEvent | TouchEvent) => {
+  const handleMouseReleased = (event: React.MouseEvent | React.TouchEvent) => {
     event.preventDefault();
     setIsKeyPressed(false);
   };
 
-  const handleTouchStart = (event: TouchEvent) => {
+  const handleTouchStart = (event: React.TouchEvent) => {
     processToneAtPoints(event);
   };
 
-  const handleTouchMove = (event: TouchEvent) => {
+  const handleTouchMove = (event: React.TouchEvent) => {
     processToneAtPoints(event);
   };
 
-  const handleTouchEnd = (event: TouchEvent) => {
+  const handleTouchEnd = (event: React.TouchEvent) => {
     event.preventDefault();
     handleStopAllSound();
   };
 
-  useEffect(() => {
-    document.addEventListener("mousedown", handleMousePressed);
-    document.addEventListener("mouseup", handleMouseReleased);
-    //event.preventDefault()と{ passive: false }の組み合わせでスクロールも無効化できる。
-    document.addEventListener("touchmove", handleTouchMove, { passive: false });
-    document.addEventListener("touchstart", handleTouchStart, {
-      passive: false,
-    });
-    document.addEventListener("touchend", handleTouchEnd, { passive: false });
+  // useEffect(() => {
+  //   document.addEventListener("mousedown", handleMousePressed);
+  //   document.addEventListener("mouseup", handleMouseReleased);
+  //   //event.preventDefault()と{ passive: false }の組み合わせでスクロールも無効化できる。
+  //   document.addEventListener("touchmove", handleTouchMove, { passive: false });
+  //   document.addEventListener("touchstart", handleTouchStart, {
+  //     passive: false,
+  //   });
+  //   document.addEventListener("touchend", handleTouchEnd, { passive: false });
 
-    return () => {
-      document.removeEventListener("mousedown", handleMousePressed);
-      document.removeEventListener("mouseup", handleMouseReleased);
-      document.removeEventListener("touchmove", handleTouchMove);
-      document.removeEventListener("touchstart", handleTouchStart);
-      document.removeEventListener("touchend", handleTouchEnd);
-    };
-  }, []);
+  //   return () => {
+  //     document.removeEventListener("mousedown", handleMousePressed);
+  //     document.removeEventListener("mouseup", handleMouseReleased);
+  //     document.removeEventListener("touchmove", handleTouchMove);
+  //     document.removeEventListener("touchstart", handleTouchStart);
+  //     document.removeEventListener("touchend", handleTouchEnd);
+  //   };
+  // }, []);
 
   const createKeyProps = (index: number, x: number, tone: Tone) => ({
     key: index,
@@ -209,6 +232,11 @@ const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
       height="100%"
       viewBox={"0 0 " + SVG_WIDTH + " " + SVG_HEIGHT}
       ref={refSVG}
+      onMouseDown={handleMousePressed}
+      onMouseUp={handleMouseReleased}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
     >
       {renderWhiteKeys()}
       {renderBlackKeys()}
