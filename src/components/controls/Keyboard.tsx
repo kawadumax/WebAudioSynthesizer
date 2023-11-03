@@ -4,7 +4,7 @@ import useKeyboardCircuit, {
   useKeyboardContext,
 } from "../circuits/KeyboardCircuit";
 import { Tone } from "@/modules/Type";
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
 import { containsPoint, Point } from "@/modules/utils/DomUtils";
 interface Props {
   width?: number;
@@ -112,29 +112,6 @@ const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
     }
   };
 
-  // const handleMousePressed = (event: MouseEvent | TouchEvent) => {
-  //   event.preventDefault();
-  //   setIsKeyPressed(true);
-  // };
-
-  // const handleMouseReleased = (event: MouseEvent | TouchEvent) => {
-  //   event.preventDefault();
-  //   setIsKeyPressed(false);
-  // };
-
-  // const handleTouchStart = (event: TouchEvent) => {
-  //   processToneAtPoints(event);
-  // };
-
-  // const handleTouchMove = (event: TouchEvent) => {
-  //   processToneAtPoints(event);
-  // };
-
-  // const handleTouchEnd = (event: TouchEvent) => {
-  //   event.preventDefault();
-  //   handleStopAllSound();
-  // };
-
   const handleMousePressed = (event: React.MouseEvent | React.TouchEvent) => {
     event.preventDefault();
     setIsKeyPressed(true);
@@ -157,25 +134,6 @@ const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
     event.preventDefault();
     handleStopAllSound();
   };
-
-  // useEffect(() => {
-  //   document.addEventListener("mousedown", handleMousePressed);
-  //   document.addEventListener("mouseup", handleMouseReleased);
-  //   //event.preventDefault()と{ passive: false }の組み合わせでスクロールも無効化できる。
-  //   document.addEventListener("touchmove", handleTouchMove, { passive: false });
-  //   document.addEventListener("touchstart", handleTouchStart, {
-  //     passive: false,
-  //   });
-  //   document.addEventListener("touchend", handleTouchEnd, { passive: false });
-
-  //   return () => {
-  //     document.removeEventListener("mousedown", handleMousePressed);
-  //     document.removeEventListener("mouseup", handleMouseReleased);
-  //     document.removeEventListener("touchmove", handleTouchMove);
-  //     document.removeEventListener("touchstart", handleTouchStart);
-  //     document.removeEventListener("touchend", handleTouchEnd);
-  //   };
-  // }, []);
 
   const createKeyProps = (index: number, x: number, tone: Tone) => ({
     key: index,
