@@ -53,7 +53,7 @@ const Knob = ({
     }
   };
 
-  const handleMouseDownAndTouchStart = (event: React.MouseEvent | React.TouchEvent) => {
+  const handleMouseDownAndTouchStart = (event: MouseEvent | TouchEvent) => {
     event.preventDefault();
     setIsDragging(true);
     setCurrentPos(getClientCoordinates(event));
@@ -70,6 +70,14 @@ const Knob = ({
     event.preventDefault();
     setIsDragging(false);
   };
+
+  const initAngle = () => {
+    // defaut valueが何%に当たるかを計算する
+    const rate = (defaultValue - minValue) / (maxValue - minValue);
+    // その%がどれぐらいのangleに相当するか計算する
+    const newAngle = MIN_ANGLE + rate * (MAX_ANGLE - MIN_ANGLE);
+    setAngle(newAngle);
+  }
 
   const getAngle = (currentPos: Position) => {
     let angle = 0;
@@ -88,7 +96,7 @@ const Knob = ({
     return angle;
   };
 
-  const getValue = () => {
+  const getValue = (angle: number) => {
     // 角度に応じてValueを返す。
     // 現在のAngleの重みを計算
     const rateAngle = (angle - MIN_ANGLE) / (MAX_ANGLE - MIN_ANGLE);
@@ -98,18 +106,21 @@ const Knob = ({
   };
 
   useEffect(() => {
-    // defaut valueが何%に当たるかを計算する
-    const rate = (defaultValue - minValue) / (maxValue - minValue);
-    // その%がどれぐらいのangleに相当するか計算する
-    const newAngle = MIN_ANGLE + rate * (MAX_ANGLE - MIN_ANGLE);
-    setAngle(newAngle);
+    initAngle();
+    const current = knobRef.current;
+    current?.addEventListener("mousedown", handleMouseDownAndTouchStart, { passive: false });
+    current?.addEventListener("touchstart", handleMouseDownAndTouchStart, { passive: false });
+    return (() => {
+      current?.removeEventListener("mousedown", handleMouseDownAndTouchStart);
+      current?.removeEventListener("touchstart", handleMouseDownAndTouchStart);
+    })
   }, []);
 
   useEffect(() => {
     if (isDragging) {
       const newAngle = getAngle(currentPos);
       setAngle(newAngle);
-      const newValue = getValue();
+      const newValue = getValue(newAngle);
       onChange(newValue);
     }
   }, [isDragging, currentPos]);
@@ -119,14 +130,14 @@ const Knob = ({
     if (isDragging) {
       document.addEventListener("mousemove", handleMouseMoveAndTouchMove, { passive: false });
       document.addEventListener("touchmove", handleMouseMoveAndTouchMove, { passive: false });
-      document.addEventListener("mouseup", handleMouseUpAndTouchEnd);
-      document.addEventListener("touchstart", handleMouseUpAndTouchEnd);
+      document.addEventListener("mouseup", handleMouseUpAndTouchEnd, { passive: false });
+      document.addEventListener("touchend", handleMouseUpAndTouchEnd, { passive: false });
     }
     return () => {
       document.removeEventListener("mousemove", handleMouseMoveAndTouchMove);
       document.removeEventListener("touchmove", handleMouseMoveAndTouchMove);
       document.removeEventListener("mouseup", handleMouseUpAndTouchEnd);
-      document.removeEventListener("touchstart", handleMouseUpAndTouchEnd);
+      document.removeEventListener("touchend", handleMouseUpAndTouchEnd);
     };
   }, [isDragging]);
 
@@ -137,8 +148,6 @@ const Knob = ({
       width={width}
       height={height}
       viewBox={"0 0 " + width + " " + height}
-      onMouseDown={handleMouseDownAndTouchStart}
-      onTouchStart={handleMouseDownAndTouchStart}
     >
       <circle
         cx={knobCenterPos.x}
