@@ -117,8 +117,8 @@ const Knob = ({
   // 移動のイベントはdocumentから取ることでSVGの領域を超えてノブを動かせる
   useEffect(() => {
     if (isDragging) {
-      document.addEventListener("mousemove", handleMouseMoveAndTouchMove);
-      document.addEventListener("touchmove", handleMouseMoveAndTouchMove);
+      document.addEventListener("mousemove", handleMouseMoveAndTouchMove, { passive: false });
+      document.addEventListener("touchmove", handleMouseMoveAndTouchMove, { passive: false });
       document.addEventListener("mouseup", handleMouseUpAndTouchEnd);
       document.addEventListener("touchstart", handleMouseUpAndTouchEnd);
     }
