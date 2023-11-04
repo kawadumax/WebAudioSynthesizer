@@ -1,9 +1,5 @@
-import React from "react";
 import { Tone } from "@/modules/Type";
 import "@styles/Key.scss";
-import useKeyboardCircuit, {
-  useKeyboardContext,
-} from "@circuits/KeyboardCircuit";
 
 interface Props {
   className?: string;
@@ -14,14 +10,9 @@ interface Props {
   height: number;
   index: number;
   tone: Tone;
+  hover?: boolean;
 }
-const Key = ({ className, keyColor, x, y, width, height, tone }: Props) => {
-  const { handleStartSound, handleStopSound } = useKeyboardCircuit();
-  const keyboardContext = useKeyboardContext();
-  if (!keyboardContext) {
-    throw new Error("KeyboardContext is not provided.");
-  }
-  const { isKeyPressed } = keyboardContext;
+const Key = ({ className, keyColor, x, y, width, height, tone, hover = false }: Props) => {
   const WHITE_WIDTH = width;
   const WHITE_HEIGHT = height;
   const BLACK_WIDTH = (WHITE_WIDTH * 3) / 4;
@@ -33,38 +24,10 @@ const Key = ({ className, keyColor, x, y, width, height, tone }: Props) => {
 
   const transform = `translate(${x}, ${y})`;
 
-  const handleMouseDown = (
-    event: React.MouseEvent<SVGGElement, MouseEvent>
-  ) => {
-    event.preventDefault();
-    handleStartSound(tone);
-  };
-
-  const handleMouseUp = (event: React.MouseEvent<SVGGElement, MouseEvent>) => {
-    event.preventDefault();
-    handleStopSound(tone);
-  };
-
-  const handleMouseEnter = () => {
-    if (isKeyPressed) {
-      handleStartSound(tone);
-    }
-  };
-
-  const handleMouseLeave = () => {
-    if (isKeyPressed) {
-      handleStopSound(tone);
-    }
-  };
-
   return (
     <g
-      className="key"
+      className={"key" + (hover ? "hover" : "")}
       transform={transform}
-      onMouseDown={handleMouseDown}
-      onMouseUp={handleMouseUp}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
     >
       <rect
         className={className + keyColor}

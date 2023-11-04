@@ -4,7 +4,7 @@ import useKeyboardCircuit, {
   useKeyboardContext,
 } from "../circuits/KeyboardCircuit";
 import { Tone } from "@/modules/Type";
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { containsPoint, Point } from "@/modules/utils/DomUtils";
 interface Props {
   width?: number;
@@ -19,7 +19,7 @@ const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
   if (!keyboardContext) {
     throw new Error("KeyboardContext is not provided.");
   }
-  const { setIsKeyPressed } = keyboardContext;
+  const { isKeyPressed, setIsKeyPressed } = keyboardContext;
   const {
     makeSequencedKeys,
     handleStartSound,
@@ -40,21 +40,17 @@ const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
   const KEYBOARD_HEIGHT = height ? height : 100;
   const KEY_WIDTH = KEYBOARD_WIDTH / naturalTones.length;
 
-  const getTone = (position: Point): Tone | undefined => {
+  const getTones = (position: Point): Tone | undefined => {
     const keyboardSVG = refSVG.current;
     if (
-      !keyboardSVG ||
-      !containsPoint(keyboardSVG.getBoundingClientRect(), position)
+      keyboardSVG &&
+      containsPoint(keyboardSVG.getBoundingClientRect(), position)
     ) {
-      //////キーボードがない、またはキーボードの範囲内にポインタがないとき、早期リターン
-      return;
+      return getBlackTones(keyboardSVG, position) || getWhiteTones(keyboardSVG, position);
     }
-    return (
-      getBlackTone(keyboardSVG, position) || getWhiteTone(keyboardSVG, position)
-    );
   };
 
-  const getBlackTone = (
+  const getBlackTones = (
     svg: SVGSVGElement,
     position: Point
   ): Tone | undefined => {
@@ -65,6 +61,7 @@ const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
       //タッチのy座標がキーボードの下半分にあるとき、早期リターン
       return;
     }
+
     const touchedKeyIndex = blackKeyRects.findIndex((rect) => {
       return containsPoint(rect, position);
     });
@@ -72,7 +69,7 @@ const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
     return accidentalTones[touchedKeyIndex];
   };
 
-  const getWhiteTone = (
+  const getWhiteTones = (
     svg: SVGSVGElement,
     position: Point
   ): Tone | undefined => {
@@ -85,11 +82,11 @@ const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
     return naturalTones[touchedKeyOrder];
   };
 
-  const processToneAtPoint = (event: React.TouchEvent) => {
+  const processToneAtPoint = (event: MouseEvent) => {
     event.preventDefault();
-    const touchedTone = getTone({
-      x: event.touches[0].clientX,
-      y: event.touches[0].clientY,
+    const touchedTone = getTones({
+      x: event.clientX,
+      y: event.clientY,
     });
     if (touchedTone) {
       handleStartAndStopExceptSound(touchedTone);
@@ -98,10 +95,10 @@ const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
     }
   };
 
-  const processToneAtPoints = (event: React.TouchEvent) => {
+  const processToneAtPoints = (event: TouchEvent) => {
     event.preventDefault();
     const touchedTones = Array.from(event.touches)
-      .map((t) => getTone({ x: t.clientX, y: t.clientY }))
+      .map((t) => getTones({ x: t.clientX, y: t.clientY }))
       .filter(Boolean) as Tone[];
 
     if (touchedTones.length > 0) {
@@ -112,28 +109,62 @@ const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
     }
   };
 
-  const handleMousePressed = (event: React.MouseEvent | React.TouchEvent) => {
+  const handleMousePressed = (event: MouseEvent) => {
     event.preventDefault();
     setIsKeyPressed(true);
+    processToneAtPoint(event);
   };
 
-  const handleMouseReleased = (event: React.MouseEvent | React.TouchEvent) => {
+  const handleTouchStart = (event: TouchEvent) => {
+    event.preventDefault();
+    setIsKeyPressed(true);
+    processToneAtPoints(event);
+  };
+
+  const handleTouchMove = (event: TouchEvent) => {
+    processToneAtPoints(event);
+  };
+
+  const handleMouseMove = (event: MouseEvent) => {
+    processToneAtPoint(event);
+  }
+
+  const handleTouchEnd = (event: TouchEvent) => {
     event.preventDefault();
     setIsKeyPressed(false);
-  };
-
-  const handleTouchStart = (event: React.TouchEvent) => {
-    processToneAtPoints(event);
-  };
-
-  const handleTouchMove = (event: React.TouchEvent) => {
-    processToneAtPoints(event);
-  };
-
-  const handleTouchEnd = (event: React.TouchEvent) => {
-    event.preventDefault();
     handleStopAllSound();
   };
+
+  const handleMouseReleased = (event: MouseEvent) => {
+    event.preventDefault();
+    setIsKeyPressed(false);
+    handleStopAllSound();
+  };
+
+  useEffect(() => {
+    const current = refSVG.current;
+    current?.addEventListener("mousedown", handleMousePressed, { passive: false });
+    current?.addEventListener("touchstart", handleTouchStart, { passive: false });
+    return () => {
+      current?.removeEventListener("mousedown", handleMousePressed);
+      current?.removeEventListener("touchstart", handleTouchStart);
+    }
+  }, [])
+
+  useEffect(() => {
+    if (isKeyPressed) {
+      document.addEventListener("mousemove", handleMouseMove, { passive: false });
+      document.addEventListener("touchmove", handleTouchMove, { passive: false });
+      document.addEventListener("mouseup", handleMouseReleased, { passive: false });
+      document.addEventListener("touchend", handleTouchEnd, { passive: false });
+    }
+    return () => {
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("touchmove", handleTouchMove);
+      document.removeEventListener("mouseup", handleMouseReleased);
+      document.removeEventListener("touchend", handleTouchEnd);
+    }
+  }, [isKeyPressed]);
 
   const createKeyProps = (index: number, x: number, tone: Tone) => ({
     key: index,
@@ -142,9 +173,8 @@ const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
     width: KEY_WIDTH,
     height: KEYBOARD_HEIGHT,
     index,
-    onKeyPressed: handleStartSound,
-    onKeyReleased: handleStopSound,
     tone,
+    hover: false
   });
 
   const renderWhiteKeys = () => {
@@ -190,11 +220,6 @@ const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
       height="100%"
       viewBox={"0 0 " + SVG_WIDTH + " " + SVG_HEIGHT}
       ref={refSVG}
-      onMouseDown={handleMousePressed}
-      onMouseUp={handleMouseReleased}
-      onTouchStart={handleTouchStart}
-      onTouchMove={handleTouchMove}
-      onTouchEnd={handleTouchEnd}
     >
       {renderWhiteKeys()}
       {renderBlackKeys()}

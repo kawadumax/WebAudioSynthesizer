@@ -10,8 +10,7 @@ interface Props {
   height: number;
   index: number;
   tone: Tone;
-  onKeyPressed?: (tone: Tone) => void;
-  onKeyReleased?: (tone: Tone) => void;
+  hover?: boolean;
 }
 
 const WhiteKey = (props: Props) => {
