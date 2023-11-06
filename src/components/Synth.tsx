@@ -4,7 +4,7 @@ import TremoloFrequencyKnob from "./controls/TremoloFrequencyKnob";
 import TremoloDepthKnob from "./controls/TremoloDepthKnob";
 import Keyboard from "@components/controls/Keyboard";
 import { useApplicationContext } from "@circuits/AudioCircuit/ApplicationContextProvider";
-import { KeyboardContextProvider } from "@circuits/KeyboardCircuit";
+import KeyboardContextProvider from "./circuits/KeyboardCircuit/KeyboardContextProvider";
 import Oscilloscope from "./controls/Oscilloscope";
 import WaveformSelector from "./controls/WaveformSelector";
 

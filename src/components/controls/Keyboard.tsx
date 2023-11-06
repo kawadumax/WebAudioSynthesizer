@@ -1,12 +1,14 @@
 import BlackKey from "@parts/BlackKey";
 import WhiteKey from "@parts/WhiteKey";
-import useKeyboardCircuit, {
-  useKeyboardContext,
-} from "../circuits/KeyboardCircuit";
+import { useKeyboardContext } from "../circuits/KeyboardCircuit/KeyboardContextProvider";
+import {
+  SoundHandlers,
+  makeSequencedKeys,
+} from "../circuits/KeyboardCircuit/KeyboardCircuit";
 import { Tone } from "@/modules/Type";
 import React, { useState, useEffect, useRef, useMemo } from "react";
-import { containsPoint, mapToDOMRects, Point, splitArray, findRectIndex } from "@/modules/utils/DomUtils";
-import Key from "../parts/Key";
+import { Point } from "@/modules/utils/DomUtils";
+
 interface Props {
   width?: number;
   height?: number;
@@ -15,100 +17,31 @@ interface Props {
 
 const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
   const keyboardContext = useKeyboardContext();
-  const [touchedKeys, setTouchedKeys] = useState<Element[]>([]);
-  const refSVG = useRef<SVGSVGElement>(null);
-
   if (!keyboardContext) {
     throw new Error("KeyboardContext is not provided.");
   }
   const { isKeyPressed, setIsKeyPressed } = keyboardContext;
-  const {
-    makeSequencedKeys,
-    handleStartSound,
-    handleStartSomeSounds,
-    handleStopSound,
-    handleStopAllSound,
-    handleStopExcepts,
-    handleStartAndStopExceptSound,
-  } = useKeyboardCircuit();
+  const [touchedKeys, setTouchedKeys] = useState<Element[]>([]);
+  const refSVG = useRef<SVGSVGElement>(null);
+
   const startKey = 44;
   const endKey = startKey + numOfKeys;
-  const { naturalTones, accidentalTones } = makeSequencedKeys(startKey, endKey);
+  const { rangedWholeTones, rangedNaturalTones, rangedAccidentalTones } =
+    makeSequencedKeys(startKey, endKey);
 
   const Padding = 10;
   const SVG_WIDTH = (width ? width : 200) + Padding;
   const SVG_HEIGHT = (height ? height : 100) + Padding;
   const KEYBOARD_WIDTH = width ? width : 200;
   const KEYBOARD_HEIGHT = height ? height : 100;
-  const KEY_WIDTH = KEYBOARD_WIDTH / naturalTones.length;
-
-  const getTones = (position: Point): Tone | undefined => {
-    const keyboardSVG = refSVG.current;
-    if (
-      keyboardSVG &&
-      containsPoint(keyboardSVG.getBoundingClientRect(), position)
-    ) {
-      return getBlackTones(keyboardSVG, position) || getWhiteTones(keyboardSVG, position);
-    }
-  };
-
-  const getBlackTones = (
-    svg: SVGSVGElement,
-    position: Point
-  ): Tone | undefined => {
-    const keys = svg.children;
-    const keyRects = Array.from(keys).map((key) => key.getBoundingClientRect());
-    const blackKeyRects = keyRects.slice(naturalTones.length);
-    if (position.y > blackKeyRects[0].bottom) {
-      //タッチのy座標がキーボードの下半分にあるとき、早期リターン
-      return;
-    }
-
-    const touchedKeyIndex = blackKeyRects.findIndex((rect) => {
-      return containsPoint(rect, position);
-    });
-
-    return accidentalTones[touchedKeyIndex];
-  };
-
-  const getWhiteTones = (
-    svg: SVGSVGElement,
-    position: Point
-  ): Tone | undefined => {
-    const keyboardRect = svg.getBoundingClientRect();
-    const scaledWhiteKeyWidth = keyboardRect.width / naturalTones.length;
-    // タッチの座標が各鍵盤のどの領域にあるのかを判定する。
-    const touchedKeyOrder = Math.floor(
-      (position.x - keyboardRect.left) / scaledWhiteKeyWidth
-    );
-    return naturalTones[touchedKeyOrder];
-  };
-
-  const getKeys = (point: Point): Element | undefined => {
-    const svg = refSVG.current;
-    if (!svg) return;
-    const keys = svg.children;
-    const keyRects = mapToDOMRects(keys);
-    const [whiteKeyRects, blackKeyRects] = splitArray(keyRects, naturalTones.length);
-    const index = findRectIndex(blackKeyRects, point) || findRectIndex(whiteKeyRects, point);
-    if (!index) return;
-    return keys[index];
-  }
-
-  const getTone = (key: Element): Tone => {
-    return;
-  }
+  const KEY_WIDTH = KEYBOARD_WIDTH / rangedNaturalTones.length;
 
   const processToneAtPoint = (event: MouseEvent) => {
     event.preventDefault();
     const point = {
       x: event.clientX,
-      y: event.clientY
+      y: event.clientY,
     };
-    // const touchedKey = getKey(point);
-    // setTouchedKeys(touchedKey)
-    // if (!touchedKey) return;
-    // // touchedKey.classList.add("hover");
     const touchedTone = getTones(point);
     if (touchedTone) {
       handleStartAndStopExceptSound(touchedTone);
@@ -119,14 +52,19 @@ const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
 
   const processToneAtPoints = (event: TouchEvent) => {
     event.preventDefault();
-    const p = { x: t.clientX, y: t.clientY };
-    const touchedKey = getKey(point);
-    setTouchedKeys(touchedKey)
-    if (!touchedKey) return;
-    // // touchedKey.classList.add("hover");
-    // const touchedTones = Array.from(event.touches)
-    //   .map((t) => getTones({ x: t.clientX, y: t.clientY }))
-    //   .filter(Boolean) as Tone[];
+    const svg = refSVG.current;
+    if (!svg) return [];
+    const keys = svg.children;
+    const points = Array.prototype.map.call(event.touches, (t: Touch) => ({
+      x: t.clientX,
+      y: t.clientY,
+    })) as Point[];
+    const touchedKeyIndexes = getKeyIndexes(keys, points);
+    if (!touchedKeyIndexes) return;
+    const touchedkeys = touchedKeyIndexes.map((index) => {
+      return keys[index];
+    });
+    setTouchedKeys(touchedKeys);
 
     // if (touchedTones.length > 0) {
     //   handleStartSomeSounds(touchedTones);
@@ -144,8 +82,17 @@ const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
       for (const key of touchedKeys) {
         key.classList.remove("hover");
       }
-    }
+    };
   }, [touchedKeys]);
+
+  const {
+    handleStartSound,
+    handleStartSomeSounds,
+    handleStopSound,
+    handleStopAllSound,
+    handleStopExcepts,
+    handleStartAndStopExceptSound,
+  } = SoundHandlers;
 
   const handleMousePressed = (event: MouseEvent) => {
     event.preventDefault();
@@ -165,7 +112,7 @@ const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
 
   const handleMouseMove = (event: MouseEvent) => {
     processToneAtPoint(event);
-  }
+  };
 
   const handleTouchEnd = (event: TouchEvent) => {
     event.preventDefault();
@@ -181,19 +128,29 @@ const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
 
   useEffect(() => {
     const current = refSVG.current;
-    current?.addEventListener("mousedown", handleMousePressed, { passive: false });
-    current?.addEventListener("touchstart", handleTouchStart, { passive: false });
+    current?.addEventListener("mousedown", handleMousePressed, {
+      passive: false,
+    });
+    current?.addEventListener("touchstart", handleTouchStart, {
+      passive: false,
+    });
     return () => {
       current?.removeEventListener("mousedown", handleMousePressed);
       current?.removeEventListener("touchstart", handleTouchStart);
-    }
-  }, [])
+    };
+  }, []);
 
   useEffect(() => {
     if (isKeyPressed) {
-      document.addEventListener("mousemove", handleMouseMove, { passive: false });
-      document.addEventListener("touchmove", handleTouchMove, { passive: false });
-      document.addEventListener("mouseup", handleMouseReleased, { passive: false });
+      document.addEventListener("mousemove", handleMouseMove, {
+        passive: false,
+      });
+      document.addEventListener("touchmove", handleTouchMove, {
+        passive: false,
+      });
+      document.addEventListener("mouseup", handleMouseReleased, {
+        passive: false,
+      });
       document.addEventListener("touchend", handleTouchEnd, { passive: false });
     }
     return () => {
@@ -201,7 +158,7 @@ const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
       document.removeEventListener("touchmove", handleTouchMove);
       document.removeEventListener("mouseup", handleMouseReleased);
       document.removeEventListener("touchend", handleTouchEnd);
-    }
+    };
   }, [isKeyPressed]);
 
   const createKeyProps = (index: number, x: number, tone: Tone) => ({
@@ -212,7 +169,7 @@ const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
     height: KEYBOARD_HEIGHT,
     index,
     tone,
-    hover: false
+    hover: false,
   });
 
   const renderWhiteKeys = () => {
