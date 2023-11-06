@@ -1,12 +1,5 @@
 import { useApplicationContext } from "../AudioCircuit/ApplicationContextProvider";
 import { Tone } from "@/modules/Type";
-import {
-  containsPoint,
-  mapToDOMRects,
-  Point,
-  splitArray,
-  findRectIndex,
-} from "@/modules/utils/DomUtils";
 
 const toneNumberToFreq = (tone: number) => {
   //1オクターブで周波数が2倍なので、半音上がると2の十二乗根倍になる。
@@ -77,111 +70,6 @@ export const makeSequencedKeys = (startIndex: number, endIndex: number) => {
     return tone.name.length >= 3;
   });
   return { rangedWholeTones, rangedNaturalTones, rangedAccidentalTones };
-};
-
-const getBlackTone = (
-  keyElements: Element[],
-  position: Point
-): Tone | undefined => {
-  return (
-    getBlackTone(keyboardSVG, position) || getWhiteTone(keyboardSVG, position)
-  );
-};
-
-const getBlackTone = (
-  svg: SVGSVGElement,
-  position: Point
-): Tone | undefined => {
-  const keys = svg.children;
-  const keyRects = Array.from(keys).map((key) => key.getBoundingClientRect());
-  const blackKeyRects = keyRects.slice(naturalTones.length);
-  if (position.y > blackKeyRects[0].bottom) {
-    //タッチのy座標がキーボードの下半分にあるとき、早期リターン
-    return;
-  }
-
-  const touchedKeyIndex = blackKeyRects.findIndex((rect) => {
-    return containsPoint(rect, position);
-  });
-
-  return accidentalTones[touchedKeyIndex];
-};
-
-const getWhiteTone = (
-  svg: SVGSVGElement,
-  position: Point
-): Tone | undefined => {
-  const keyboardRect = svg.getBoundingClientRect();
-  const scaledWhiteKeyWidth = keyboardRect.width / naturalTones.length;
-  // タッチの座標が各鍵盤のどの領域にあるのかを判定する。
-  const touchedKeyOrder = Math.floor(
-    (position.x - keyboardRect.left) / scaledWhiteKeyWidth
-  );
-  return naturalTones[touchedKeyOrder];
-};
-
-const getTones = (position: Point): Tone | undefined => {
-  const keyboardSVG = refSVG.current;
-  if (
-    keyboardSVG &&
-    containsPoint(keyboardSVG.getBoundingClientRect(), position)
-  ) {
-    return (
-      getBlackTones(keyboardSVG, position) ||
-      getWhiteTones(keyboardSVG, position)
-    );
-  }
-};
-
-const getBlackTones = (
-  svg: SVGSVGElement,
-  position: Point
-): Tone | undefined => {
-  const keys = svg.children;
-  const keyRects = Array.from(keys).map((key) => key.getBoundingClientRect());
-  const blackKeyRects = keyRects.slice(naturalTones.length);
-  if (position.y > blackKeyRects[0].bottom) {
-    //タッチのy座標がキーボードの下半分にあるとき、早期リターン
-    return;
-  }
-
-  const touchedKeyIndex = blackKeyRects.findIndex((rect) => {
-    return containsPoint(rect, position);
-  });
-
-  return accidentalTones[touchedKeyIndex];
-};
-
-const getWhiteTones = (
-  svg: SVGSVGElement,
-  position: Point
-): Tone | undefined => {
-  const keyboardRect = svg.getBoundingClientRect();
-  const scaledWhiteKeyWidth = keyboardRect.width / naturalTones.length;
-  // タッチの座標が各鍵盤のどの領域にあるのかを判定する。
-  const touchedKeyOrder = Math.floor(
-    (position.x - keyboardRect.left) / scaledWhiteKeyWidth
-  );
-  return naturalTones[touchedKeyOrder];
-};
-
-const getKeyIndexes = (keys: HTMLCollection, points: Point[]): number[] => {
-  const keyRects = mapToDOMRects(keys);
-  const [whiteKeyRects, blackKeyRects] = splitArray(
-    keyRects,
-    naturalTones.length
-  );
-
-  const touchedKeyIndexes = points
-    .map((point) => {
-      return (
-        findRectIndex(blackKeyRects, point) ||
-        findRectIndex(whiteKeyRects, point)
-      );
-    })
-    .filter((index) => index !== undefined) as number[];
-  if (!touchedKeyIndexes) return [];
-  return touchedKeyIndexes;
 };
 
 const {
