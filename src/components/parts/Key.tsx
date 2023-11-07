@@ -12,7 +12,16 @@ interface Props {
   tone: Tone;
   hover?: boolean;
 }
-const Key = ({ className, keyColor, x, y, width, height, tone, hover = false }: Props) => {
+const Key = ({
+  className,
+  keyColor,
+  x,
+  y,
+  width,
+  height,
+  tone,
+  hover = false,
+}: Props) => {
   const WHITE_WIDTH = width;
   const WHITE_HEIGHT = height;
   const BLACK_WIDTH = (WHITE_WIDTH * 3) / 4;
@@ -25,10 +34,7 @@ const Key = ({ className, keyColor, x, y, width, height, tone, hover = false }: 
   const transform = `translate(${x}, ${y})`;
 
   return (
-    <g
-      className={"key" + (hover ? "hover" : "")}
-      transform={transform}
-    >
+    <g className={"key" + (hover ? "hover" : "")} transform={transform}>
       <rect
         className={className + keyColor}
         width={keyColor === "white" ? WHITE_WIDTH : BLACK_WIDTH}

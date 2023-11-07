@@ -8,6 +8,7 @@ import {
 import { Tone } from "@/modules/Type";
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import { Point } from "@/modules/utils/DomUtils";
+import useKeyboardManager from "../circuits/KeyboardCircuit/KeyboardManager";
 
 interface Props {
   width?: number;
@@ -20,14 +21,21 @@ const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
   if (!keyboardContext) {
     throw new Error("KeyboardContext is not provided.");
   }
+  const startKey = 44;
+  const endKey = startKey + numOfKeys;
+  const {
+    blackKeyElements,
+    whiteKeyElements,
+    constantsRef,
+    getTone,
+    getTones,
+    wholeTones,
+    naturalTones,
+    accidentalTones,
+  } = useKeyboardManager(startKey, endKey, width || 200, height || 100);
   const { isKeyPressed, setIsKeyPressed } = keyboardContext;
   const [touchedKeys, setTouchedKeys] = useState<Element[]>([]);
   const refSVG = useRef<SVGSVGElement>(null);
-
-  const startKey = 44;
-  const endKey = startKey + numOfKeys;
-  const { rangedWholeTones, rangedNaturalTones, rangedAccidentalTones } =
-    makeSequencedKeys(startKey, endKey);
 
   const processToneAtPoint = (event: MouseEvent) => {
     event.preventDefault();
@@ -35,7 +43,7 @@ const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
       x: event.clientX,
       y: event.clientY,
     };
-    const touchedTone = getTones(point);
+    const touchedTone = getTone(point);
     if (touchedTone) {
       handleStartAndStopExceptSound(touchedTone);
     } else {
@@ -154,10 +162,6 @@ const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
     };
   }, [isKeyPressed]);
 
-
-
-
-
   return (
     <svg
       width="100%"
@@ -165,8 +169,8 @@ const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
       viewBox={"0 0 " + SVG_WIDTH + " " + SVG_HEIGHT}
       ref={refSVG}
     >
-      {renderWhiteKeys()}
-      {renderBlackKeys()}
+      {whiteKeyElements}
+      {blackKeyElements}
     </svg>
   );
 };

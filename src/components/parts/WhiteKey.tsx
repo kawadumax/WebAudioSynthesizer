@@ -1,4 +1,3 @@
-
 import { Tone } from "@/modules/Type";
 import Key from "./Key";
 
@@ -14,13 +13,7 @@ interface Props {
 }
 
 const WhiteKey = (props: Props) => {
-  return (
-    <Key
-      {...props}
-      keyColor="white"
-
-    ></Key>
-  );
+  return <Key {...props} keyColor="white"></Key>;
 };
 
 export default WhiteKey;
