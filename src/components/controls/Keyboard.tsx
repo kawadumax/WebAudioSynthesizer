@@ -41,6 +41,7 @@ const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
 
   const processToneAtPoint = (event: MouseEvent) => {
     event.preventDefault();
+    if (!isKeyPressed) return;
     const point = {
       x: event.clientX,
       y: event.clientY,
@@ -115,6 +116,7 @@ const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
   };
 
   const handleMouseMove = (event: MouseEvent) => {
+
     processToneAtPoint(event);
   };
 
