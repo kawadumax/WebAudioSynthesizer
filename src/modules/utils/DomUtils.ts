@@ -30,7 +30,7 @@ export function findRectIndex(
 }
 
 export function findIndexByPoint(
-  refs: React.RefObject<Element>[],
+  refs: React.RefObject<SVGGElement>[],
   point: Point
 ): number | undefined {
   return refs.findIndex((ref) => {

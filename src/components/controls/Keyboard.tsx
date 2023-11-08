@@ -20,6 +20,8 @@ const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
   const {
     blackKeyElements,
     whiteKeyElements,
+    blackKeyRefs,
+    whiteKeyRefs,
     constantsRef,
     getTone,
     getTonesByPoints,
@@ -38,7 +40,6 @@ const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
 
   const processToneAtPoint = (event: MouseEvent) => {
     event.preventDefault();
-    if (!isKeyPressed) return;
     const point = {
       x: event.clientX,
       y: event.clientY,
@@ -61,8 +62,9 @@ const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
     //touchされているキーとtoneを取得する
     const { blackRefsIndexes, whiteRefsIndexes } = getKeyIndexes(points);
     if (!blackRefsIndexes.length && !whiteRefsIndexes.length) return;
-    const touchedkeys = getKeyElementsByRefIndexes(blackRefsIndexes, whiteRefsIndexes);
-    setTouchedKeys(touchedKeys);
+    const touchedKeys = getKeyElementsByRefIndexes(blackRefsIndexes, whiteRefsIndexes);
+    //TODO: 型が合わない
+    // setTouchedKeys(touchedKeys);
 
     const touchedTones = [
       ...getBlackTonesByIndexes(blackRefsIndexes),
@@ -97,13 +99,20 @@ const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
   } = useSoundHandlers();
 
   const handleMousePressed = (event: MouseEvent) => {
-    event.preventDefault();
     setIsKeyPressed(true);
     processToneAtPoint(event);
   };
 
+  const handleMouseMove = (event: MouseEvent) => {
+    processToneAtPoint(event);
+  };
+
+  const handleMouseReleased = (event: MouseEvent) => {
+    setIsKeyPressed(false);
+    handleStopAllSound();
+  };
+
   const handleTouchStart = (event: TouchEvent) => {
-    event.preventDefault();
     setIsKeyPressed(true);
     processToneAtPoints(event);
   };
@@ -112,19 +121,7 @@ const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
     processToneAtPoints(event);
   };
 
-  const handleMouseMove = (event: MouseEvent) => {
-
-    processToneAtPoint(event);
-  };
-
   const handleTouchEnd = (event: TouchEvent) => {
-    event.preventDefault();
-    setIsKeyPressed(false);
-    handleStopAllSound();
-  };
-
-  const handleMouseReleased = (event: MouseEvent) => {
-    event.preventDefault();
     setIsKeyPressed(false);
     handleStopAllSound();
   };
@@ -141,7 +138,7 @@ const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
       current?.removeEventListener("mousedown", handleMousePressed);
       current?.removeEventListener("touchstart", handleTouchStart);
     };
-  }, []);
+  }, [blackKeyRefs, whiteKeyRefs]);
 
   useEffect(() => {
     if (isKeyPressed) {

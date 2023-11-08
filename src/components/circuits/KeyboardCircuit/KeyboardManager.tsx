@@ -130,8 +130,8 @@ const useKeyboardManager = (
   const [whiteKeyElements, setWhiteKeyElements] = useState<JSX.Element[]>([]);
   const [blackKeyElements, setBlackKeyElements] = useState<JSX.Element[]>([]);
 
-  const [whiteKeyRefs, setWhiteKeyRefs] = useState<RefObject<Element>[]>([]);
-  const [blackKeyRefs, setBlackKeyRefs] = useState<RefObject<Element>[]>([]);
+  const [whiteKeyRefs, setWhiteKeyRefs] = useState<RefObject<SVGGElement>[]>([]);
+  const [blackKeyRefs, setBlackKeyRefs] = useState<RefObject<SVGGElement>[]>([]);
 
   const getTone = (position: Point): Tone | undefined => {
     return getBlackTone(position) || getWhiteTone(position);
@@ -200,6 +200,8 @@ const useKeyboardManager = (
   return {
     whiteKeyElements,
     blackKeyElements,
+    whiteKeyRefs,
+    blackKeyRefs,
     constantsRef,
     wholeTones,
     accidentalTones,
