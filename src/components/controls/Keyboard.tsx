@@ -1,10 +1,7 @@
 import BlackKey from "@parts/BlackKey";
 import WhiteKey from "@parts/WhiteKey";
 import { useKeyboardContext } from "../circuits/KeyboardCircuit/KeyboardContextProvider";
-import {
-  SoundHandlers,
-  makeSequencedKeys,
-} from "../circuits/KeyboardCircuit/KeyboardCircuit";
+import useSoundHandlers from "../circuits/KeyboardCircuit/SoundHandlers";
 import { Tone } from "@/modules/Type";
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import { Point } from "@/modules/utils/DomUtils";
@@ -99,7 +96,7 @@ const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
     handleStopAllSound,
     handleStopExcepts,
     handleStartAndStopExceptSound,
-  } = SoundHandlers;
+  } = useSoundHandlers();
 
   const handleMousePressed = (event: MouseEvent) => {
     event.preventDefault();

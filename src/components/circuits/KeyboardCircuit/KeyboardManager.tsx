@@ -194,8 +194,8 @@ const useKeyboardManager = (
   };
 
   const getKeyElementsByRefIndexes = (blackIndexes: number[], whiteIndexes: number[]) => {
-    const blackElements = blackIndexes.map((index) => { blackKeyRefs[index].current })
-    const whiteElements = whiteIndexes.map((index) => { whiteKeyRefs[index].current })
+    const blackElements = blackIndexes.map((index) => blackKeyRefs[index].current)
+    const whiteElements = whiteIndexes.map((index) => whiteKeyRefs[index].current)
     return [...blackElements, ...whiteElements];
   }
 
