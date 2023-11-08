@@ -4,6 +4,7 @@ import {
   Point,
   splitArray,
   findRectIndex,
+  findIndexByPoint
 } from "@/modules/utils/DomUtils";
 import WhiteKey from "@/components/parts/WhiteKey";
 import BlackKey from "@/components/parts/BlackKey";
@@ -36,6 +37,8 @@ interface Constants {
   KEYBOARD_WIDTH: number;
   KEYBOARD_HEIGHT: number;
   KEY_WIDTH: number;
+  SVG_WIDTH: number;
+  SVG_HEIGHT: number;
 }
 
 const useKeyboardManager = (
@@ -94,7 +97,7 @@ const useKeyboardManager = (
         {...createKeyProps(
           index,
           index * constantsRef.current.KEY_WIDTH +
-            constantsRef.current.PADDING / 2,
+          constantsRef.current.PADDING / 2,
           ref,
           naturalTones[index]
         )}
@@ -119,8 +122,8 @@ const useKeyboardManager = (
             {...createKeyProps(
               index,
               index * constantsRef.current.KEY_WIDTH +
-                constantsRef.current.PADDING / 2 +
-                constantsRef.current.KEY_WIDTH / 2,
+              constantsRef.current.PADDING / 2 +
+              constantsRef.current.KEY_WIDTH / 2,
               ref,
               accidentalTones[index]
             )}
@@ -146,77 +149,55 @@ const useKeyboardManager = (
     if (!bottom || position.y > bottom) {
       return;
     }
-    const touchedKeyIndex = blackKeyRefs.findIndex((ref) => {
-      const rect = ref.current?.getBoundingClientRect();
-      if (rect) return containsPoint(rect, position);
-    });
-    return accidentalTones[touchedKeyIndex];
+    const touchedKeyIndex = findIndexByPoint(blackKeyRefs, position);
+    if (touchedKeyIndex !== undefined) return accidentalTones[touchedKeyIndex];
   };
 
   const getWhiteTone = (position: Point): Tone | undefined => {
-    const touchedKeyIndex = whiteKeyRefs.findIndex((ref) => {
-      const rect = ref.current?.getBoundingClientRect();
-      if (rect) return containsPoint(rect, position);
-    });
-    return naturalTones[touchedKeyIndex];
+    const touchedKeyIndex = findIndexByPoint(whiteKeyRefs, position);
+    if (touchedKeyIndex !== undefined) return naturalTones[touchedKeyIndex];
   };
 
-  const getTones = (points: Point[]): Tone[] => {
+  const getTonesByPoints = (points: Point[]): Tone[] => {
     return points
       .map((point) => getTone(point))
       .filter((tone): tone is Tone => tone !== undefined);
+  }
+
+  const getBlackTonesByIndexes = (indexes: number[]): Tone[] => {
+    return accidentalTones.filter((t, index) => indexes.includes(index));
+  }
+
+  const getWhiteTonesByIndexes = (indexes: number[]): Tone[] => {
+    return naturalTones.filter((t, index) => indexes.includes(index));
+  }
+
+  const getKeyIndexes = (points: Point[]) => {
+    //各pointごとに、最初にblackに属するかを確認し、そうであればindexを確認し、black配列いれる。
+    //そうでなければwhiteに属するかを見て、属するのであればindexを確認しwhite配列に入れる。
+    let blackRefsIndexes = [];
+    let whiteRefsIndexes = [];
+
+    for (const point of points) {
+      let foundIndex = findIndexByPoint(blackKeyRefs, point);
+
+      if (foundIndex !== undefined) {
+        blackRefsIndexes.push(foundIndex);
+      } else {
+        foundIndex = findIndexByPoint(whiteKeyRefs, point);
+        if (foundIndex === undefined) continue;
+        whiteRefsIndexes.push(foundIndex);
+      }
+    }
+
+    return { blackRefsIndexes, whiteRefsIndexes }
   };
 
-  // const getBlackTones = (
-  //   svg: SVGSVGElement,
-  //   position: Point
-  // ): Tone | undefined => {
-  //   const keys = svg.children;
-  //   const keyRects = Array.from(keys).map((key) => key.getBoundingClientRect());
-  //   const blackKeyRects = keyRects.slice(naturalTones.length);
-  //   if (position.y > blackKeyRects[0].bottom) {
-  //     //タッチのy座標がキーボードの下半分にあるとき、早期リターン
-  //     return;
-  //   }
-
-  //   const touchedKeyIndex = blackKeyRects.findIndex((rect) => {
-  //     return containsPoint(rect, position);
-  //   });
-
-  //   return accidentalTones[touchedKeyIndex];
-  // };
-
-  // const getWhiteTones = (
-  //   svg: SVGSVGElement,
-  //   position: Point
-  // ): Tone | undefined => {
-  //   const keyboardRect = svg.getBoundingClientRect();
-  //   const scaledWhiteKeyWidth = keyboardRect.width / naturalTones.length;
-  //   // タッチの座標が各鍵盤のどの領域にあるのかを判定する。
-  //   const touchedKeyOrder = Math.floor(
-  //     (position.x - keyboardRect.left) / scaledWhiteKeyWidth
-  //   );
-  //   return naturalTones[touchedKeyOrder];
-  // };
-
-  // const getKeyIndexes = (keys: HTMLCollection, points: Point[]): number[] => {
-  //   const keyRects = mapToDOMRects(keys);
-  //   const [whiteKeyRects, blackKeyRects] = splitArray(
-  //     keyRects,
-  //     naturalTones.length
-  //   );
-
-  //   const touchedKeyIndexes = points
-  //     .map((point) => {
-  //       return (
-  //         findRectIndex(blackKeyRects, point) ||
-  //         findRectIndex(whiteKeyRects, point)
-  //       );
-  //     })
-  //     .filter((index) => index !== undefined) as number[];
-  //   if (!touchedKeyIndexes) return [];
-  //   return touchedKeyIndexes;
-  // };
+  const getKeyElementsByRefIndexes = (blackIndexes: number[], whiteIndexes: number[]) => {
+    const blackElements = blackIndexes.map((index) => { blackKeyRefs[index].current })
+    const whiteElements = whiteIndexes.map((index) => { whiteKeyRefs[index].current })
+    return [...blackElements, ...whiteElements];
+  }
 
   useEffect(() => {
     const whiteKeyRefs = naturalTones.map((t) => createRef<Element>());
@@ -235,7 +216,11 @@ const useKeyboardManager = (
     accidentalTones,
     naturalTones,
     getTone,
-    getTones,
+    getTonesByPoints,
+    getBlackTonesByIndexes,
+    getWhiteTonesByIndexes,
+    getKeyIndexes,
+    getKeyElementsByRefIndexes,
   };
 };
 

@@ -28,11 +28,16 @@ const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
     whiteKeyElements,
     constantsRef,
     getTone,
-    getTones,
+    getTonesByPoints,
+    getBlackTonesByIndexes,
+    getWhiteTonesByIndexes,
+    getKeyIndexes,
+    getKeyElementsByRefIndexes,
     wholeTones,
     naturalTones,
     accidentalTones,
   } = useKeyboardManager(startKey, endKey, width || 200, height || 100);
+
   const { isKeyPressed, setIsKeyPressed } = keyboardContext;
   const [touchedKeys, setTouchedKeys] = useState<Element[]>([]);
   const refSVG = useRef<SVGSVGElement>(null);
@@ -53,26 +58,27 @@ const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
 
   const processToneAtPoints = (event: TouchEvent) => {
     event.preventDefault();
-    const svg = refSVG.current;
-    if (!svg) return [];
-    const keys = svg.children;
     const points = Array.prototype.map.call(event.touches, (t: Touch) => ({
       x: t.clientX,
       y: t.clientY,
     })) as Point[];
-    const touchedKeyIndexes = getKeyIndexes(keys, points);
-    if (!touchedKeyIndexes) return;
-    const touchedkeys = touchedKeyIndexes.map((index) => {
-      return keys[index];
-    });
+
+    //touchされているキーとtoneを取得する
+    const { blackRefsIndexes, whiteRefsIndexes } = getKeyIndexes(points);
+    if (!blackRefsIndexes.length && !whiteRefsIndexes.length) return;
+    const touchedkeys = getKeyElementsByRefIndexes(blackRefsIndexes, whiteRefsIndexes);
     setTouchedKeys(touchedKeys);
 
-    // if (touchedTones.length > 0) {
-    //   handleStartSomeSounds(touchedTones);
-    //   handleStopExcepts(touchedTones);
-    // } else {
-    //   handleStopAllSound();
-    // }
+    const touchedTones = [
+      ...getBlackTonesByIndexes(blackRefsIndexes),
+      ...getWhiteTonesByIndexes(whiteRefsIndexes)
+    ];
+    if (touchedTones.length > 0) {
+      handleStartSomeSounds(touchedTones);
+      handleStopExcepts(touchedTones);
+    } else {
+      handleStopAllSound();
+    }
   };
 
   useEffect(() => {
@@ -166,7 +172,7 @@ const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
     <svg
       width="100%"
       height="100%"
-      viewBox={"0 0 " + SVG_WIDTH + " " + SVG_HEIGHT}
+      viewBox={"0 0 " + constantsRef.current?.SVG_WIDTH + " " + constantsRef.current?.SVG_HEIGHT}
       ref={refSVG}
     >
       {whiteKeyElements}

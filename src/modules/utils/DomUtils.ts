@@ -28,3 +28,13 @@ export function findRectIndex(
 ): number | undefined {
   return rects.findIndex((rect) => containsPoint(rect, point));
 }
+
+export function findIndexByPoint(
+  refs: React.RefObject<Element>[],
+  point: Point
+): number | undefined {
+  return refs.findIndex((ref) => {
+    const rect = ref.current?.getBoundingClientRect();
+    if (rect) return containsPoint(rect, point);
+  });
+}
