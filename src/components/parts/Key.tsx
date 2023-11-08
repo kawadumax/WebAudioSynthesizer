@@ -1,5 +1,6 @@
 import { Tone } from "@/modules/Type";
 import "@styles/Key.scss";
+import React from "react";
 
 interface Props {
   className?: string;
@@ -12,7 +13,7 @@ interface Props {
   tone: Tone;
   hover?: boolean;
 }
-const Key = ({
+const Key = React.forwardRef<SVGGElement, Props>(({
   className,
   keyColor,
   x,
@@ -21,7 +22,7 @@ const Key = ({
   height,
   tone,
   hover = false,
-}: Props) => {
+}: Props, ref) => {
   const WHITE_WIDTH = width;
   const WHITE_HEIGHT = height;
   const BLACK_WIDTH = (WHITE_WIDTH * 3) / 4;
@@ -34,7 +35,7 @@ const Key = ({
   const transform = `translate(${x}, ${y})`;
 
   return (
-    <g className={"key" + (hover ? "hover" : "")} transform={transform}>
+    <g ref={ref} className={"key" + (hover ? "hover" : "")} transform={transform}>
       <rect
         className={className + keyColor}
         width={keyColor === "white" ? WHITE_WIDTH : BLACK_WIDTH}
@@ -58,6 +59,6 @@ const Key = ({
       ) : null}
     </g>
   );
-};
+});
 
 export default Key;

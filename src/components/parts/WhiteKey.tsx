@@ -1,3 +1,4 @@
+import React from "react";
 import { Tone } from "@/modules/Type";
 import Key from "./Key";
 
@@ -12,8 +13,8 @@ interface Props {
   hover?: boolean;
 }
 
-const WhiteKey = (props: Props) => {
-  return <Key {...props} keyColor="white"></Key>;
-};
+const WhiteKey = React.forwardRef<SVGGElement, Props>((props: Props, ref) => {
+  return <Key ref={ref} {...props} keyColor="white"></Key>;
+});
 
 export default WhiteKey;

@@ -21,7 +21,6 @@ import React, {
 } from "react";
 
 interface KeyProps {
-  ref: React.Ref<Element>;
   key: number;
   x: number;
   y: number;
@@ -77,11 +76,9 @@ const useKeyboardManager = (
   const createKeyProps = (
     index: number,
     x: number,
-    ref: Ref<Element>,
     tone: Tone
   ): KeyProps => ({
     key: index,
-    ref,
     x,
     y: constantsRef.current.PADDING / 2,
     width: constantsRef.current.KEY_WIDTH,
@@ -91,20 +88,20 @@ const useKeyboardManager = (
     hover: false,
   });
 
-  const renderWhiteKeys = (whiteKeyRefs: Ref<Element>[]): JSX.Element[] =>
+  const renderWhiteKeys = (whiteKeyRefs: Ref<SVGGElement>[]): JSX.Element[] =>
     whiteKeyRefs.map((ref, index) => (
       <WhiteKey
         {...createKeyProps(
           index,
           index * constantsRef.current.KEY_WIDTH +
           constantsRef.current.PADDING / 2,
-          ref,
           naturalTones[index]
         )}
+        ref={ref}
       />
     ));
 
-  const renderBlackKeys = (blackKeyRefs: Ref<Element>[]): JSX.Element[] => {
+  const renderBlackKeys = (blackKeyRefs: Ref<SVGGElement>[]): JSX.Element[] => {
     const result: Array<JSX.Element> = [];
     let refs = [...blackKeyRefs]; //あとでshiftするのでコピーを取る
     naturalTones.forEach((ntone, index, naturalTones) => {
@@ -124,9 +121,9 @@ const useKeyboardManager = (
               index * constantsRef.current.KEY_WIDTH +
               constantsRef.current.PADDING / 2 +
               constantsRef.current.KEY_WIDTH / 2,
-              ref,
               accidentalTones[index]
             )}
+            ref={ref}
           ></BlackKey>
         );
       }
@@ -145,10 +142,6 @@ const useKeyboardManager = (
   };
 
   const getBlackTone = (position: Point): Tone | undefined => {
-    const bottom = blackKeyRefs[0].current?.getBoundingClientRect().bottom;
-    if (!bottom || position.y > bottom) {
-      return;
-    }
     const touchedKeyIndex = findIndexByPoint(blackKeyRefs, position);
     if (touchedKeyIndex !== undefined) return accidentalTones[touchedKeyIndex];
   };
@@ -200,8 +193,8 @@ const useKeyboardManager = (
   }
 
   useEffect(() => {
-    const whiteKeyRefs = naturalTones.map((t) => createRef<Element>());
-    const blackKeyRefs = accidentalTones.map((t) => createRef<Element>());
+    const whiteKeyRefs = naturalTones.map((t) => createRef<SVGGElement>());
+    const blackKeyRefs = accidentalTones.map((t) => createRef<SVGGElement>());
     setWhiteKeyElements(renderWhiteKeys(whiteKeyRefs));
     setBlackKeyElements(renderBlackKeys(blackKeyRefs));
     setWhiteKeyRefs(whiteKeyRefs);
