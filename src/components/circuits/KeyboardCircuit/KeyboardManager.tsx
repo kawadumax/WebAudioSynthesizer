@@ -97,33 +97,37 @@ const useKeyboardManager = (
       />
     ));
 
+  function calculateKeyPosition(index: number) {
+    // キーの位置を計算するためのユーティリティ関数
+    return (
+      index * constantsRef.current.KEY_WIDTH +
+      constantsRef.current.PADDING / 2 +
+      constantsRef.current.KEY_WIDTH / 2
+    );
+  }
+
   const renderBlackKeys = (blackKeyRefs: Ref<SVGGElement>[]): JSX.Element[] => {
+    // 結果の JSX.Element 配列
     const result: Array<JSX.Element> = [];
-    let refs = [...blackKeyRefs]; //あとでshiftするのでコピーを取る
-    naturalTones.forEach((ntone, index, naturalTones) => {
-      if (
-        ntone.name.includes("E") ||
-        ntone.name.includes("B") ||
-        index === naturalTones.length - 1
-      ) {
-        return;
-      }
-      const ref = refs.shift();
-      if (ref) {
-        result.push(
-          <BlackKey
-            {...createKeyProps(
-              index,
-              index * constantsRef.current.KEY_WIDTH +
-              constantsRef.current.PADDING / 2 +
-              constantsRef.current.KEY_WIDTH / 2,
-              accidentalTones[index]
-            )}
-            ref={ref}
-          ></BlackKey>
-        );
-      }
-    });
+
+    // 黒鍵をレンダリングする必要のある音符のインデックスを取得
+    const blackKeyIndices = naturalTones
+      .map((ntone, index) => (ntone.name.includes("E") || ntone.name.includes("B") ? -1 : index))
+      .filter(index => index !== -1);
+
+    // 必要な黒鍵の数だけループして JSX.Element を生成
+    for (const [i, index] of blackKeyIndices.entries()) {
+      const keyProps = createKeyProps(
+        index,
+        calculateKeyPosition(index),
+        accidentalTones[index]
+      );
+
+      result.push(
+        <BlackKey {...keyProps} ref={blackKeyRefs[i]}></BlackKey>
+      );
+    }
+
     return result;
   };
 
