@@ -1,8 +1,5 @@
-import BlackKey from "@parts/BlackKey";
-import WhiteKey from "@parts/WhiteKey";
 import { useKeyboardContext } from "../circuits/KeyboardCircuit/KeyboardContextProvider";
 import useSoundHandlers from "../circuits/KeyboardCircuit/SoundHandlers";
-import { Tone } from "@/modules/Type";
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import { Point } from "@/modules/utils/DomUtils";
 import useKeyboardManager from "../circuits/KeyboardCircuit/KeyboardManager";

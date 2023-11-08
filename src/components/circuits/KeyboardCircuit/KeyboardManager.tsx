@@ -1,9 +1,5 @@
 import {
-  containsPoint,
-  mapToDOMRects,
   Point,
-  splitArray,
-  findRectIndex,
   findIndexByPoint
 } from "@/modules/utils/DomUtils";
 import WhiteKey from "@/components/parts/WhiteKey";

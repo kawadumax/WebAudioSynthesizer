@@ -1,4 +1,4 @@
-import { useApplicationContext } from "../AudioCircuit/ApplicationContextProvider";
+
 import { Tone } from "@/modules/Type";
 
 const toneNumberToFreq = (tone: number) => {
