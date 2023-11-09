@@ -163,20 +163,23 @@ const useKeyboardManager = (
   };
 
   const getKeyIndexes = (points: Point[]) => {
-    //TODO whiteが取得できていない
     //各pointごとに、最初にblackに属するかを確認し、そうであればindexを確認し、black配列いれる。
     //そうでなければwhiteに属するかを見て、属するのであればindexを確認しwhite配列に入れる。
     let blackRefsIndexes = [];
     let whiteRefsIndexes = [];
 
     for (const point of points) {
-      let foundIndex = findIndexByPoint(blackKeyRefs, point);
-      if (foundIndex >= 0) {
-        blackRefsIndexes.push(foundIndex);
-      } else {
-        foundIndex = findIndexByPoint(whiteKeyRefs, point);
-        if (foundIndex === -1) continue;
-        whiteRefsIndexes.push(foundIndex);
+      // ポイントが黒鍵のインデックスに該当するか調べる
+      const blackIndex = findIndexByPoint(blackKeyRefs, point);
+      if (blackIndex !== -1) {
+        blackRefsIndexes.push(blackIndex);
+        continue; // 黒鍵が見つかれば次のポイントへ
+      }
+
+      // ポイントが白鍵のインデックスに該当するか調べる
+      const whiteIndex = findIndexByPoint(whiteKeyRefs, point);
+      if (whiteIndex !== -1) {
+        whiteRefsIndexes.push(whiteIndex);
       }
     }
 
@@ -186,14 +189,16 @@ const useKeyboardManager = (
   const getKeyElementsByRefIndexes = (
     blackIndexes: number[],
     whiteIndexes: number[]
-  ) => {
+  ): SVGGElement[] => {
     const blackElements = blackIndexes.map(
       (index) => blackKeyRefs[index].current
     );
     const whiteElements = whiteIndexes.map(
       (index) => whiteKeyRefs[index].current
     );
-    return [...blackElements, ...whiteElements];
+    return [...blackElements, ...whiteElements].filter(
+      (elm): elm is SVGGElement => elm !== null
+    );
   };
 
   useEffect(() => {

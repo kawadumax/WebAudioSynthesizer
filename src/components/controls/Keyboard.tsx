@@ -35,7 +35,7 @@ const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
   } = useKeyboardManager(startKey, endKey, width || 200, height || 100);
 
   const { isKeyPressed, setIsKeyPressed } = keyboardContext;
-  const [touchedKeys, setTouchedKeys] = useState<Element[]>([]);
+  const [touchedKeys, setTouchedKeys] = useState<SVGGElement[]>([]);
   const refSVG = useRef<SVGSVGElement>(null);
 
   const processToneAtPoint = (event: MouseEvent) => {
@@ -63,13 +63,15 @@ const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
     const { blackRefsIndexes, whiteRefsIndexes } = getKeyIndexes(points);
     console.log(blackRefsIndexes, whiteRefsIndexes);
     if (!blackRefsIndexes.length && !whiteRefsIndexes.length) return;
-    const touchedKeys = getKeyElementsByRefIndexes(blackRefsIndexes, whiteRefsIndexes);
-    //TODO: 型が合わない
-    // setTouchedKeys(touchedKeys);
+    const touchedKeys = getKeyElementsByRefIndexes(
+      blackRefsIndexes,
+      whiteRefsIndexes
+    );
+    setTouchedKeys(touchedKeys);
 
     const touchedTones = [
       ...getBlackTonesByIndexes(blackRefsIndexes),
-      ...getWhiteTonesByIndexes(whiteRefsIndexes)
+      ...getWhiteTonesByIndexes(whiteRefsIndexes),
     ];
     if (touchedTones.length > 0) {
       handleStartSomeSounds(touchedTones);
@@ -166,7 +168,12 @@ const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
     <svg
       width="100%"
       height="100%"
-      viewBox={"0 0 " + constantsRef.current?.SVG_WIDTH + " " + constantsRef.current?.SVG_HEIGHT}
+      viewBox={
+        "0 0 " +
+        constantsRef.current?.SVG_WIDTH +
+        " " +
+        constantsRef.current?.SVG_HEIGHT
+      }
       ref={refSVG}
     >
       {whiteKeyElements}
