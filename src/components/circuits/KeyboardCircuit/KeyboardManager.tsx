@@ -1,7 +1,4 @@
-import {
-  Point,
-  findIndexByPoint
-} from "@/modules/utils/DomUtils";
+import { Point, findIndexByPoint } from "@/modules/utils/DomUtils";
 import WhiteKey from "@/components/parts/WhiteKey";
 import BlackKey from "@/components/parts/BlackKey";
 import { Tone } from "@/modules/Type";
@@ -69,11 +66,7 @@ const useKeyboardManager = (
     })()
   );
 
-  const createKeyProps = (
-    index: number,
-    x: number,
-    tone: Tone
-  ): KeyProps => ({
+  const createKeyProps = (index: number, x: number, tone: Tone): KeyProps => ({
     key: index,
     x,
     y: constantsRef.current.PADDING / 2,
@@ -90,7 +83,7 @@ const useKeyboardManager = (
         {...createKeyProps(
           index,
           index * constantsRef.current.KEY_WIDTH +
-          constantsRef.current.PADDING / 2,
+            constantsRef.current.PADDING / 2,
           naturalTones[index]
         )}
         ref={ref}
@@ -112,8 +105,10 @@ const useKeyboardManager = (
 
     // 黒鍵をレンダリングする必要のある音符のインデックスを取得
     const blackKeyIndices = naturalTones
-      .map((ntone, index) => (ntone.name.includes("E") || ntone.name.includes("B") ? -1 : index))
-      .filter(index => index !== -1);
+      .map((ntone, index) =>
+        ntone.name.includes("E") || ntone.name.includes("B") ? -1 : index
+      )
+      .filter((index) => index !== -1);
 
     // 必要な黒鍵の数だけループして JSX.Element を生成
     for (const [i, index] of blackKeyIndices.entries()) {
@@ -123,9 +118,7 @@ const useKeyboardManager = (
         accidentalTones[index]
       );
 
-      result.push(
-        <BlackKey {...keyProps} ref={blackKeyRefs[i]}></BlackKey>
-      );
+      result.push(<BlackKey {...keyProps} ref={blackKeyRefs[i]}></BlackKey>);
     }
 
     return result;
@@ -134,8 +127,12 @@ const useKeyboardManager = (
   const [whiteKeyElements, setWhiteKeyElements] = useState<JSX.Element[]>([]);
   const [blackKeyElements, setBlackKeyElements] = useState<JSX.Element[]>([]);
 
-  const [whiteKeyRefs, setWhiteKeyRefs] = useState<RefObject<SVGGElement>[]>([]);
-  const [blackKeyRefs, setBlackKeyRefs] = useState<RefObject<SVGGElement>[]>([]);
+  const [whiteKeyRefs, setWhiteKeyRefs] = useState<RefObject<SVGGElement>[]>(
+    []
+  );
+  const [blackKeyRefs, setBlackKeyRefs] = useState<RefObject<SVGGElement>[]>(
+    []
+  );
 
   const getTone = (position: Point): Tone | undefined => {
     return getBlackTone(position) || getWhiteTone(position);
@@ -155,15 +152,15 @@ const useKeyboardManager = (
     return points
       .map((point) => getTone(point))
       .filter((tone): tone is Tone => tone !== undefined);
-  }
+  };
 
   const getBlackTonesByIndexes = (indexes: number[]): Tone[] => {
     return accidentalTones.filter((t, index) => indexes.includes(index));
-  }
+  };
 
   const getWhiteTonesByIndexes = (indexes: number[]): Tone[] => {
     return naturalTones.filter((t, index) => indexes.includes(index));
-  }
+  };
 
   const getKeyIndexes = (points: Point[]) => {
     //TODO whiteが取得できていない
@@ -174,24 +171,30 @@ const useKeyboardManager = (
 
     for (const point of points) {
       let foundIndex = findIndexByPoint(blackKeyRefs, point);
-
-      if (foundIndex !== undefined) {
+      if (foundIndex >= 0) {
         blackRefsIndexes.push(foundIndex);
       } else {
         foundIndex = findIndexByPoint(whiteKeyRefs, point);
-        if (foundIndex === undefined) continue;
+        if (foundIndex === -1) continue;
         whiteRefsIndexes.push(foundIndex);
       }
     }
 
-    return { blackRefsIndexes, whiteRefsIndexes }
+    return { blackRefsIndexes, whiteRefsIndexes };
   };
 
-  const getKeyElementsByRefIndexes = (blackIndexes: number[], whiteIndexes: number[]) => {
-    const blackElements = blackIndexes.map((index) => blackKeyRefs[index].current)
-    const whiteElements = whiteIndexes.map((index) => whiteKeyRefs[index].current)
+  const getKeyElementsByRefIndexes = (
+    blackIndexes: number[],
+    whiteIndexes: number[]
+  ) => {
+    const blackElements = blackIndexes.map(
+      (index) => blackKeyRefs[index].current
+    );
+    const whiteElements = whiteIndexes.map(
+      (index) => whiteKeyRefs[index].current
+    );
     return [...blackElements, ...whiteElements];
-  }
+  };
 
   useEffect(() => {
     const whiteKeyRefs = naturalTones.map((t) => createRef<SVGGElement>());
