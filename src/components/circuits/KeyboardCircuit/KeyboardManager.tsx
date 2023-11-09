@@ -166,6 +166,7 @@ const useKeyboardManager = (
   }
 
   const getKeyIndexes = (points: Point[]) => {
+    //TODO whiteが取得できていない
     //各pointごとに、最初にblackに属するかを確認し、そうであればindexを確認し、black配列いれる。
     //そうでなければwhiteに属するかを見て、属するのであればindexを確認しwhite配列に入れる。
     let blackRefsIndexes = [];

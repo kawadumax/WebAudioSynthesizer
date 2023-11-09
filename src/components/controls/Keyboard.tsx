@@ -61,6 +61,7 @@ const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
 
     //touchされているキーとtoneを取得する
     const { blackRefsIndexes, whiteRefsIndexes } = getKeyIndexes(points);
+    console.log(blackRefsIndexes, whiteRefsIndexes);
     if (!blackRefsIndexes.length && !whiteRefsIndexes.length) return;
     const touchedKeys = getKeyElementsByRefIndexes(blackRefsIndexes, whiteRefsIndexes);
     //TODO: 型が合わない
