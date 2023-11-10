@@ -126,6 +126,7 @@ const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
 
   const handleTouchEnd = (event: TouchEvent) => {
     setIsKeyPressed(false);
+    setTouchedKeys([]);
     handleStopAllSound();
   };
 
