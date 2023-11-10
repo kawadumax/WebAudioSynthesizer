@@ -1,3 +1,4 @@
+import React from "react";
 import { Tone } from "@/modules/Type";
 import Key from "./Key";
 
@@ -9,12 +10,11 @@ interface Props {
   height: number;
   index: number;
   tone: Tone;
-  onKeyPressed?: (tone: Tone) => void;
-  onKeyReleased?: (tone: Tone) => void;
+  hover?: boolean;
 }
 
-const BlackKey = (props: Props) => {
-  return <Key {...props} keyColor="black"></Key>;
-};
+const BlackKey = React.forwardRef<SVGGElement, Props>((props: Props, ref) => {
+  return <Key ref={ref} {...props} keyColor="black"></Key>;
+});
 
 export default BlackKey;

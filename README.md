@@ -8,7 +8,7 @@ https://web-audio-synthesizer.vercel.app/ で確認できます。
 ## コンポーネント
 
 - parts: 最小限の UI コンポーネント
-- circuits: 振舞いを興味ごとに纏めたコンポーネント
+- circuits: 振舞いを興味ごとに纏めたコンポーネントと内部 API
 - controls: parts と circuits を用いた操作を表現できるコンポーネント
 
 ## SVG-based Components

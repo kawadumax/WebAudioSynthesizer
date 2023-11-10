@@ -1,4 +1,11 @@
-.App{
+@media only screen and (orientation: portrait) {
+  body {
+    overflow: auto;
+    width: 100vmax;
+  }
+}
+
+.App {
   text-align: center;
 }
 

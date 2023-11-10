@@ -1,6 +1,9 @@
 import React, { useState, useRef, useEffect } from "react";
 import "@styles/Knob.scss";
 
+type CommonMouseEvent = React.MouseEvent | MouseEvent;
+type CommonTouchEvent = React.TouchEvent | TouchEvent;
+
 interface Position {
   x: number;
   y: number;
@@ -30,58 +33,51 @@ const Knob = ({
   const MIN_ANGLE = -120;
   const MAX_ANGLE = 120;
 
-  useEffect(() => {
+  // degree指定
+  const transform = `rotate(${angle}, ${knobCenterPos.x}, ${knobCenterPos.y})`;
+  const width = 100;
+  const height = 100;
+  const knobRadius = 40;
+  const thumWidth = 6;
+
+  const isMouseEvent = (event: CommonMouseEvent | CommonTouchEvent): event is CommonMouseEvent => {
+    return (event as CommonMouseEvent).clientX !== undefined;
+  }
+
+  const getClientCoordinates = (event: CommonMouseEvent | CommonTouchEvent): Position => {
+    if (isMouseEvent(event)) {
+      return { x: event.clientX, y: event.clientY };
+    } else {
+      const touch = event.touches[0] || event.changedTouches[0];
+      return { x: touch.clientX, y: touch.clientY };
+    }
+  };
+
+  const handleMouseDownAndTouchStart = (event: MouseEvent | TouchEvent) => {
+    event.preventDefault();
+    setIsDragging(true);
+    setCurrentPos(getClientCoordinates(event));
+  };
+
+  const handleMouseMoveAndTouchMove = (event: MouseEvent | TouchEvent) => {
+    event.preventDefault();
+    if (isDragging) {
+      setCurrentPos(getClientCoordinates(event));
+    }
+  };
+
+  const handleMouseUpAndTouchEnd = (event: MouseEvent | TouchEvent) => {
+    event.preventDefault();
+    setIsDragging(false);
+  };
+
+  const initAngle = () => {
     // defaut valueが何%に当たるかを計算する
     const rate = (defaultValue - minValue) / (maxValue - minValue);
     // その%がどれぐらいのangleに相当するか計算する
     const newAngle = MIN_ANGLE + rate * (MAX_ANGLE - MIN_ANGLE);
     setAngle(newAngle);
-  }, []);
-
-  useEffect(() => {
-    if (isDragging) {
-      const oldAngle = angle;
-      const newAngle = getAngle(currentPos);
-      setAngle(newAngle);
-      const newValue = getValue();
-      onChange(newValue);
-    }
-  }, [isDragging, angle, currentPos]);
-
-  // 移動のイベントはdocumentから取ることでSVGの領域を超えてノブを動かせる
-  useEffect(() => {
-    const handleDocumentMouseMove = (event: MouseEvent) => {
-      if (isDragging) {
-        setCurrentPos({
-          x: event.clientX,
-          y: event.clientY,
-        });
-      }
-    };
-    if (isDragging) {
-      document.addEventListener("mousemove", handleDocumentMouseMove);
-    }
-    return () => {
-      document.removeEventListener("mousemove", handleDocumentMouseMove);
-    };
-  }, [isDragging, setCurrentPos]);
-
-  useEffect(() => {
-    const handleMoveEnd = (event: MouseEvent) => {
-      setIsDragging(false);
-    };
-    document.addEventListener("mouseup", handleMoveEnd);
-
-    return () => {
-      document.removeEventListener("mouseup", handleMoveEnd);
-    };
-  }, []);
-
-  const handleMouseDown = (event: React.MouseEvent<SVGSVGElement>) => {
-    setIsDragging(true);
-    const { clientX, clientY } = event;
-    setCurrentPos({ x: clientX, y: clientY });
-  };
+  }
 
   const getAngle = (currentPos: Position) => {
     let angle = 0;
@@ -100,7 +96,7 @@ const Knob = ({
     return angle;
   };
 
-  const getValue = () => {
+  const getValue = (angle: number) => {
     // 角度に応じてValueを返す。
     // 現在のAngleの重みを計算
     const rateAngle = (angle - MIN_ANGLE) / (MAX_ANGLE - MIN_ANGLE);
@@ -109,12 +105,42 @@ const Knob = ({
     return value;
   };
 
-  // degree指定
-  const transform = `rotate(${angle}, ${knobCenterPos.x}, ${knobCenterPos.y})`;
-  const width = 100;
-  const height = 100;
-  const knobRadius = 40;
-  const thumWidth = 6;
+  useEffect(() => {
+    initAngle();
+    const current = knobRef.current;
+    current?.addEventListener("mousedown", handleMouseDownAndTouchStart, { passive: false });
+    current?.addEventListener("touchstart", handleMouseDownAndTouchStart, { passive: false });
+    return (() => {
+      current?.removeEventListener("mousedown", handleMouseDownAndTouchStart);
+      current?.removeEventListener("touchstart", handleMouseDownAndTouchStart);
+    })
+  }, []);
+
+  useEffect(() => {
+    if (isDragging) {
+      const newAngle = getAngle(currentPos);
+      setAngle(newAngle);
+      const newValue = getValue(newAngle);
+      onChange(newValue);
+    }
+  }, [isDragging, currentPos]);
+
+  // 移動のイベントはdocumentから取ることでSVGの領域を超えてノブを動かせる
+  useEffect(() => {
+    if (isDragging) {
+      document.addEventListener("mousemove", handleMouseMoveAndTouchMove, { passive: false });
+      document.addEventListener("touchmove", handleMouseMoveAndTouchMove, { passive: false });
+      document.addEventListener("mouseup", handleMouseUpAndTouchEnd, { passive: false });
+      document.addEventListener("touchend", handleMouseUpAndTouchEnd, { passive: false });
+    }
+    return () => {
+      document.removeEventListener("mousemove", handleMouseMoveAndTouchMove);
+      document.removeEventListener("touchmove", handleMouseMoveAndTouchMove);
+      document.removeEventListener("mouseup", handleMouseUpAndTouchEnd);
+      document.removeEventListener("touchend", handleMouseUpAndTouchEnd);
+    };
+  }, [isDragging]);
+
   return (
     <svg
       ref={knobRef}
@@ -122,7 +148,6 @@ const Knob = ({
       width={width}
       height={height}
       viewBox={"0 0 " + width + " " + height}
-      onMouseDown={handleMouseDown}
     >
       <circle
         cx={knobCenterPos.x}

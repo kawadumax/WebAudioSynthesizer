@@ -50,7 +50,7 @@ const drawInsetShadow = (
   ctx.restore();
 };
 
-const Oscilloscope = ({ className }: Props) => {
+const Oscilloscope = ({ className = "" }: Props) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const { audioContext, analyser } = useApplicationContext();
 
@@ -104,7 +104,7 @@ const Oscilloscope = ({ className }: Props) => {
   }, [audioContext, canvasRef]);
 
   return (
-    <div className={"oscilloscope " + className}>
+    <div className={className ? className + " oscilloscope" : "oscilloscope"}>
       <canvas ref={canvasRef} />
     </div>
   );

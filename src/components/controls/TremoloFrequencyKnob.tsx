@@ -23,9 +23,7 @@ const TremoloFrequencyKnob = () => {
   }, [frequency]);
 
   const handleLFOChange = (frequency: number) => {
-    if (frequency) {
-      setFrequency(frequency);
-    }
+    setFrequency(frequency);
   };
 
   return (
