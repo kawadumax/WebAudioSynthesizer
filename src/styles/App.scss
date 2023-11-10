@@ -1,4 +1,21 @@
-.App{
+// body {
+//   overflow: scroll;
+// }
+
+@media only screen and (orientation: portrait) {
+  body {
+    overflow: auto;
+    height: 100vw;
+    width: 100vh;
+  }
+  .App {
+    transform-origin: top left;
+    transform: rotate(90deg) translateY(-100vw);
+    transition: all 0.1s;
+  }
+}
+
+.App {
   text-align: center;
 }
 
