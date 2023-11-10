@@ -1,11 +1,9 @@
-import BlackKey from "@parts/BlackKey";
-import WhiteKey from "@parts/WhiteKey";
-import useKeyboardCircuit, {
-  useKeyboardContext,
-} from "../circuits/KeyboardCircuit";
-import { Tone } from "@/modules/Type";
-import { useEffect, useRef } from "react";
-import { containsPoint, Point } from "@/modules/utils/DomUtils";
+import { useKeyboardContext } from "../circuits/KeyboardCircuit/KeyboardContextProvider";
+import useSoundHandlers from "../circuits/KeyboardCircuit/SoundHandlers";
+import React, { useState, useEffect, useRef, useMemo } from "react";
+import { Point } from "@/modules/utils/DomUtils";
+import useKeyboardManager from "../circuits/KeyboardCircuit/KeyboardManager";
+
 interface Props {
   width?: number;
   height?: number;
@@ -14,83 +12,39 @@ interface Props {
 
 const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
   const keyboardContext = useKeyboardContext();
-  const refSVG = useRef<SVGSVGElement>(null);
-
   if (!keyboardContext) {
     throw new Error("KeyboardContext is not provided.");
   }
-  const { setIsKeyPressed } = keyboardContext;
-  const {
-    makeSequencedKeys,
-    handleStartSound,
-    handleStartSomeSounds,
-    handleStopSound,
-    handleStopAllSound,
-    handleStopExcepts,
-    handleStartAndStopExceptSound,
-  } = useKeyboardCircuit();
   const startKey = 44;
   const endKey = startKey + numOfKeys;
-  const { naturalTones, accidentalTones } = makeSequencedKeys(startKey, endKey);
+  const {
+    blackKeyElements,
+    whiteKeyElements,
+    blackKeyRefs,
+    whiteKeyRefs,
+    constantsRef,
+    getTone,
+    getTonesByPoints,
+    getBlackTonesByIndexes,
+    getWhiteTonesByIndexes,
+    getKeyIndexes,
+    getKeyElementsByRefIndexes,
+    wholeTones,
+    naturalTones,
+    accidentalTones,
+  } = useKeyboardManager(startKey, endKey, width || 200, height || 100);
 
-  const Padding = 10;
-  const SVG_WIDTH = (width ? width : 200) + Padding;
-  const SVG_HEIGHT = (height ? height : 100) + Padding;
-  const KEYBOARD_WIDTH = width ? width : 200;
-  const KEYBOARD_HEIGHT = height ? height : 100;
-  const KEY_WIDTH = KEYBOARD_WIDTH / naturalTones.length;
+  const { isKeyPressed, setIsKeyPressed } = keyboardContext;
+  const [touchedKeys, setTouchedKeys] = useState<SVGGElement[]>([]);
+  const refSVG = useRef<SVGSVGElement>(null);
 
-  const getTone = (position: Point): Tone | undefined => {
-    const keyboardSVG = refSVG.current;
-    if (
-      !keyboardSVG ||
-      !containsPoint(keyboardSVG.getBoundingClientRect(), position)
-    ) {
-      //////キーボードがない、またはキーボードの範囲内にポインタがないとき、早期リターン
-      return;
-    }
-    return (
-      getBlackTone(keyboardSVG, position) || getWhiteTone(keyboardSVG, position)
-    );
-  };
-
-  const getBlackTone = (
-    svg: SVGSVGElement,
-    position: Point
-  ): Tone | undefined => {
-    const keys = svg.children;
-    const keyRects = Array.from(keys).map((key) => key.getBoundingClientRect());
-    const blackKeyRects = keyRects.slice(naturalTones.length);
-    if (position.y > blackKeyRects[0].bottom) {
-      //タッチのy座標がキーボードの下半分にあるとき、早期リターン
-      return;
-    }
-    const touchedKeyIndex = blackKeyRects.findIndex((rect) => {
-      return containsPoint(rect, position);
-    });
-
-    return accidentalTones[touchedKeyIndex];
-  };
-
-  const getWhiteTone = (
-    svg: SVGSVGElement,
-    position: Point
-  ): Tone | undefined => {
-    const keyboardRect = svg.getBoundingClientRect();
-    const scaledWhiteKeyWidth = keyboardRect.width / naturalTones.length;
-    // タッチの座標が各鍵盤のどの領域にあるのかを判定する。
-    const touchedKeyOrder = Math.floor(
-      (position.x - keyboardRect.left) / scaledWhiteKeyWidth
-    );
-    return naturalTones[touchedKeyOrder];
-  };
-
-  const processToneAtPoint = (event: TouchEvent) => {
+  const processToneAtPoint = (event: MouseEvent) => {
     event.preventDefault();
-    const touchedTone = getTone({
-      x: event.touches[0].clientX,
-      y: event.touches[0].clientY,
-    });
+    const point = {
+      x: event.clientX,
+      y: event.clientY,
+    };
+    const touchedTone = getTone(point);
     if (touchedTone) {
       handleStartAndStopExceptSound(touchedTone);
     } else {
@@ -100,10 +54,25 @@ const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
 
   const processToneAtPoints = (event: TouchEvent) => {
     event.preventDefault();
-    const touchedTones = Array.from(event.touches)
-      .map((t) => getTone({ x: t.clientX, y: t.clientY }))
-      .filter(Boolean) as Tone[];
+    const points = Array.prototype.map.call(event.touches, (t: Touch) => ({
+      x: t.clientX,
+      y: t.clientY,
+    })) as Point[];
 
+    //touchされているキーとtoneを取得する
+    const { blackRefsIndexes, whiteRefsIndexes } = getKeyIndexes(points);
+    console.log(blackRefsIndexes, whiteRefsIndexes);
+    if (!blackRefsIndexes.length && !whiteRefsIndexes.length) return;
+    const touchedKeys = getKeyElementsByRefIndexes(
+      blackRefsIndexes,
+      whiteRefsIndexes
+    );
+    setTouchedKeys(touchedKeys);
+
+    const touchedTones = [
+      ...getBlackTonesByIndexes(blackRefsIndexes),
+      ...getWhiteTonesByIndexes(whiteRefsIndexes),
+    ];
     if (touchedTones.length > 0) {
       handleStartSomeSounds(touchedTones);
       handleStopExcepts(touchedTones);
@@ -112,17 +81,42 @@ const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
     }
   };
 
-  const handleMousePressed = (event: MouseEvent | TouchEvent) => {
-    event.preventDefault();
+  useEffect(() => {
+    for (const key of touchedKeys) {
+      key.classList.add("hover");
+    }
+    return () => {
+      for (const key of touchedKeys) {
+        key.classList.remove("hover");
+      }
+    };
+  }, [touchedKeys]);
+
+  const {
+    handleStartSound,
+    handleStartSomeSounds,
+    handleStopSound,
+    handleStopAllSound,
+    handleStopExcepts,
+    handleStartAndStopExceptSound,
+  } = useSoundHandlers();
+
+  const handleMousePressed = (event: MouseEvent) => {
     setIsKeyPressed(true);
+    processToneAtPoint(event);
   };
 
-  const handleMouseReleased = (event: MouseEvent | TouchEvent) => {
-    event.preventDefault();
+  const handleMouseMove = (event: MouseEvent) => {
+    processToneAtPoint(event);
+  };
+
+  const handleMouseReleased = (event: MouseEvent) => {
     setIsKeyPressed(false);
+    handleStopAllSound();
   };
 
   const handleTouchStart = (event: TouchEvent) => {
+    setIsKeyPressed(true);
     processToneAtPoints(event);
   };
 
@@ -131,87 +125,60 @@ const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
   };
 
   const handleTouchEnd = (event: TouchEvent) => {
-    event.preventDefault();
+    setIsKeyPressed(false);
+    setTouchedKeys([]);
     handleStopAllSound();
   };
 
   useEffect(() => {
-    document.addEventListener("mousedown", handleMousePressed);
-    document.addEventListener("mouseup", handleMouseReleased);
-    //event.preventDefault()と{ passive: false }の組み合わせでスクロールも無効化できる。
-    document.addEventListener("touchmove", handleTouchMove, { passive: false });
-    document.addEventListener("touchstart", handleTouchStart, {
+    const current = refSVG.current;
+    current?.addEventListener("mousedown", handleMousePressed, {
       passive: false,
     });
-    document.addEventListener("touchend", handleTouchEnd, { passive: false });
-
+    current?.addEventListener("touchstart", handleTouchStart, {
+      passive: false,
+    });
     return () => {
-      document.removeEventListener("mousedown", handleMousePressed);
-      document.removeEventListener("mouseup", handleMouseReleased);
+      current?.removeEventListener("mousedown", handleMousePressed);
+      current?.removeEventListener("touchstart", handleTouchStart);
+    };
+  }, [blackKeyRefs, whiteKeyRefs]);
+
+  useEffect(() => {
+    if (isKeyPressed) {
+      document.addEventListener("mousemove", handleMouseMove, {
+        passive: false,
+      });
+      document.addEventListener("touchmove", handleTouchMove, {
+        passive: false,
+      });
+      document.addEventListener("mouseup", handleMouseReleased, {
+        passive: false,
+      });
+      document.addEventListener("touchend", handleTouchEnd, { passive: false });
+    }
+    return () => {
+      document.removeEventListener("mousemove", handleMouseMove);
       document.removeEventListener("touchmove", handleTouchMove);
-      document.removeEventListener("touchstart", handleTouchStart);
+      document.removeEventListener("mouseup", handleMouseReleased);
       document.removeEventListener("touchend", handleTouchEnd);
     };
-  }, []);
-
-  const createKeyProps = (index: number, x: number, tone: Tone) => ({
-    key: index,
-    x,
-    y: Padding / 2,
-    width: KEY_WIDTH,
-    height: KEYBOARD_HEIGHT,
-    index,
-    onKeyPressed: handleStartSound,
-    onKeyReleased: handleStopSound,
-    tone,
-  });
-
-  const renderWhiteKeys = () => {
-    return naturalTones.map((tone, index) => (
-      <WhiteKey
-        {...createKeyProps(index, index * KEY_WIDTH + Padding / 2, tone)}
-      ></WhiteKey>
-    ));
-  };
-
-  const renderBlackKeys = () => {
-    const result: Array<JSX.Element | null> = [];
-    const accidentalTonesCopy = [...accidentalTones];
-
-    naturalTones.forEach((ntone, index, naturalTones) => {
-      if (
-        ntone.name.includes("E") ||
-        ntone.name.includes("B") ||
-        index === naturalTones.length - 1
-      ) {
-        result.push(null);
-        return;
-      }
-      const atone = accidentalTonesCopy.shift();
-      if (atone) {
-        result.push(
-          <BlackKey
-            {...createKeyProps(
-              index,
-              index * KEY_WIDTH + Padding / 2 + KEY_WIDTH / 2,
-              atone
-            )}
-          ></BlackKey>
-        );
-      }
-    });
-    return result;
-  };
+  }, [isKeyPressed]);
 
   return (
     <svg
       width="100%"
       height="100%"
-      viewBox={"0 0 " + SVG_WIDTH + " " + SVG_HEIGHT}
+      viewBox={
+        "0 0 " +
+        constantsRef.current?.SVG_WIDTH +
+        " " +
+        constantsRef.current?.SVG_HEIGHT
+      }
       ref={refSVG}
     >
-      {renderWhiteKeys()}
-      {renderBlackKeys()}
+      {whiteKeyElements}
+      {blackKeyElements}
     </svg>
   );
 };
