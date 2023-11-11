@@ -3,7 +3,7 @@ import Knob from "@parts/Knob";
 import Display from "@parts/Display";
 import { useApplicationContext } from "../circuits/AudioCircuit/ApplicationContextProvider";
 import Label from "../parts/Label";
-import styles from "@styles/Knob.module.scss";
+import styles from "@styles/controls/KnobControl.module.scss";
 
 const FXDepthKnob = () => {
   //max:1, min:0でトレモロの深さを指定する変数
@@ -21,7 +21,7 @@ const FXDepthKnob = () => {
   };
 
   return (
-    <div className={styles.knob}>
+    <div className={styles.KnobControl}>
       <Label>Depth</Label>
       <Knob onChange={handleValueChange} defaultValue={0.5} />
       <Display parameter={value}></Display>

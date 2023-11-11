@@ -6,11 +6,12 @@
   #synth-controls {
     display: flex;
     justify-content: space-between;
+    margin-bottom: 5px;
 
-    #toremolo-unit, #oscilloscope-unit {
+    #toremolo-unit,
+    #oscilloscope-unit,
+    #global-unit {
       display: flex;
     }
-    
   }
-
 }
