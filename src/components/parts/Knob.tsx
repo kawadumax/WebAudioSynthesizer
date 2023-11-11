@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import "@styles/Knob.scss";
+import style from "@styles/Knob.module.scss";
 
 type CommonMouseEvent = React.MouseEvent | MouseEvent;
 type CommonTouchEvent = React.TouchEvent | TouchEvent;
@@ -144,9 +144,7 @@ const Knob = ({
   return (
     <svg
       ref={knobRef}
-      className="knob"
-      width={width}
-      height={height}
+      className={style.Knob}
       viewBox={"0 0 " + width + " " + height}
     >
       <circle

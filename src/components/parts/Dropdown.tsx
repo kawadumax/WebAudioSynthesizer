@@ -1,7 +1,7 @@
 // src/components/Dropdown.tsx
 
 import React, { useState, useEffect, LiHTMLAttributes } from 'react';
-import '@styles/Dropdown.scss';
+import style from '@styles/Dropdown.module.scss';
 import { Waveform } from '@/modules/Type';
 
 interface Props {
@@ -26,14 +26,14 @@ const Dropdown: React.FC<Props> = ({
     }
 
     return (
-        <div className="dropdown">
-            <button onClick={toggleDropdown} className="dropdown-toggle">
+        <div className={style.dropdown}>
+            <button onClick={toggleDropdown}>
                 Select Waveform
             </button>
             {isOpen && (
-                <ul className="dropdown-menu">
+                <ul>
                     {options.map((option, index) => (
-                        <li key={index} data-value={option} className="dropdown-item" onClick={selectOptionHandler}>
+                        <li key={index} data-value={option} onClick={selectOptionHandler}>
                             {option}
                         </li>
                     ))}

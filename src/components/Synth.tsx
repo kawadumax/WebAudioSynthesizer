@@ -1,4 +1,4 @@
-import "@styles/Synth.scss";
+import style from "@styles/Synth.module.scss";
 import MasterVolumeKnob from "@/components/controls/MasterVolumeKnob";
 import TremoloFrequencyKnob from "./controls/TremoloFrequencyKnob";
 import TremoloDepthKnob from "./controls/TremoloDepthKnob";
@@ -14,17 +14,17 @@ const Synth = () => {
     if (audioContext) {
       return (
         <>
-          <div id="synth-controls">
-            <div id="toremolo-unit">
+          <div id={style["synth-controls"]}>
+            <div id={style["toremolo-unit"]}>
               {/* <TremoloToggle></TremoloToggle> */}
               <TremoloFrequencyKnob></TremoloFrequencyKnob>
               <TremoloDepthKnob></TremoloDepthKnob>
             </div>
-            <div id="oscilloscope-unit">
+            <div id={style["oscilloscope-unit"]}>
               <WaveformSelector></WaveformSelector>
               <Oscilloscope></Oscilloscope>
             </div>
-            <div id="global-unit">
+            <div id={style["global-unit"]}>
               <MasterVolumeKnob></MasterVolumeKnob>
             </div>
           </div>
@@ -39,7 +39,7 @@ const Synth = () => {
   };
 
   return (
-    <div className="synth" id="synth">
+    <div className="synth" id={style.synth}>
       {renderSynth(audioContext)}
     </div>
   );

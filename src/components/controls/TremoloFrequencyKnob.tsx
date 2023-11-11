@@ -2,7 +2,7 @@ import Knob from "@parts/Knob";
 import Display from "@parts/Display";
 import { useApplicationContext } from "../circuits/AudioCircuit/ApplicationContextProvider";
 import Label from "../parts/Label";
-import styles from "@styles/Knob.module.scss";
+import styles from "@styles/controls/KnobControl.module.scss";
 import { useState, useEffect } from "react";
 
 const TremoloFrequencyKnob = () => {
@@ -27,7 +27,7 @@ const TremoloFrequencyKnob = () => {
   };
 
   return (
-    <div className={styles.knob}>
+    <div className={styles.KnobControl}>
       <Label>LFO</Label>
       <Knob
         onChange={handleLFOChange}

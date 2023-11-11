@@ -3,8 +3,8 @@
 import React, { useEffect, useState } from "react";
 import Dropdown from "@parts/Dropdown";
 import Display from "@parts/Display";
-import styles from "@styles/WaveformSelector.module.scss";
-import { useApplicationContext } from "../circuits/AudioCircuit/ApplicationContextProvider";
+import styles from "@styles/controls/WaveformSelector.module.scss";
+import { useApplicationContext } from "@circuits/AudioCircuit/ApplicationContextProvider";
 import { Waveform } from "@/modules/Type";
 
 const options: Waveform[] = ["sine", "square", "sawtooth", "triangle"];

@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from "react";
 import { useApplicationContext } from "../circuits/AudioCircuit/ApplicationContextProvider";
-import "@styles/Oscilloscope.scss";
+import style from "@styles/controls/Oscilloscope.module.scss";
 
 interface Props {
   className?: string;
@@ -104,7 +104,7 @@ const Oscilloscope = ({ className = "" }: Props) => {
   }, [audioContext, canvasRef]);
 
   return (
-    <div className={className ? className + " oscilloscope" : "oscilloscope"}>
+    <div className={className ? className + " " + style.Oscilloscope : style.Oscilloscope}>
       <canvas ref={canvasRef} />
     </div>
   );
