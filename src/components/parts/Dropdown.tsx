@@ -1,6 +1,6 @@
 // src/components/Dropdown.tsx
 
-import React, { useState, useEffect, LiHTMLAttributes } from 'react';
+import React, { useState, useEffect } from 'react';
 import style from '@styles/Dropdown.module.scss';
 import { Waveform } from '@/modules/Type';
 
