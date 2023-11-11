@@ -1,5 +1,5 @@
 import React from "react";
-import "@styles/Label.scss";
+import style from "@styles/parts/Label.module.scss";
 
 interface Props {
   children: React.ReactNode;
@@ -7,7 +7,7 @@ interface Props {
 }
 
 const Label = ({ className, children }: Props) => {
-  return <label className={className + " label"}>{children}</label>;
+  return <label className={className + "  " + style.label}>{children}</label>;
 };
 
 export default Label;
