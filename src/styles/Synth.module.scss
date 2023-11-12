@@ -1,7 +1,9 @@
 @import "variables";
 
 #synth {
-  margin: 20px;
+  padding: 20px;
+  min-width: $min-width;
+  background-color: white;
 
   #synth-controls {
     display: flex;

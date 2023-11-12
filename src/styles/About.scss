@@ -4,6 +4,7 @@ section.about {
   background-color: $base-color;
   color: white;
   padding: 20px;
+  min-width: $min-width;
 
   a {
     color: $primary-color;

@@ -1,7 +1,7 @@
 // src/components/Dropdown.tsx
 
 import React, { useState, useEffect } from 'react';
-import style from '@styles/Dropdown.module.scss';
+import style from '@styles/parts/Dropdown.module.scss';
 import { Waveform } from '@/modules/Type';
 
 interface Props {

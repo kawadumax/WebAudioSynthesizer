@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import style from "@styles/Knob.module.scss";
+import style from "@styles/parts/Knob.module.scss";
 
 type CommonMouseEvent = React.MouseEvent | MouseEvent;
 type CommonTouchEvent = React.TouchEvent | TouchEvent;
