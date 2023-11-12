@@ -1,0 +1,18 @@
+@import "../variables";
+.Knob {
+  width: 100%;
+  height: 100%;
+
+  max-width: 150px;
+  max-height: 150px;
+
+  circle {
+    // box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+    filter: drop-shadow(3px 3px 5px rgba(0, 0, 0, 0.5));
+  }
+  rect {
+    fill: rgb(254, 254, 254);
+    stroke: white;
+    filter: drop-shadow(2px 2px 5px rgba(31, 28, 56, 0.5));
+  }
+}

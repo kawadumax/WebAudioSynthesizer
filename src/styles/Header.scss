@@ -5,6 +5,7 @@ header {
   justify-content: space-around;
   flex-wrap: wrap;
   background-color: $base-color;
+  min-width: $min-width;
 
   h1,
   a,
@@ -47,7 +48,6 @@ header {
       display: flex;
       align-items: center;
       margin-right: -15px;
-
 
       @include for-size(phone-only) {
         display: none;

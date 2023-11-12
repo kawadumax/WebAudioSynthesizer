@@ -25,27 +25,29 @@ const SelectBox = <T,>({ onChange, options, initialValue }: Props<T>): JSX.Eleme
     setLedStates([...ledStates]);
   }
 
-  const onClickHandler = (e: React.MouseEvent<HTMLInputElement>) => {
-    const target = e.target as HTMLInputElement;
-    const v = target.value as T;
+  const onClickHandler = (e: React.MouseEvent<HTMLLIElement>) => {
+    const liTarget = e.currentTarget as HTMLLIElement;
+    const input = liTarget.children[0] as HTMLInputElement;
+    const v = input.value as T;
     changeLedStates(v);
     onChange(v);
   }
 
   useEffect(() => {
     if (initialValue !== undefined) changeLedStates(initialValue);
-  }, [])
+  }, [initialValue])
 
   const renderSelectItems = (options: T[]) => {
-
-    return options.map((option, index) => {
+    const items = options.map((option, index) => {
       const isActive = ledStates[index].isActive;
-      return <li className={style.item} key={index}>
-        <input type="button" value={option as string} onClick={onClickHandler} className={isActive ? style.on : style.off}></input>
-        <Led isActive={isActive} />
-      </li>;
-    }
-    )
+      return (
+        <li className={style.item} key={index} onClick={onClickHandler}>
+          <input type="button" value={option as string} className={isActive ? style.on : style.off}></input>
+          <Led isActive={isActive} />
+        </li>
+      )
+    })
+    return items;
   }
 
   return (
