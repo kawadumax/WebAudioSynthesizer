@@ -3,26 +3,29 @@ import Led from "@parts/Led";
 import Toggle from "@parts/Toggle";
 import Label from "@parts/Label";
 import style from "@styles/controls/PowerToggle.module.scss";
+import { useApplicationContext } from "../circuits/AudioCircuit/ApplicationContextProvider";
 
-interface Props {
-  onPower: (isToggled: boolean) => void;
-}
-
-const PowerToggle = ({ onPower }: Props) => {
+const PowerToggle = () => {
+  const { audioContext } = useApplicationContext();
   const [power, setPower] = useState(false);
   const handlePower = () => {
     setPower(!power);
   };
 
   useEffect(() => {
-    onPower(power);
+    if (power) {
+      audioContext.resume();
+    } else {
+      audioContext.suspend();
+    }
   }, [power]);
 
   return (
     <div className={style["power-toggle"]}>
       <Label>Power</Label>
-      <Toggle onToggle={handlePower}></Toggle>
       <Led className={style["power-toggle-led"]} isActive={power}></Led>
+      <Toggle onToggle={handlePower}></Toggle>
+
     </div>
   );
 };

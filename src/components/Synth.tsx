@@ -7,6 +7,7 @@ import { useApplicationContext } from "@circuits/AudioCircuit/ApplicationContext
 import KeyboardContextProvider from "./circuits/KeyboardCircuit/KeyboardContextProvider";
 import Oscilloscope from "./controls/Oscilloscope";
 import WaveformSelector from "./controls/WaveformSelector";
+import PowerToggle from "./controls/PowerToggle";
 
 const Synth = () => {
   const { audioContext } = useApplicationContext();
@@ -26,6 +27,7 @@ const Synth = () => {
             </div>
             <div id={style["global-unit"]}>
               <MasterVolumeKnob></MasterVolumeKnob>
+              <PowerToggle></PowerToggle>
             </div>
           </div>
           <KeyboardContextProvider>
