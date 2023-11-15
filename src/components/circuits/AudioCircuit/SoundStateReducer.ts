@@ -20,6 +20,7 @@ const SoundStateReducer = (
           newSounds.push({ tone: newTone, isStarted: true });
         }
       }
+      console.log("soundstate", state, newSounds);
       return [...state, ...newSounds];
     case "STOP":
       return state.filter((s) => s.tone.name !== action.payload.name);

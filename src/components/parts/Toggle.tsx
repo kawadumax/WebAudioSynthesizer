@@ -1,5 +1,5 @@
-import "@styles/Toggle.scss";
-import React from "react";
+import style from "@styles/parts/Toggle.module.scss";
+import React, { useRef, useEffect } from "react";
 
 interface ToggleProps {
   onToggle?: (isChecked: boolean) => void;
@@ -7,9 +7,9 @@ interface ToggleProps {
 
 const Toggle = ({ onToggle }: ToggleProps) => {
   const [isChecked, setIsChecked] = React.useState(true);
-  const animateRef = React.useRef<SVGAnimateElement>(null);
+  const animateRef = useRef<SVGAnimateElement>(null);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (animateRef.current) {
       animateRef.current.beginElement();
     }
@@ -28,7 +28,7 @@ const Toggle = ({ onToggle }: ToggleProps) => {
   const initialX = width / 3;
   const movedX = (2 * width) / 3;
   return (
-    <svg className="toggle" width={width} height={height} onClick={handleClick}>
+    <svg className={style.toggle} width={width} height={height} onClick={handleClick}>
       <rect
         className="groove"
         x={width / 3 - radius}
