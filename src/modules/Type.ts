@@ -70,5 +70,4 @@ export type ApplicationContextProperties = {
   setWaveform: React.Dispatch<React.SetStateAction<Waveform>>;
 };
 
-export type ApplicationContextType = SoundStateActionDispatchers &
-  ApplicationContextProperties;
+export type ApplicationContextType = SoundStateActionDispatchers & ApplicationContextProperties;

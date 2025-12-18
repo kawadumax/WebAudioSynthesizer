@@ -1,8 +1,8 @@
+import { useEffect, useRef, useState } from "react";
+import type { Point } from "@/modules/utils/DomUtils";
 import { useKeyboardContext } from "../circuits/KeyboardCircuit/KeyboardContextProvider";
-import useSoundHandlers from "../circuits/KeyboardCircuit/SoundHandlers";
-import React, { useState, useEffect, useRef, useMemo } from "react";
-import { Point } from "@/modules/utils/DomUtils";
 import useKeyboardManager from "../circuits/KeyboardCircuit/KeyboardManager";
+import useSoundHandlers from "../circuits/KeyboardCircuit/SoundHandlers";
 
 interface Props {
   width?: number;
@@ -63,10 +63,7 @@ const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
     const { blackRefsIndexes, whiteRefsIndexes } = getKeyIndexes(points);
     console.log(blackRefsIndexes, whiteRefsIndexes);
     if (!blackRefsIndexes.length && !whiteRefsIndexes.length) return;
-    const touchedKeys = getKeyElementsByRefIndexes(
-      blackRefsIndexes,
-      whiteRefsIndexes
-    );
+    const touchedKeys = getKeyElementsByRefIndexes(blackRefsIndexes, whiteRefsIndexes);
     setTouchedKeys(touchedKeys);
 
     const touchedTones = [
@@ -110,7 +107,7 @@ const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
     processToneAtPoint(event);
   };
 
-  const handleMouseReleased = (event: MouseEvent) => {
+  const handleMouseReleased = (_event: MouseEvent) => {
     setIsKeyPressed(false);
     handleStopAllSound();
   };
@@ -124,7 +121,7 @@ const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
     processToneAtPoints(event);
   };
 
-  const handleTouchEnd = (event: TouchEvent) => {
+  const handleTouchEnd = (_event: TouchEvent) => {
     setIsKeyPressed(false);
     setTouchedKeys([]);
     handleStopAllSound();
@@ -142,7 +139,7 @@ const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
       current?.removeEventListener("mousedown", handleMousePressed);
       current?.removeEventListener("touchstart", handleTouchStart);
     };
-  }, [blackKeyRefs, whiteKeyRefs]);
+  }, [handleMousePressed, handleTouchStart]);
 
   useEffect(() => {
     if (isKeyPressed) {
@@ -163,18 +160,13 @@ const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
       document.removeEventListener("mouseup", handleMouseReleased);
       document.removeEventListener("touchend", handleTouchEnd);
     };
-  }, [isKeyPressed]);
+  }, [isKeyPressed, handleMouseMove, handleMouseReleased, handleTouchEnd, handleTouchMove]);
 
   return (
     <svg
       width="100%"
       height="100%"
-      viewBox={
-        "0 0 " +
-        constantsRef.current?.SVG_WIDTH +
-        " " +
-        constantsRef.current?.SVG_HEIGHT
-      }
+      viewBox={`0 0 ${constantsRef.current?.SVG_WIDTH} ${constantsRef.current?.SVG_HEIGHT}`}
       ref={refSVG}
     >
       {whiteKeyElements}

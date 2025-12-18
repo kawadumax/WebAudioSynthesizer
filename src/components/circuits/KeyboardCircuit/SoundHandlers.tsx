@@ -1,4 +1,4 @@
-import { Tone } from "@/modules/Type";
+import type { Tone } from "@/modules/Type";
 import { useApplicationContext } from "../AudioCircuit/ApplicationContextProvider";
 
 const useSoundHandlers = () => {
@@ -40,16 +40,14 @@ const useSoundHandlers = () => {
     stopOscillatorAll();
   };
 
-
   return {
     handleStartAndStopExceptSound,
     handleStartSomeSounds,
     handleStartSound,
     handleStopAllSound,
     handleStopExcepts,
-    handleStopSound
-  }
-
+    handleStopSound,
+  };
 };
 
 export default useSoundHandlers;

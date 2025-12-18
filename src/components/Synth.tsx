@@ -1,13 +1,13 @@
+import { useApplicationContext } from "@circuits/AudioCircuit/ApplicationContextProvider";
+import Keyboard from "@components/controls/Keyboard";
 import style from "@styles/Synth.module.scss";
 import MasterVolumeKnob from "@/components/controls/MasterVolumeKnob";
-import TremoloFrequencyKnob from "./controls/TremoloFrequencyKnob";
-import TremoloDepthKnob from "./controls/TremoloDepthKnob";
-import Keyboard from "@components/controls/Keyboard";
-import { useApplicationContext } from "@circuits/AudioCircuit/ApplicationContextProvider";
 import KeyboardContextProvider from "./circuits/KeyboardCircuit/KeyboardContextProvider";
 import Oscilloscope from "./controls/Oscilloscope";
-import WaveformSelector from "./controls/WaveformSelector";
 import PowerToggle from "./controls/PowerToggle";
+import TremoloDepthKnob from "./controls/TremoloDepthKnob";
+import TremoloFrequencyKnob from "./controls/TremoloFrequencyKnob";
+import WaveformSelector from "./controls/WaveformSelector";
 
 const Synth = () => {
   const { audioContext } = useApplicationContext();

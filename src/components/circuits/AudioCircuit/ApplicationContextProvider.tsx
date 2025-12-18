@@ -1,25 +1,16 @@
-import {
-  ReactNode,
-  createContext,
-  useContext,
-  useEffect,
-  useState,
-  useReducer
-} from "react";
-import { Tone, Waveform, OscillatorStates, ApplicationContextType } from "@/modules/Type";
+import { createContext, type ReactNode, useContext, useEffect, useReducer, useState } from "react";
+import type { ApplicationContextType, OscillatorStates, Tone, Waveform } from "@/modules/Type";
 import { createOscillator, removeOscillator } from "@/modules/utils/WebAudioUtils";
-import SoundStateReducer from "./SoundStateReducer";
 import * as soundStateActions from "./SoundStateActions";
-
+import SoundStateReducer from "./SoundStateReducer";
 
 const ApplicationContext = createContext<ApplicationContextType | undefined>(undefined);
 
 interface Props {
-  children: ReactNode
+  children: ReactNode;
 }
 
 const ApplicationContextProvider = ({ children }: Props) => {
-
   const [audioContext, setAudioContext] = useState<AudioContext | null>(null);
   const [masterVolume, setMasterVolume] = useState<GainNode | null>(null);
   const [analyser, setAnalyzer] = useState<AnalyserNode | null>(null);
@@ -80,7 +71,7 @@ const ApplicationContextProvider = ({ children }: Props) => {
     for (const tone of tonesToBeStart) {
       createOscillator(tone, oscillatorStates, audioContext, amplitude, waveform);
     }
-  }, [soundStates]);
+  }, [soundStates, amplitude, audioContext, oscillatorStates, waveform]);
 
   const boundActions = {
     startOscillator: (tone: Tone) => soundStateActions.startOscillator(dispatch, tone),
@@ -88,7 +79,8 @@ const ApplicationContextProvider = ({ children }: Props) => {
     stopOscillator: (tone: Tone) => soundStateActions.stopOscillator(dispatch, tone),
     stopOscillatorAll: () => soundStateActions.stopOscillatorAll(dispatch),
     stopOscillatorExcept: (tone: Tone) => soundStateActions.stopOscillatorExcept(dispatch, tone),
-    stopOscillatorExcepts: (tones: Tone[]) => soundStateActions.stopOscillatorExcepts(dispatch, tones),
+    stopOscillatorExcepts: (tones: Tone[]) =>
+      soundStateActions.stopOscillatorExcepts(dispatch, tones),
   };
 
   return (
@@ -102,7 +94,7 @@ const ApplicationContextProvider = ({ children }: Props) => {
         lfo: lfo!,
         waveform,
         setWaveform,
-        ...boundActions
+        ...boundActions,
       }}
     >
       {children}
@@ -113,7 +105,7 @@ const ApplicationContextProvider = ({ children }: Props) => {
 export const useApplicationContext = () => {
   const context = useContext(ApplicationContext);
   if (!context) {
-    throw new Error("ApplicationContext Error.")
+    throw new Error("ApplicationContext Error.");
   }
   return context;
 };

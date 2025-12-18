@@ -1,6 +1,6 @@
-import React, { useEffect, useRef } from "react";
-import { useApplicationContext } from "../circuits/AudioCircuit/ApplicationContextProvider";
 import style from "@styles/controls/Oscilloscope.module.scss";
+import { useEffect, useRef } from "react";
+import { useApplicationContext } from "../circuits/AudioCircuit/ApplicationContextProvider";
 
 interface Props {
   className?: string;
@@ -29,10 +29,7 @@ const drawGrid = (ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement) => {
   }
 };
 
-const drawInsetShadow = (
-  ctx: CanvasRenderingContext2D,
-  canvas: HTMLCanvasElement
-) => {
+const drawInsetShadow = (ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement) => {
   ctx.save();
 
   // シャドウプロパティを設定
@@ -100,11 +97,11 @@ const Oscilloscope = ({ className = "" }: Props) => {
     updateFrame();
 
     // コンポーネントがアンマウントされたらオーディオ解析ノードを解放する
-    return () => { };
-  }, [audioContext, canvasRef]);
+    return () => {};
+  }, [analyser]);
 
   return (
-    <div className={className ? className + " " + style.Oscilloscope : style.Oscilloscope}>
+    <div className={className ? `${className} ${style.Oscilloscope}` : style.Oscilloscope}>
       <canvas ref={canvasRef} />
     </div>
   );

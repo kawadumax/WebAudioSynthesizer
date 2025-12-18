@@ -1,5 +1,5 @@
 import style from "@styles/parts/Toggle.module.scss";
-import React, { useRef, useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 
 interface ToggleProps {
   onToggle?: (isChecked: boolean) => void;
@@ -13,7 +13,7 @@ const Toggle = ({ onToggle }: ToggleProps) => {
     if (animateRef.current) {
       animateRef.current.beginElement();
     }
-  }, [isChecked]);
+  }, []);
 
   const handleClick = () => {
     setIsChecked(!isChecked);
@@ -39,21 +39,10 @@ const Toggle = ({ onToggle }: ToggleProps) => {
         fill="white"
         filter="url(#drop-shadow-groove)"
       />
-      <filter
-        x="-20%"
-        y="-20%"
-        width="140%"
-        height="140%"
-        id="drop-shadow-groove"
-      >
+      <filter x="-20%" y="-20%" width="140%" height="140%" id="drop-shadow-groove">
         <feOffset dx="0" dy="0" />
         <feGaussianBlur stdDeviation="2" result="offset-blur" />
-        <feComposite
-          operator="out"
-          in="SourceGraphic"
-          in2="offset-blur"
-          result="inverse"
-        />
+        <feComposite operator="out" in="SourceGraphic" in2="offset-blur" result="inverse" />
         <feFlood floodColor="#000" floodOpacity="0.5" result="color" />
         <feComposite operator="in" in="color" in2="inverse" result="shadow" />
         <feComposite operator="over" in="shadow" in2="SourceGraphic" />

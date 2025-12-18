@@ -1,17 +1,9 @@
-import { Point, findIndexByPoint } from "@/modules/utils/DomUtils";
-import WhiteKey from "@/components/parts/WhiteKey";
+import { createRef, type Ref, type RefObject, useEffect, useRef, useState } from "react";
 import BlackKey from "@/components/parts/BlackKey";
-import { Tone } from "@/modules/Type";
+import WhiteKey from "@/components/parts/WhiteKey";
+import type { Tone } from "@/modules/Type";
+import { findIndexByPoint, type Point } from "@/modules/utils/DomUtils";
 import { makeSequencedKeys } from "./KeyboardCircuit";
-
-import React, {
-  useState,
-  useRef,
-  useEffect,
-  Ref,
-  createRef,
-  RefObject,
-} from "react";
 
 interface KeyProps {
   key: number;
@@ -37,16 +29,12 @@ const useKeyboardManager = (
   startIndex: number,
   endIndex: number,
   width: number,
-  height: number
+  height: number,
 ) => {
   const keys = makeSequencedKeys(startIndex, endIndex);
-  const [accidentalTones, setAccidentalTones] = useState<Tone[]>(
-    keys.rangedAccidentalTones
-  );
-  const [naturalTones, setNaturalTones] = useState<Tone[]>(
-    keys.rangedNaturalTones
-  );
-  const [wholeTones, setWholeTones] = useState<Tone[]>(keys.rangedWholeTones);
+  const [accidentalTones, _setAccidentalTones] = useState<Tone[]>(keys.rangedAccidentalTones);
+  const [naturalTones, _setNaturalTones] = useState<Tone[]>(keys.rangedNaturalTones);
+  const [wholeTones, _setWholeTones] = useState<Tone[]>(keys.rangedWholeTones);
 
   const constantsRef = useRef<Constants>(
     (() => {
@@ -63,7 +51,7 @@ const useKeyboardManager = (
         KEYBOARD_HEIGHT,
         KEY_WIDTH: (width || 200) / keys.rangedNaturalTones.length,
       };
-    })()
+    })(),
   );
 
   const createKeyProps = (index: number, x: number, tone: Tone): KeyProps => ({
@@ -82,9 +70,8 @@ const useKeyboardManager = (
       <WhiteKey
         {...createKeyProps(
           index,
-          index * constantsRef.current.KEY_WIDTH +
-            constantsRef.current.PADDING / 2,
-          naturalTones[index]
+          index * constantsRef.current.KEY_WIDTH + constantsRef.current.PADDING / 2,
+          naturalTones[index],
         )}
         ref={ref}
       />
@@ -105,18 +92,12 @@ const useKeyboardManager = (
 
     // 黒鍵をレンダリングする必要のある音符のインデックスを取得
     const blackKeyIndices = naturalTones
-      .map((ntone, index) =>
-        ntone.name.includes("E") || ntone.name.includes("B") ? -1 : index
-      )
+      .map((ntone, index) => (ntone.name.includes("E") || ntone.name.includes("B") ? -1 : index))
       .filter((index) => index !== -1);
 
     // 必要な黒鍵の数だけループして JSX.Element を生成
     for (const [i, index] of blackKeyIndices.entries()) {
-      const keyProps = createKeyProps(
-        index,
-        calculateKeyPosition(index),
-        accidentalTones[index]
-      );
+      const keyProps = createKeyProps(index, calculateKeyPosition(index), accidentalTones[index]);
 
       result.push(<BlackKey {...keyProps} ref={blackKeyRefs[i]}></BlackKey>);
     }
@@ -127,12 +108,8 @@ const useKeyboardManager = (
   const [whiteKeyElements, setWhiteKeyElements] = useState<JSX.Element[]>([]);
   const [blackKeyElements, setBlackKeyElements] = useState<JSX.Element[]>([]);
 
-  const [whiteKeyRefs, setWhiteKeyRefs] = useState<RefObject<SVGGElement>[]>(
-    []
-  );
-  const [blackKeyRefs, setBlackKeyRefs] = useState<RefObject<SVGGElement>[]>(
-    []
-  );
+  const [whiteKeyRefs, setWhiteKeyRefs] = useState<RefObject<SVGGElement>[]>([]);
+  const [blackKeyRefs, setBlackKeyRefs] = useState<RefObject<SVGGElement>[]>([]);
 
   const getTone = (position: Point): Tone | undefined => {
     return getBlackTone(position) || getWhiteTone(position);
@@ -149,24 +126,22 @@ const useKeyboardManager = (
   };
 
   const getTonesByPoints = (points: Point[]): Tone[] => {
-    return points
-      .map((point) => getTone(point))
-      .filter((tone): tone is Tone => tone !== undefined);
+    return points.map((point) => getTone(point)).filter((tone): tone is Tone => tone !== undefined);
   };
 
   const getBlackTonesByIndexes = (indexes: number[]): Tone[] => {
-    return accidentalTones.filter((t, index) => indexes.includes(index));
+    return accidentalTones.filter((_t, index) => indexes.includes(index));
   };
 
   const getWhiteTonesByIndexes = (indexes: number[]): Tone[] => {
-    return naturalTones.filter((t, index) => indexes.includes(index));
+    return naturalTones.filter((_t, index) => indexes.includes(index));
   };
 
   const getKeyIndexes = (points: Point[]) => {
     //各pointごとに、最初にblackに属するかを確認し、そうであればindexを確認し、black配列いれる。
     //そうでなければwhiteに属するかを見て、属するのであればindexを確認しwhite配列に入れる。
-    let blackRefsIndexes = [];
-    let whiteRefsIndexes = [];
+    const blackRefsIndexes = [];
+    const whiteRefsIndexes = [];
 
     for (const point of points) {
       // ポイントが黒鍵のインデックスに該当するか調べる
@@ -188,27 +163,21 @@ const useKeyboardManager = (
 
   const getKeyElementsByRefIndexes = (
     blackIndexes: number[],
-    whiteIndexes: number[]
+    whiteIndexes: number[],
   ): SVGGElement[] => {
-    const blackElements = blackIndexes.map(
-      (index) => blackKeyRefs[index].current
-    );
-    const whiteElements = whiteIndexes.map(
-      (index) => whiteKeyRefs[index].current
-    );
-    return [...blackElements, ...whiteElements].filter(
-      (elm): elm is SVGGElement => elm !== null
-    );
+    const blackElements = blackIndexes.map((index) => blackKeyRefs[index].current);
+    const whiteElements = whiteIndexes.map((index) => whiteKeyRefs[index].current);
+    return [...blackElements, ...whiteElements].filter((elm): elm is SVGGElement => elm !== null);
   };
 
   useEffect(() => {
-    const whiteKeyRefs = naturalTones.map((t) => createRef<SVGGElement>());
-    const blackKeyRefs = accidentalTones.map((t) => createRef<SVGGElement>());
+    const whiteKeyRefs = naturalTones.map((_t) => createRef<SVGGElement>());
+    const blackKeyRefs = accidentalTones.map((_t) => createRef<SVGGElement>());
     setWhiteKeyElements(renderWhiteKeys(whiteKeyRefs));
     setBlackKeyElements(renderBlackKeys(blackKeyRefs));
     setWhiteKeyRefs(whiteKeyRefs);
     setBlackKeyRefs(blackKeyRefs);
-  }, [naturalTones, accidentalTones, constantsRef.current]);
+  }, [naturalTones, accidentalTones, renderBlackKeys, renderWhiteKeys]);
 
   return {
     whiteKeyElements,

@@ -1,5 +1,6 @@
-import React, { useState, useRef, useEffect } from "react";
 import style from "@styles/parts/Knob.module.scss";
+import type React from "react";
+import { useEffect, useRef, useState } from "react";
 
 type CommonMouseEvent = React.MouseEvent | MouseEvent;
 type CommonTouchEvent = React.TouchEvent | TouchEvent;
@@ -16,12 +17,7 @@ interface Props {
   minValue?: number;
 }
 
-const Knob = ({
-  onChange,
-  defaultValue = 0.5,
-  maxValue = 1,
-  minValue = 0,
-}: Props) => {
+const Knob = ({ onChange, defaultValue = 0.5, maxValue = 1, minValue = 0 }: Props) => {
   const knobCenterPos = { x: 50, y: 50 };
 
   const [angle, setAngle] = useState<number>(0);
@@ -42,7 +38,7 @@ const Knob = ({
 
   const isMouseEvent = (event: CommonMouseEvent | CommonTouchEvent): event is CommonMouseEvent => {
     return (event as CommonMouseEvent).clientX !== undefined;
-  }
+  };
 
   const getClientCoordinates = (event: CommonMouseEvent | CommonTouchEvent): Position => {
     if (isMouseEvent(event)) {
@@ -77,7 +73,7 @@ const Knob = ({
     // その%がどれぐらいのangleに相当するか計算する
     const newAngle = MIN_ANGLE + rate * (MAX_ANGLE - MIN_ANGLE);
     setAngle(newAngle);
-  }
+  };
 
   const getAngle = (currentPos: Position) => {
     let angle = 0;
@@ -110,11 +106,11 @@ const Knob = ({
     const current = knobRef.current;
     current?.addEventListener("mousedown", handleMouseDownAndTouchStart, { passive: false });
     current?.addEventListener("touchstart", handleMouseDownAndTouchStart, { passive: false });
-    return (() => {
+    return () => {
       current?.removeEventListener("mousedown", handleMouseDownAndTouchStart);
       current?.removeEventListener("touchstart", handleMouseDownAndTouchStart);
-    })
-  }, []);
+    };
+  }, [handleMouseDownAndTouchStart, initAngle]);
 
   useEffect(() => {
     if (isDragging) {
@@ -123,7 +119,7 @@ const Knob = ({
       const newValue = getValue(newAngle);
       onChange(newValue);
     }
-  }, [isDragging, currentPos]);
+  }, [isDragging, currentPos, getAngle, getValue, onChange]);
 
   // 移動のイベントはdocumentから取ることでSVGの領域を超えてノブを動かせる
   useEffect(() => {
@@ -139,14 +135,10 @@ const Knob = ({
       document.removeEventListener("mouseup", handleMouseUpAndTouchEnd);
       document.removeEventListener("touchend", handleMouseUpAndTouchEnd);
     };
-  }, [isDragging]);
+  }, [isDragging, handleMouseMoveAndTouchMove, handleMouseUpAndTouchEnd]);
 
   return (
-    <svg
-      ref={knobRef}
-      className={style.Knob}
-      viewBox={"0 0 " + width + " " + height}
-    >
+    <svg ref={knobRef} className={style.Knob} viewBox={`0 0 ${width} ${height}`}>
       <circle
         cx={knobCenterPos.x}
         cy={knobCenterPos.y}

@@ -1,4 +1,3 @@
-import React from "react";
 import "@styles/About.scss";
 
 const About = () => {
@@ -6,8 +5,7 @@ const About = () => {
     <section className="about" id="about">
       <h2>## About Auther</h2>
       <p>
-        This Software is made by{" "}
-        <a href="https://github.com/kawadumax">kawadumax</a>
+        This Software is made by <a href="https://github.com/kawadumax">kawadumax</a>
       </p>
       <p>
         He is currently looking for a position as an audio software engineer.
@@ -23,8 +21,7 @@ const About = () => {
       <p>
         彼は今、音響ソフトウェアのエンジニアの職を求めています。
         <br />
-        彼を雇ってあげたい場合はこちら( ultima.times.sounds[at]gmail.com
-        )に連絡してみてください。
+        彼を雇ってあげたい場合はこちら( ultima.times.sounds[at]gmail.com )に連絡してみてください。
       </p>
     </section>
   );

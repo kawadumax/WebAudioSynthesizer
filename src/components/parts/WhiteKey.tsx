@@ -1,5 +1,5 @@
 import React from "react";
-import { Tone } from "@/modules/Type";
+import type { Tone } from "@/modules/Type";
 import Key from "./Key";
 
 interface Props {

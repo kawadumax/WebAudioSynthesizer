@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from "react";
-import Knob from "@parts/Knob";
 import Display from "@parts/Display";
+import Knob from "@parts/Knob";
+import styles from "@styles/controls/KnobControl.module.scss";
+import { useEffect, useState } from "react";
 import { useApplicationContext } from "../circuits/AudioCircuit/ApplicationContextProvider";
 import Label from "../parts/Label";
-import styles from "@styles/controls/KnobControl.module.scss";
 
 const FXDepthKnob = () => {
   //max:1, min:0でトレモロの深さを指定する変数
@@ -14,7 +14,7 @@ const FXDepthKnob = () => {
     if (audioContext && depth) {
       depth.gain.linearRampToValueAtTime(value, audioContext.currentTime + 1);
     }
-  }, [value]);
+  }, [value, audioContext, depth]);
 
   const handleValueChange = (value: number) => {
     setValue(value);

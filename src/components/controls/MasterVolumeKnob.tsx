@@ -1,9 +1,9 @@
-import { useState, useEffect } from "react";
-import Knob from "@parts/Knob";
 import Display from "@parts/Display";
-import { useApplicationContext } from "../circuits/AudioCircuit/ApplicationContextProvider";
+import Knob from "@parts/Knob";
 import Label from "@parts/Label";
 import styles from "@styles/controls/KnobControl.module.scss";
+import { useEffect, useState } from "react";
+import { useApplicationContext } from "../circuits/AudioCircuit/ApplicationContextProvider";
 
 const MasterVolumeKnob = () => {
   const [gain, setGain] = useState(0.5);

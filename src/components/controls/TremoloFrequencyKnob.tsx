@@ -1,9 +1,9 @@
-import Knob from "@parts/Knob";
 import Display from "@parts/Display";
+import Knob from "@parts/Knob";
+import styles from "@styles/controls/KnobControl.module.scss";
+import { useEffect, useState } from "react";
 import { useApplicationContext } from "../circuits/AudioCircuit/ApplicationContextProvider";
 import Label from "../parts/Label";
-import styles from "@styles/controls/KnobControl.module.scss";
-import { useState, useEffect } from "react";
 
 const TremoloFrequencyKnob = () => {
   //max:20, min:0でトレモロのlfoを指定する変数
@@ -15,12 +15,9 @@ const TremoloFrequencyKnob = () => {
 
   useEffect(() => {
     if (audioContext && lfo) {
-      lfo.frequency.linearRampToValueAtTime(
-        frequency,
-        audioContext.currentTime + 1
-      );
+      lfo.frequency.linearRampToValueAtTime(frequency, audioContext.currentTime + 1);
     }
-  }, [frequency]);
+  }, [frequency, audioContext, lfo]);
 
   const handleLFOChange = (frequency: number) => {
     setFrequency(frequency);

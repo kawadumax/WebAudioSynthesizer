@@ -1,5 +1,5 @@
-import { render, screen } from "@testing-library/react";
 import Label from "@parts/Label";
+import { render, screen } from "@testing-library/react";
 
 describe("Label", () => {
   it("renders with the correct text content", () => {
