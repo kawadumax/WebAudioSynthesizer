@@ -49,7 +49,7 @@ const drawInsetShadow = (ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElemen
 
 const Oscilloscope = ({ className = "" }: Props) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const { audioContext, analyser } = useApplicationContext();
+  const { analyser } = useApplicationContext();
 
   useEffect(() => {
     const canvas = canvasRef.current;

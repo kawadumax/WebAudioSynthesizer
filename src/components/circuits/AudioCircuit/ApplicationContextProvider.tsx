@@ -83,15 +83,21 @@ const ApplicationContextProvider = ({ children }: Props) => {
       soundStateActions.stopOscillatorExcepts(dispatch, tones),
   };
 
+  const isInitialized =
+    audioContext && masterVolume && analyser && amplitude && depth && lfo;
+  if (!isInitialized) {
+    return null;
+  }
+
   return (
     <ApplicationContext.Provider
       value={{
-        audioContext: audioContext!,
-        masterVolume: masterVolume!,
-        analyser: analyser!,
-        amplitude: amplitude!,
-        depth: depth!,
-        lfo: lfo!,
+        audioContext,
+        masterVolume,
+        analyser,
+        amplitude,
+        depth,
+        lfo,
         waveform,
         setWaveform,
         ...boundActions,

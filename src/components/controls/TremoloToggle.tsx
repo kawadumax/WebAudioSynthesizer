@@ -3,9 +3,7 @@ import Led from "@parts/Led";
 import Toggle from "@parts/Toggle";
 import styles from "@styles/TremoloToggle.module.scss";
 
-type Props = {};
-
-const TremoloToggle = ({}: Props) => {
+const TremoloToggle = () => {
   return (
     <div className={styles.TremoloToggle}>
       <Label>Tremolo</Label>

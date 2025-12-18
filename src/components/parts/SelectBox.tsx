@@ -1,6 +1,5 @@
 import style from "@styles/parts/SelectBox.module.scss";
-import type React from "react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Led from "./Led";
 
 interface Props<T> {
@@ -22,21 +21,22 @@ const SelectBox = <T,>({ onChange, options, initialValue }: Props<T>): JSX.Eleme
     }),
   );
 
-  const changeLedStates = (v: T) => {
-    ledStates.map((s) => {
-      s.isActive = s.value === v;
-      return s;
-    });
-    setLedStates([...ledStates]);
-  };
+  const changeLedStates = useCallback((selected: T) => {
+    setLedStates((prev) =>
+      prev.map((state) => ({
+        ...state,
+        isActive: state.value === selected,
+      })),
+    );
+  }, []);
 
-  const onClickHandler = (e: React.MouseEvent<HTMLLIElement>) => {
-    const liTarget = e.currentTarget as HTMLLIElement;
-    const input = liTarget.children[0] as HTMLInputElement;
-    const v = input.value as T;
-    changeLedStates(v);
-    onChange(v);
-  };
+  const handleSelect = useCallback(
+    (value: T) => {
+      changeLedStates(value);
+      onChange(value);
+    },
+    [changeLedStates, onChange],
+  );
 
   useEffect(() => {
     if (initialValue !== undefined) changeLedStates(initialValue);
@@ -46,11 +46,12 @@ const SelectBox = <T,>({ onChange, options, initialValue }: Props<T>): JSX.Eleme
     const items = options.map((option, index) => {
       const isActive = ledStates[index].isActive;
       return (
-        <li className={style.item} key={index} onClick={onClickHandler}>
+        <li className={style.item} key={String(option)}>
           <input
             type="button"
             value={option as string}
             className={isActive ? style.on : style.off}
+            onClick={() => handleSelect(option)}
           ></input>
           <Led isActive={isActive} />
         </li>

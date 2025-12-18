@@ -28,5 +28,6 @@ export function findIndexByPoint(refs: React.RefObject<SVGGElement>[], point: Po
   return refs.findIndex((ref) => {
     const rect = ref.current?.getBoundingClientRect();
     if (rect) return containsPoint(rect, point);
+    return false;
   });
 }

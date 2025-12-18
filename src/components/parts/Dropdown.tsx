@@ -19,18 +19,23 @@ const Dropdown: React.FC<Props> = ({ options, onChange }) => {
     onChange(value);
   }, [value, onChange]);
 
-  const selectOptionHandler = (e: React.MouseEvent<HTMLLIElement>) => {
-    setValue(e.currentTarget.getAttribute("data-value") as Waveform);
+  const selectOptionHandler = (option: Waveform) => {
+    setValue(option);
+    setIsOpen(false);
   };
 
   return (
     <div className={style.dropdown}>
-      <button onClick={toggleDropdown}>Select Waveform</button>
+      <button type="button" onClick={toggleDropdown}>
+        Select Waveform
+      </button>
       {isOpen && (
         <ul>
-          {options.map((option, index) => (
-            <li key={index} data-value={option} onClick={selectOptionHandler}>
-              {option}
+          {options.map((option) => (
+            <li key={option} data-value={option}>
+              <button type="button" onClick={() => selectOptionHandler(option)}>
+                {option}
+              </button>
             </li>
           ))}
         </ul>

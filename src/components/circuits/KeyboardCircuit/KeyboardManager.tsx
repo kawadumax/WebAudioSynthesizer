@@ -1,4 +1,12 @@
-import { createRef, type Ref, type RefObject, useEffect, useRef, useState } from "react";
+import {
+  createRef,
+  type Ref,
+  type RefObject,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import BlackKey from "@/components/parts/BlackKey";
 import WhiteKey from "@/components/parts/WhiteKey";
 import type { Tone } from "@/modules/Type";
@@ -54,56 +62,64 @@ const useKeyboardManager = (
     })(),
   );
 
-  const createKeyProps = (index: number, x: number, tone: Tone): KeyProps => ({
-    key: index,
-    x,
-    y: constantsRef.current.PADDING / 2,
-    width: constantsRef.current.KEY_WIDTH,
-    height: constantsRef.current.KEYBOARD_HEIGHT,
-    index,
-    tone,
-    hover: false,
-  });
+  const createKeyProps = useCallback(
+    (index: number, x: number, tone: Tone): KeyProps => ({
+      key: index,
+      x,
+      y: constantsRef.current.PADDING / 2,
+      width: constantsRef.current.KEY_WIDTH,
+      height: constantsRef.current.KEYBOARD_HEIGHT,
+      index,
+      tone,
+      hover: false,
+    }),
+    [],
+  );
 
-  const renderWhiteKeys = (whiteKeyRefs: Ref<SVGGElement>[]): JSX.Element[] =>
-    whiteKeyRefs.map((ref, index) => (
-      <WhiteKey
-        {...createKeyProps(
-          index,
-          index * constantsRef.current.KEY_WIDTH + constantsRef.current.PADDING / 2,
-          naturalTones[index],
-        )}
-        ref={ref}
-      />
-    ));
+  const renderWhiteKeys = useCallback(
+    (whiteKeyRefs: Ref<SVGGElement>[]): JSX.Element[] =>
+      whiteKeyRefs.map((ref, index) => (
+        <WhiteKey
+          key={`white-key-${naturalTones[index]?.name ?? index}`}
+          {...createKeyProps(
+            index,
+            index * constantsRef.current.KEY_WIDTH + constantsRef.current.PADDING / 2,
+            naturalTones[index],
+          )}
+          ref={ref}
+        />
+      )),
+    [createKeyProps, naturalTones],
+  );
 
-  function calculateKeyPosition(index: number) {
-    // キーの位置を計算するためのユーティリティ関数
+  const calculateKeyPosition = useCallback((index: number) => {
     return (
       index * constantsRef.current.KEY_WIDTH +
       constantsRef.current.PADDING / 2 +
       constantsRef.current.KEY_WIDTH / 2
     );
-  }
+  }, []);
 
-  const renderBlackKeys = (blackKeyRefs: Ref<SVGGElement>[]): JSX.Element[] => {
-    // 結果の JSX.Element 配列
-    const result: Array<JSX.Element> = [];
+  const renderBlackKeys = useCallback(
+    (blackKeyRefs: Ref<SVGGElement>[]): JSX.Element[] => {
+      const result: Array<JSX.Element> = [];
+      const blackKeyIndices = naturalTones
+        .map((ntone, index) => (ntone.name.includes("E") || ntone.name.includes("B") ? -1 : index))
+        .filter((index) => index !== -1);
 
-    // 黒鍵をレンダリングする必要のある音符のインデックスを取得
-    const blackKeyIndices = naturalTones
-      .map((ntone, index) => (ntone.name.includes("E") || ntone.name.includes("B") ? -1 : index))
-      .filter((index) => index !== -1);
+      for (const [i, index] of blackKeyIndices.entries()) {
+        const tone = accidentalTones[index];
+        const keyProps = createKeyProps(index, calculateKeyPosition(index), tone);
 
-    // 必要な黒鍵の数だけループして JSX.Element を生成
-    for (const [i, index] of blackKeyIndices.entries()) {
-      const keyProps = createKeyProps(index, calculateKeyPosition(index), accidentalTones[index]);
+        result.push(
+          <BlackKey key={`black-key-${tone?.name ?? index}`} {...keyProps} ref={blackKeyRefs[i]} />,
+        );
+      }
 
-      result.push(<BlackKey {...keyProps} ref={blackKeyRefs[i]}></BlackKey>);
-    }
-
-    return result;
-  };
+      return result;
+    },
+    [accidentalTones, calculateKeyPosition, createKeyProps, naturalTones],
+  );
 
   const [whiteKeyElements, setWhiteKeyElements] = useState<JSX.Element[]>([]);
   const [blackKeyElements, setBlackKeyElements] = useState<JSX.Element[]>([]);

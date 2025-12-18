@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { Point } from "@/modules/utils/DomUtils";
 import { useKeyboardContext } from "../circuits/KeyboardCircuit/KeyboardContextProvider";
 import useKeyboardManager from "../circuits/KeyboardCircuit/KeyboardManager";
@@ -20,63 +20,76 @@ const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
   const {
     blackKeyElements,
     whiteKeyElements,
-    blackKeyRefs,
-    whiteKeyRefs,
     constantsRef,
     getTone,
-    getTonesByPoints,
     getBlackTonesByIndexes,
     getWhiteTonesByIndexes,
     getKeyIndexes,
     getKeyElementsByRefIndexes,
-    wholeTones,
-    naturalTones,
-    accidentalTones,
   } = useKeyboardManager(startKey, endKey, width || 200, height || 100);
 
   const { isKeyPressed, setIsKeyPressed } = keyboardContext;
   const [touchedKeys, setTouchedKeys] = useState<SVGGElement[]>([]);
   const refSVG = useRef<SVGSVGElement>(null);
 
-  const processToneAtPoint = (event: MouseEvent) => {
-    event.preventDefault();
-    const point = {
-      x: event.clientX,
-      y: event.clientY,
-    };
-    const touchedTone = getTone(point);
-    if (touchedTone) {
-      handleStartAndStopExceptSound(touchedTone);
-    } else {
-      handleStopAllSound();
-    }
-  };
+  const {
+    handleStartSomeSounds,
+    handleStopAllSound,
+    handleStopExcepts,
+    handleStartAndStopExceptSound,
+  } = useSoundHandlers();
 
-  const processToneAtPoints = (event: TouchEvent) => {
-    event.preventDefault();
-    const points = Array.prototype.map.call(event.touches, (t: Touch) => ({
-      x: t.clientX,
-      y: t.clientY,
-    })) as Point[];
+  const processToneAtPoint = useCallback(
+    (event: MouseEvent) => {
+      event.preventDefault();
+      const point = {
+        x: event.clientX,
+        y: event.clientY,
+      };
+      const touchedTone = getTone(point);
+      if (touchedTone) {
+        handleStartAndStopExceptSound(touchedTone);
+      } else {
+        handleStopAllSound();
+      }
+    },
+    [getTone, handleStartAndStopExceptSound, handleStopAllSound],
+  );
 
-    //touchされているキーとtoneを取得する
-    const { blackRefsIndexes, whiteRefsIndexes } = getKeyIndexes(points);
-    console.log(blackRefsIndexes, whiteRefsIndexes);
-    if (!blackRefsIndexes.length && !whiteRefsIndexes.length) return;
-    const touchedKeys = getKeyElementsByRefIndexes(blackRefsIndexes, whiteRefsIndexes);
-    setTouchedKeys(touchedKeys);
+  const processToneAtPoints = useCallback(
+    (event: TouchEvent) => {
+      event.preventDefault();
+      const points = Array.prototype.map.call(event.touches, (t: Touch) => ({
+        x: t.clientX,
+        y: t.clientY,
+      })) as Point[];
 
-    const touchedTones = [
-      ...getBlackTonesByIndexes(blackRefsIndexes),
-      ...getWhiteTonesByIndexes(whiteRefsIndexes),
-    ];
-    if (touchedTones.length > 0) {
-      handleStartSomeSounds(touchedTones);
-      handleStopExcepts(touchedTones);
-    } else {
-      handleStopAllSound();
-    }
-  };
+      const { blackRefsIndexes, whiteRefsIndexes } = getKeyIndexes(points);
+      if (!blackRefsIndexes.length && !whiteRefsIndexes.length) return;
+      const touchedKeys = getKeyElementsByRefIndexes(blackRefsIndexes, whiteRefsIndexes);
+      setTouchedKeys(touchedKeys);
+
+      const touchedTones = [
+        ...getBlackTonesByIndexes(blackRefsIndexes),
+        ...getWhiteTonesByIndexes(whiteRefsIndexes),
+      ];
+      if (touchedTones.length > 0) {
+        handleStartSomeSounds(touchedTones);
+        handleStopExcepts(touchedTones);
+      } else {
+        handleStopAllSound();
+      }
+    },
+    [
+      getBlackTonesByIndexes,
+      getKeyElementsByRefIndexes,
+      getKeyIndexes,
+      getWhiteTonesByIndexes,
+      handleStartSomeSounds,
+      handleStopAllSound,
+      handleStopExcepts,
+    ],
+  );
 
   useEffect(() => {
     for (const key of touchedKeys) {
@@ -89,43 +102,52 @@ const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
     };
   }, [touchedKeys]);
 
-  const {
-    handleStartSound,
-    handleStartSomeSounds,
-    handleStopSound,
-    handleStopAllSound,
-    handleStopExcepts,
-    handleStartAndStopExceptSound,
-  } = useSoundHandlers();
+  const handleMousePressed = useCallback(
+    (event: MouseEvent) => {
+      setIsKeyPressed(true);
+      processToneAtPoint(event);
+    },
+    [processToneAtPoint, setIsKeyPressed],
+  );
 
-  const handleMousePressed = (event: MouseEvent) => {
-    setIsKeyPressed(true);
-    processToneAtPoint(event);
-  };
+  const handleMouseMove = useCallback(
+    (event: MouseEvent) => {
+      processToneAtPoint(event);
+    },
+    [processToneAtPoint],
+  );
 
-  const handleMouseMove = (event: MouseEvent) => {
-    processToneAtPoint(event);
-  };
+  const handleMouseReleased = useCallback(
+    (_event: MouseEvent) => {
+      setIsKeyPressed(false);
+      handleStopAllSound();
+    },
+    [handleStopAllSound, setIsKeyPressed],
+  );
 
-  const handleMouseReleased = (_event: MouseEvent) => {
-    setIsKeyPressed(false);
-    handleStopAllSound();
-  };
+  const handleTouchStart = useCallback(
+    (event: TouchEvent) => {
+      setIsKeyPressed(true);
+      processToneAtPoints(event);
+    },
+    [processToneAtPoints, setIsKeyPressed],
+  );
 
-  const handleTouchStart = (event: TouchEvent) => {
-    setIsKeyPressed(true);
-    processToneAtPoints(event);
-  };
+  const handleTouchMove = useCallback(
+    (event: TouchEvent) => {
+      processToneAtPoints(event);
+    },
+    [processToneAtPoints],
+  );
 
-  const handleTouchMove = (event: TouchEvent) => {
-    processToneAtPoints(event);
-  };
-
-  const handleTouchEnd = (_event: TouchEvent) => {
-    setIsKeyPressed(false);
-    setTouchedKeys([]);
-    handleStopAllSound();
-  };
+  const handleTouchEnd = useCallback(
+    (_event: TouchEvent) => {
+      setIsKeyPressed(false);
+      setTouchedKeys([]);
+      handleStopAllSound();
+    },
+    [handleStopAllSound, setIsKeyPressed],
+  );
 
   useEffect(() => {
     const current = refSVG.current;
@@ -168,7 +190,9 @@ const Keyboard = ({ width, height, numOfKeys = 24 }: Props) => {
       height="100%"
       viewBox={`0 0 ${constantsRef.current?.SVG_WIDTH} ${constantsRef.current?.SVG_HEIGHT}`}
       ref={refSVG}
+      aria-label="Keyboard"
     >
+      <title>Keyboard</title>
       {whiteKeyElements}
       {blackKeyElements}
     </svg>
