@@ -1,4 +1,4 @@
-@import "variables";
+@use "./variables" as *;
 
 #synth {
   padding: 20px;

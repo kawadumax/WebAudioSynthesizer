@@ -1,4 +1,4 @@
-@import "../variables";
+@use "../variables" as *;
 .SelectBox {
   padding: 0;
   margin: 10px;
