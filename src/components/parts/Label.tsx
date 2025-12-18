@@ -7,7 +7,8 @@ interface Props {
 }
 
 const Label = ({ className, children }: Props) => {
-  return <label className={`${className}  ${style.label}`}>{children}</label>;
+  const classes = [className, style.label].filter(Boolean).join(" ");
+  return <label className={classes}>{children}</label>;
 };
 
 export default Label;

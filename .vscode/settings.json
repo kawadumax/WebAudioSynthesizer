@@ -1,8 +1,8 @@
 {
   "editor.formatOnSave": true,
   "editor.codeActionsOnSave": {
-    "source.fixAll.biome": true,
-    "source.organizeImports.biome": true
+    "source.fixAll.biome": "explicit",
+    "source.organizeImports.biome": "explicit"
   },
   "[javascript]": {
     "editor.defaultFormatter": "biomejs.biome"
@@ -22,5 +22,6 @@
   "[jsonc]": {
     "editor.defaultFormatter": "biomejs.biome"
   },
-  "biome.enable": true
+  "biome.enable": true,
+  "biome.lsp.bin": "${workspaceFolder}/node_modules/.bin/biome.cmd"
 }

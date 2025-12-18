@@ -1,8 +1,8 @@
 import PowerToggle from "@components/controls/PowerToggle";
 import { render, screen } from "@testing-library/react";
 
-//子コンポーネントを持つコンポーネントのテストは保留。
-xdescribe("PowerToggle", () => {
+// 子コンポーネントを持つコンポーネントのテストは保留。
+describe.skip("PowerToggle", () => {
   it("2 + 2 = 4", () => {
     expect(2 + 2).toBe(4);
   });
