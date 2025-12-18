@@ -1,39 +1,33 @@
 {
-  "compilerOptions": {
-    "target": "es5",
-    "downlevelIteration": true,
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
-    "baseUrl": ".", // プロジェクトのルートディレクトリをベースURLとして設定
-    "paths": {
-      "@/*": ["src/*"],
-      "@components/*": ["src/components/*"],
-      "@circuits/*": ["src/components/circuits/*"],
-      "@parts/*": ["src/components/parts/*"],
-      "@controls/*":["src/components/controls/*"],
-      "@utils/*": ["src/modules/utils/*"],
-      "@styles/*": ["src/styles/*"],
-      "@assets/*": ["src/assets/*"],
-    },
-    "allowJs": true,
-    "skipLibCheck": true,
-    "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
-    "strict": true,
-    "forceConsistentCasingInFileNames": true,
-    "noFallthroughCasesInSwitch": true,
-    "module": "esnext",
-    "moduleResolution": "node",
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "noEmit": true,
-    "jsx": "react-jsx"
-  },
-  "include": [
-    "src",
-    "tests"
-  ]
+	"compilerOptions": {
+		"target": "es5",
+		"downlevelIteration": true,
+		"lib": ["dom", "dom.iterable", "esnext"],
+		"baseUrl": ".", // プロジェクトのルートディレクトリをベースURLとして設定
+		"paths": {
+			"@/*": ["src/*"],
+			"@components/*": ["src/components/*"],
+			"@circuits/*": ["src/components/circuits/*"],
+			"@parts/*": ["src/components/parts/*"],
+			"@controls/*": ["src/components/controls/*"],
+			"@utils/*": ["src/modules/utils/*"],
+			"@styles/*": ["src/styles/*"],
+			"@assets/*": ["src/assets/*"]
+		},
+		"types": ["vite/client"],
+		"allowJs": true,
+		"skipLibCheck": true,
+		"esModuleInterop": true,
+		"allowSyntheticDefaultImports": true,
+		"strict": true,
+		"forceConsistentCasingInFileNames": true,
+		"noFallthroughCasesInSwitch": true,
+		"module": "esnext",
+		"moduleResolution": "node",
+		"resolveJsonModule": true,
+		"isolatedModules": true,
+		"noEmit": true,
+		"jsx": "react-jsx"
+	},
+	"include": ["src", "tests"]
 }
