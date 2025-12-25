@@ -2,20 +2,19 @@ import Label from "@parts/Label";
 import Led from "@parts/Led";
 import Toggle from "@parts/Toggle";
 import style from "@styles/controls/PowerToggle.module.scss";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useAudioEngine } from "@circuits/AudioCircuit/AudioEngineProvider";
 
 const PowerToggle = () => {
-  const { engine, initEngine } = useAudioEngine();
-  const [power, setPower] = useState(false);
-  const handlePower = () => {
-    setPower((prev) => !prev);
+  const { engine, initEngine, isPowered, setIsPowered } = useAudioEngine();
+  const handlePower = (next: boolean) => {
+    setIsPowered(next);
   };
 
   useEffect(() => {
     let isActive = true;
     const updatePowerState = async () => {
-      if (power) {
+      if (isPowered) {
         if (!engine.isInitialized()) {
           await initEngine();
         }
@@ -29,13 +28,13 @@ const PowerToggle = () => {
     return () => {
       isActive = false;
     };
-  }, [engine, initEngine, power]);
+  }, [engine, initEngine, isPowered]);
 
   return (
     <div className={style["power-toggle"]}>
       <Label>Power</Label>
-      <Led className={style["power-toggle-led"]} isActive={power}></Led>
-      <Toggle onToggle={handlePower}></Toggle>
+      <Led className={style["power-toggle-led"]} isActive={isPowered}></Led>
+      <Toggle isOn={isPowered} onToggle={handlePower}></Toggle>
     </div>
   );
 };

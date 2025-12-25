@@ -10,11 +10,11 @@ import TremoloFrequencyKnob from "./controls/TremoloFrequencyKnob";
 import WaveformSelector from "./controls/WaveformSelector";
 
 const Synth = () => {
-  const { isReady } = useAudioEngine();
+  const { isInitializing } = useAudioEngine();
 
   return (
     <div className="synth" id={style.synth}>
-      {!isReady && <p>Initialize Audio Engine...</p>}
+      {isInitializing && <p>Initializing....</p>}
       <div id={style["synth-controls"]}>
         <div id={style["toremolo-unit"]}>
           {/* <TremoloToggle></TremoloToggle> */}

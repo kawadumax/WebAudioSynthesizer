@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import type { Dispatch, ReactNode, SetStateAction } from "react";
 import {
   createContext,
   useCallback,
@@ -13,6 +13,9 @@ import { AudioEngine } from "@/modules/AudioEngine";
 type AudioEngineContextValue = {
   engine: AudioEngine;
   isReady: boolean;
+  isInitializing: boolean;
+  isPowered: boolean;
+  setIsPowered: Dispatch<SetStateAction<boolean>>;
   initEngine: () => Promise<void>;
 };
 
@@ -21,6 +24,9 @@ const AudioEngineContext = createContext<AudioEngineContextValue | null>(null);
 const AudioEngineProvider = ({ children }: { children: ReactNode }) => {
   const engineRef = useRef(new AudioEngine());
   const [isReady, setIsReady] = useState(engineRef.current.isInitialized());
+  const [isInitializing, setIsInitializing] = useState(false);
+  const [isPowered, setIsPowered] = useState(false);
+  const initPromiseRef = useRef<Promise<void> | null>(null);
 
   useEffect(() => {
     return () => {
@@ -29,19 +35,34 @@ const AudioEngineProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const initEngine = useCallback(async () => {
-    if (!engineRef.current.isInitialized()) {
-      await engineRef.current.init();
-      setIsReady(true);
+    if (engineRef.current.isInitialized()) {
+      return;
     }
+    if (!initPromiseRef.current) {
+      setIsInitializing(true);
+      initPromiseRef.current = engineRef.current
+        .init()
+        .then(() => {
+          setIsReady(true);
+        })
+        .finally(() => {
+          setIsInitializing(false);
+          initPromiseRef.current = null;
+        });
+    }
+    await initPromiseRef.current;
   }, []);
 
   const value = useMemo(
     () => ({
       engine: engineRef.current,
       isReady,
+      isInitializing,
+      isPowered,
+      setIsPowered,
       initEngine,
     }),
-    [initEngine, isReady],
+    [initEngine, isInitializing, isPowered, isReady],
   );
 
   return <AudioEngineContext.Provider value={value}>{children}</AudioEngineContext.Provider>;

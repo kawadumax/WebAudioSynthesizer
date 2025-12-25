@@ -47,17 +47,33 @@ const drawInsetShadow = (ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElemen
   ctx.restore();
 };
 
+const drawBackground = (ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement) => {
+  ctx.fillStyle = "#282c34";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  drawGrid(ctx, canvas);
+};
+
+const drawInactiveWave = (ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement) => {
+  drawBackground(ctx, canvas);
+  drawInsetShadow(ctx, canvas);
+};
+
 const Oscilloscope = ({ className = "" }: Props) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const { engine, isReady } = useAudioEngine();
+  const { engine, isReady, isPowered } = useAudioEngine();
 
   useEffect(() => {
     const canvas = canvasRef.current;
-    const analyser = engine.getAnalyser();
-    if (!canvas || !analyser) return;
+    if (!canvas) return;
 
     const canvasContext = canvas.getContext("2d");
     if (!canvasContext) return;
+
+    const analyser = engine.getAnalyser();
+    if (!isReady || !isPowered || !analyser) {
+      drawInactiveWave(canvasContext, canvas);
+      return;
+    }
 
     analyser.fftSize = 2048;
     const bufferLength = analyser.frequencyBinCount;
@@ -68,9 +84,7 @@ const Oscilloscope = ({ className = "" }: Props) => {
       rafId = requestAnimationFrame(updateFrame);
       analyser.getByteTimeDomainData(dataArray);
 
-      canvasContext.fillStyle = "#282c34";
-      canvasContext.fillRect(0, 0, canvas.width, canvas.height);
-      drawGrid(canvasContext, canvas);
+      drawBackground(canvasContext, canvas);
 
       canvasContext.lineWidth = 2;
       canvasContext.strokeStyle = "#61dafb";
@@ -103,7 +117,7 @@ const Oscilloscope = ({ className = "" }: Props) => {
         cancelAnimationFrame(rafId);
       }
     };
-  }, [engine, isReady]);
+  }, [engine, isPowered, isReady]);
 
   return (
     <div className={className ? `${className} ${style.Oscilloscope}` : style.Oscilloscope}>
