@@ -1,43 +1,36 @@
-import type { Tone } from "@/modules/Type";
-import { useApplicationContext } from "../AudioCircuit/ApplicationContextProvider";
+import type { Tone } from "@/modules/AudioEngine/types";
+import { useAudioEngine } from "../AudioCircuit/AudioEngineProvider";
 
 const useSoundHandlers = () => {
-  const {
-    startOscillator,
-    startOscillatorSome,
-    stopOscillator,
-    stopOscillatorExcept,
-    stopOscillatorExcepts,
-    stopOscillatorAll,
-  } = useApplicationContext();
+  const { engine } = useAudioEngine();
 
   const handleStartSound: (tone: Tone) => void = (tone) => {
-    startOscillator(tone);
+    engine.startVoice(tone);
   };
 
   const handleStartSomeSounds: (tones: Tone[]) => void = (tones) => {
-    startOscillatorSome(tones);
+    engine.startVoices(tones);
   };
 
   const handleStopSound: (tone: Tone) => void = (tone) => {
-    stopOscillator(tone);
+    engine.stopVoice(tone);
   };
 
   const handleStartAndStopExceptSound: (tone: Tone | undefined) => void = (tone) => {
     if (tone) {
-      startOscillator(tone);
-      stopOscillatorExcept(tone);
+      engine.startVoice(tone);
+      engine.stopExcept(tone);
     } else {
-      stopOscillatorAll();
+      engine.stopAll();
     }
   };
 
   const handleStopExcepts: (tones: Tone[]) => void = (tones) => {
-    stopOscillatorExcepts(tones);
+    engine.stopExcepts(tones);
   };
 
   const handleStopAllSound: () => void = () => {
-    stopOscillatorAll();
+    engine.stopAll();
   };
 
   return {

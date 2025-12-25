@@ -1,4 +1,4 @@
-import type { Tone } from "@/modules/Type";
+import type { Tone } from "@/modules/AudioEngine/types";
 
 const toneNumberToFreq = (tone: number) => {
   //1オクターブで周波数が2倍なので、半音上がると2の十二乗根倍になる。

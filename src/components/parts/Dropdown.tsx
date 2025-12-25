@@ -3,7 +3,7 @@
 import style from "@styles/parts/Dropdown.module.scss";
 import type React from "react";
 import { useEffect, useState } from "react";
-import type { Waveform } from "@/modules/Type";
+import type { Waveform } from "@/modules/AudioEngine/types";
 
 interface Props {
   options: Waveform[];

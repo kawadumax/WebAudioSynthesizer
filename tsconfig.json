@@ -14,7 +14,7 @@
       "@styles/*": ["src/styles/*"],
       "@assets/*": ["src/assets/*"]
     },
-    "types": ["vite/client", "vitest/globals"],
+    "types": ["vite/client", "vitest/globals", "react", "react-dom"],
     "allowJs": true,
     "skipLibCheck": true,
     "esModuleInterop": true,

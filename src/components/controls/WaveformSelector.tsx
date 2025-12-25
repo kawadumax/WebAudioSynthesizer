@@ -1,25 +1,25 @@
 // 他のコンポーネントまたはページで
 
-import { useApplicationContext } from "@circuits/AudioCircuit/ApplicationContextProvider";
 import SelectBox from "@components/parts/SelectBox";
 import styles from "@styles/controls/WaveformSelector.module.scss";
 import type React from "react";
 import { useEffect, useState } from "react";
-import type { Waveform } from "@/modules/Type";
+import { useAudioEngine } from "@circuits/AudioCircuit/AudioEngineProvider";
+import type { Waveform } from "@/modules/AudioEngine/types";
 import Label from "../parts/Label";
 
 const options: Waveform[] = ["sine", "square", "sawtooth", "triangle"];
 
 const WaveFormSelector: React.FC = () => {
-  const { setWaveform } = useApplicationContext();
+  const { engine } = useAudioEngine();
   const [value, setValue] = useState(options[0]);
   const changeHandler = (option: Waveform) => {
     setValue(option);
   };
 
   useEffect(() => {
-    setWaveform(value);
-  }, [value, setWaveform]);
+    engine.setWaveform(value);
+  }, [engine, value]);
 
   return (
     <div className={styles.WaveformSelector}>
@@ -30,3 +30,4 @@ const WaveFormSelector: React.FC = () => {
 };
 
 export default WaveFormSelector;
+

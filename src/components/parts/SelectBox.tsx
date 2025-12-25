@@ -1,5 +1,5 @@
 import style from "@styles/parts/SelectBox.module.scss";
-import { useCallback, useEffect, useState } from "react";
+import { type ReactElement, useCallback, useEffect, useState } from "react";
 import Led from "./Led";
 
 interface Props<T> {
@@ -14,7 +14,11 @@ interface LEDState<T> {
 }
 
 // <T,>(...) の形式でジェネリック型をコンポーネントに適用
-const SelectBox = <T,>({ onChange, options, initialValue }: Props<T>): JSX.Element => {
+const SelectBox = <T,>({
+  onChange,
+  options,
+  initialValue,
+}: Props<T>): ReactElement => {
   const [ledStates, setLedStates] = useState<LEDState<T>[]>(
     options.map((option) => {
       return { value: option, isActive: false };

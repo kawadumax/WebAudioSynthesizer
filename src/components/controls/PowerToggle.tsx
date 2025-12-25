@@ -3,22 +3,33 @@ import Led from "@parts/Led";
 import Toggle from "@parts/Toggle";
 import style from "@styles/controls/PowerToggle.module.scss";
 import { useEffect, useState } from "react";
-import { useApplicationContext } from "../circuits/AudioCircuit/ApplicationContextProvider";
+import { useAudioEngine } from "@circuits/AudioCircuit/AudioEngineProvider";
 
 const PowerToggle = () => {
-  const { audioContext } = useApplicationContext();
+  const { engine, initEngine } = useAudioEngine();
   const [power, setPower] = useState(false);
   const handlePower = () => {
-    setPower(!power);
+    setPower((prev) => !prev);
   };
 
   useEffect(() => {
-    if (power) {
-      audioContext.resume();
-    } else {
-      audioContext.suspend();
-    }
-  }, [power, audioContext.resume, audioContext.suspend]);
+    let isActive = true;
+    const updatePowerState = async () => {
+      if (power) {
+        if (!engine.isInitialized()) {
+          await initEngine();
+        }
+        if (!isActive) return;
+        await engine.resume();
+      } else {
+        await engine.suspend();
+      }
+    };
+    void updatePowerState();
+    return () => {
+      isActive = false;
+    };
+  }, [engine, initEngine, power]);
 
   return (
     <div className={style["power-toggle"]}>
@@ -30,3 +41,4 @@ const PowerToggle = () => {
 };
 
 export default PowerToggle;
+

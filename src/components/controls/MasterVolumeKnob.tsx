@@ -3,22 +3,18 @@ import Knob from "@parts/Knob";
 import Label from "@parts/Label";
 import styles from "@styles/controls/KnobControl.module.scss";
 import { useEffect, useState } from "react";
-import { useApplicationContext } from "../circuits/AudioCircuit/ApplicationContextProvider";
+import { useAudioEngine } from "@circuits/AudioCircuit/AudioEngineProvider";
 
 const MasterVolumeKnob = () => {
   const [gain, setGain] = useState(0.5);
-  const { masterVolume } = useApplicationContext();
+  const { engine } = useAudioEngine();
 
   useEffect(() => {
-    if (masterVolume) {
-      masterVolume.gain.value = gain;
-    }
-  }, [gain, masterVolume]);
+    engine.setMasterGain(gain);
+  }, [engine, gain]);
 
   const handleGainChange = (newGain: number) => {
-    if (masterVolume) {
-      setGain(newGain);
-    }
+    setGain(newGain);
   };
 
   return (
@@ -31,3 +27,4 @@ const MasterVolumeKnob = () => {
 };
 
 export default MasterVolumeKnob;
+

@@ -1,4 +1,4 @@
-import type { Tone } from "@/modules/Type";
+import type { Tone } from "@/modules/AudioEngine/types";
 import "@styles/Key.scss";
 import React from "react";
 

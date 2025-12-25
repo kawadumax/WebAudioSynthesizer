@@ -1,6 +1,6 @@
 import style from "@styles/controls/Oscilloscope.module.scss";
 import { useEffect, useRef } from "react";
-import { useApplicationContext } from "../circuits/AudioCircuit/ApplicationContextProvider";
+import { useAudioEngine } from "@circuits/AudioCircuit/AudioEngineProvider";
 
 interface Props {
   className?: string;
@@ -49,10 +49,11 @@ const drawInsetShadow = (ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElemen
 
 const Oscilloscope = ({ className = "" }: Props) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const { analyser } = useApplicationContext();
+  const { engine, isReady } = useAudioEngine();
 
   useEffect(() => {
     const canvas = canvasRef.current;
+    const analyser = engine.getAnalyser();
     if (!canvas || !analyser) return;
 
     const canvasContext = canvas.getContext("2d");
@@ -62,8 +63,9 @@ const Oscilloscope = ({ className = "" }: Props) => {
     const bufferLength = analyser.frequencyBinCount;
     const dataArray = new Uint8Array(bufferLength);
 
+    let rafId = 0;
     const updateFrame = () => {
-      requestAnimationFrame(updateFrame);
+      rafId = requestAnimationFrame(updateFrame);
       analyser.getByteTimeDomainData(dataArray);
 
       canvasContext.fillStyle = "#282c34";
@@ -96,9 +98,12 @@ const Oscilloscope = ({ className = "" }: Props) => {
 
     updateFrame();
 
-    // コンポーネントがアンマウントされたらオーディオ解析ノードを解放する
-    return () => {};
-  }, [analyser]);
+    return () => {
+      if (rafId) {
+        cancelAnimationFrame(rafId);
+      }
+    };
+  }, [engine, isReady]);
 
   return (
     <div className={className ? `${className} ${style.Oscilloscope}` : style.Oscilloscope}>
@@ -108,3 +113,4 @@ const Oscilloscope = ({ className = "" }: Props) => {
 };
 
 export default Oscilloscope;
+

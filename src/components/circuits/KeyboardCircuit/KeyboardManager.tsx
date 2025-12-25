@@ -1,5 +1,6 @@
 import {
   createRef,
+  type ReactElement,
   type Ref,
   type RefObject,
   useCallback,
@@ -9,12 +10,11 @@ import {
 } from "react";
 import BlackKey from "@/components/parts/BlackKey";
 import WhiteKey from "@/components/parts/WhiteKey";
-import type { Tone } from "@/modules/Type";
+import type { Tone } from "@/modules/AudioEngine/types";
 import { findIndexByPoint, type Point } from "@/modules/utils/DomUtils";
 import { makeSequencedKeys } from "./KeyboardCircuit";
 
 interface KeyProps {
-  key: number;
   x: number;
   y: number;
   width: number;
@@ -64,7 +64,6 @@ const useKeyboardManager = (
 
   const createKeyProps = useCallback(
     (index: number, x: number, tone: Tone): KeyProps => ({
-      key: index,
       x,
       y: constantsRef.current.PADDING / 2,
       width: constantsRef.current.KEY_WIDTH,
@@ -77,7 +76,7 @@ const useKeyboardManager = (
   );
 
   const renderWhiteKeys = useCallback(
-    (whiteKeyRefs: Ref<SVGGElement>[]): JSX.Element[] =>
+    (whiteKeyRefs: Ref<SVGGElement>[]): ReactElement[] =>
       whiteKeyRefs.map((ref, index) => (
         <WhiteKey
           key={`white-key-${naturalTones[index]?.name ?? index}`}
@@ -101,8 +100,8 @@ const useKeyboardManager = (
   }, []);
 
   const renderBlackKeys = useCallback(
-    (blackKeyRefs: Ref<SVGGElement>[]): JSX.Element[] => {
-      const result: Array<JSX.Element> = [];
+    (blackKeyRefs: Ref<SVGGElement>[]): ReactElement[] => {
+      const result: Array<ReactElement> = [];
       const blackKeyIndices = naturalTones
         .map((ntone, index) => (ntone.name.includes("E") || ntone.name.includes("B") ? -1 : index))
         .filter((index) => index !== -1);
@@ -121,11 +120,11 @@ const useKeyboardManager = (
     [accidentalTones, calculateKeyPosition, createKeyProps, naturalTones],
   );
 
-  const [whiteKeyElements, setWhiteKeyElements] = useState<JSX.Element[]>([]);
-  const [blackKeyElements, setBlackKeyElements] = useState<JSX.Element[]>([]);
+  const [whiteKeyElements, setWhiteKeyElements] = useState<ReactElement[]>([]);
+  const [blackKeyElements, setBlackKeyElements] = useState<ReactElement[]>([]);
 
-  const [whiteKeyRefs, setWhiteKeyRefs] = useState<RefObject<SVGGElement>[]>([]);
-  const [blackKeyRefs, setBlackKeyRefs] = useState<RefObject<SVGGElement>[]>([]);
+  const [whiteKeyRefs, setWhiteKeyRefs] = useState<RefObject<SVGGElement | null>[]>([]);
+  const [blackKeyRefs, setBlackKeyRefs] = useState<RefObject<SVGGElement | null>[]>([]);
 
   const getTone = (position: Point): Tone | undefined => {
     return getBlackTone(position) || getWhiteTone(position);

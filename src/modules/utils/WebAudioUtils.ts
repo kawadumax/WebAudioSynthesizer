@@ -1,4 +1,4 @@
-import type { OscillatorStates, Tone, Waveform } from "../Type";
+import type { OscillatorStates, Tone, Waveform } from "../AudioEngine/types";
 
 export const createOscillator = (
   tone: Tone,

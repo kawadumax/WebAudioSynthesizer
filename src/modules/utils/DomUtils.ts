@@ -23,7 +23,10 @@ export function findRectIndex(rects: DOMRect[], point: Point): number | undefine
   return rects.findIndex((rect) => containsPoint(rect, point));
 }
 
-export function findIndexByPoint(refs: React.RefObject<SVGGElement>[], point: Point): number {
+export function findIndexByPoint(
+  refs: React.RefObject<SVGGElement | null>[],
+  point: Point,
+): number {
   // findIndexの返り値は条件を満たさなかった場合、-1、それ以外は当該のindex。
   return refs.findIndex((ref) => {
     const rect = ref.current?.getBoundingClientRect();
