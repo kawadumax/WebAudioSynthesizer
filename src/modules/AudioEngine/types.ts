@@ -37,10 +37,8 @@ export type SoundStateActionDispatchers = {
 
 export type ApplicationContextProperties = {
   audioContext: AudioContext;
-  amplitude: GainNode;
+  preFxGain: GainNode;
   masterVolume: GainNode;
-  depth: GainNode;
-  lfo: OscillatorNode;
   analyser: AnalyserNode;
   waveform: Waveform;
   setWaveform: React.Dispatch<React.SetStateAction<Waveform>>;

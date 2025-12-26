@@ -1,4 +1,7 @@
 import type { Tone, Waveform } from "@/modules/AudioEngine/types";
+import { InsertFxRack } from "./InsertFxRack";
+import type { EffectParamKey, EffectSlot } from "./effects";
+import { createEffectSlot } from "./effects";
 import { VoiceManager } from "./VoiceManager";
 
 export type SynthParams = {
@@ -15,15 +18,14 @@ const DEFAULT_PARAMS: SynthParams = {
   waveform: "sine",
 };
 
-const RAMP_SECONDS = 1;
+const LEGACY_TREMOLO_SLOT_ID = "legacy-tremolo";
 
 export class AudioEngine {
   private audioContext: AudioContext | null = null;
   private masterVolume: GainNode | null = null;
   private analyser: AnalyserNode | null = null;
-  private amplitude: GainNode | null = null;
-  private depth: GainNode | null = null;
-  private lfo: OscillatorNode | null = null;
+  private preFxGain: GainNode | null = null;
+  private insertFxRack: InsertFxRack | null = null;
   private params: SynthParams = { ...DEFAULT_PARAMS };
   private voiceManager: VoiceManager;
 
@@ -36,9 +38,8 @@ export class AudioEngine {
       !!this.audioContext &&
       !!this.masterVolume &&
       !!this.analyser &&
-      !!this.amplitude &&
-      !!this.depth &&
-      !!this.lfo
+      !!this.preFxGain &&
+      !!this.insertFxRack
     );
   }
 
@@ -52,25 +53,26 @@ export class AudioEngine {
     const analyser = ac.createAnalyser();
     analyser.connect(masterVolume);
 
-    const amplitude = ac.createGain();
-    amplitude.gain.setValueAtTime(0.5, ac.currentTime);
-    amplitude.connect(analyser);
+    const preFxGain = ac.createGain();
+    preFxGain.gain.setValueAtTime(0.5, ac.currentTime);
 
-    const depth = ac.createGain();
-    depth.gain.setValueAtTime(this.params.tremoloDepth, ac.currentTime);
-
-    const lfo = ac.createOscillator();
-    lfo.frequency.value = this.params.tremoloFrequency;
-    lfo.connect(depth);
-    depth.connect(amplitude.gain);
-    lfo.start();
+    const insertFxRack = new InsertFxRack(ac);
+    preFxGain.connect(insertFxRack.input);
+    insertFxRack.output.connect(analyser);
 
     this.audioContext = ac;
     this.masterVolume = masterVolume;
     this.analyser = analyser;
-    this.amplitude = amplitude;
-    this.depth = depth;
-    this.lfo = lfo;
+    this.preFxGain = preFxGain;
+    this.insertFxRack = insertFxRack;
+
+    const legacyTremoloSlot = createEffectSlot(LEGACY_TREMOLO_SLOT_ID, "tremolo", {
+      rate: this.params.tremoloFrequency,
+      depth: this.params.tremoloDepth,
+      mix: 1,
+    });
+    legacyTremoloSlot.collapsed = true;
+    insertFxRack.setChain([legacyTremoloSlot]);
   }
 
   async resume() {
@@ -90,33 +92,23 @@ export class AudioEngine {
   async dispose() {
     if (!this.audioContext) return;
     this.voiceManager.stopAll();
-    if (this.lfo) {
-      try {
-        this.lfo.stop();
-      } catch {
-        // Ignore invalid state errors when stopping a finished LFO.
-      } finally {
-        this.lfo.disconnect();
-      }
-    }
-    this.depth?.disconnect();
-    this.amplitude?.disconnect();
+    this.insertFxRack?.dispose();
+    this.preFxGain?.disconnect();
     this.analyser?.disconnect();
     this.masterVolume?.disconnect();
     await this.audioContext.close();
     this.audioContext = null;
     this.masterVolume = null;
     this.analyser = null;
-    this.amplitude = null;
-    this.depth = null;
-    this.lfo = null;
+    this.preFxGain = null;
+    this.insertFxRack = null;
   }
 
   async loadWorklet(moduleUrl: string) {
-    if (!this.audioContext) {
+    if (!this.audioContext || !this.insertFxRack) {
       throw new Error("AudioEngine is not initialized.");
     }
-    await this.audioContext.audioWorklet.addModule(moduleUrl);
+    await this.insertFxRack.initWorklet(moduleUrl);
   }
 
   setMasterGain(value: number) {
@@ -127,20 +119,14 @@ export class AudioEngine {
 
   setTremoloDepth(value: number) {
     this.params.tremoloDepth = value;
-    if (!this.audioContext || !this.depth) return;
-    this.depth.gain.linearRampToValueAtTime(
-      value,
-      this.audioContext.currentTime + RAMP_SECONDS,
-    );
+    if (!this.insertFxRack) return;
+    this.insertFxRack.updateEffectParam(LEGACY_TREMOLO_SLOT_ID, "depth", value);
   }
 
   setTremoloFrequency(value: number) {
     this.params.tremoloFrequency = value;
-    if (!this.audioContext || !this.lfo) return;
-    this.lfo.frequency.linearRampToValueAtTime(
-      value,
-      this.audioContext.currentTime + RAMP_SECONDS,
-    );
+    if (!this.insertFxRack) return;
+    this.insertFxRack.updateEffectParam(LEGACY_TREMOLO_SLOT_ID, "rate", value);
   }
 
   setWaveform(value: Waveform) {
@@ -148,9 +134,34 @@ export class AudioEngine {
     this.voiceManager.setWaveformForAll(value);
   }
 
+  setInsertChain(slots: EffectSlot[]) {
+    if (!this.insertFxRack) return;
+    this.insertFxRack.setChain(slots);
+  }
+
+  updateEffectParam(id: string, key: EffectParamKey, value: number) {
+    if (!this.insertFxRack) return;
+    this.insertFxRack.updateEffectParam(id, key, value);
+  }
+
+  toggleEffect(id: string, enabled: boolean) {
+    if (!this.insertFxRack) return;
+    this.insertFxRack.toggleEffect(id, enabled);
+  }
+
+  moveEffect(id: string, direction: "up" | "down") {
+    if (!this.insertFxRack) return;
+    this.insertFxRack.moveEffect(id, direction);
+  }
+
+  removeEffect(id: string) {
+    if (!this.insertFxRack) return;
+    this.insertFxRack.removeEffect(id);
+  }
+
   startVoice(tone: Tone) {
-    if (!this.audioContext || !this.amplitude) return;
-    this.voiceManager.startVoice(tone, this.audioContext, this.amplitude, this.params.waveform);
+    if (!this.audioContext || !this.preFxGain) return;
+    this.voiceManager.startVoice(tone, this.audioContext, this.preFxGain, this.params.waveform);
   }
 
   startVoices(tones: Tone[]) {
