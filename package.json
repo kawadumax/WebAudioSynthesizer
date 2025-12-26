@@ -12,6 +12,9 @@
     "typescript": "^5.9.3"
   },
   "scripts": {
+    "wasm:build": "cargo build --release --target wasm32-unknown-unknown --manifest-path wasm/insert_fx/Cargo.toml",
+    "wasm:copy": "node scripts/copy-wasm.mjs",
+    "wasm": "pnpm run wasm:build && pnpm run wasm:copy",
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",

@@ -9,12 +9,14 @@ type WorkletEffectSlot = {
 };
 
 type InsertFxWorkletMessage =
+  | { type: "loadWasm"; wasmBytes: ArrayBuffer }
   | { type: "setChain"; slots: WorkletEffectSlot[] }
   | { type: "setParam"; id: string; key: EffectParamKey; value: number }
   | { type: "setEnabled"; id: string; enabled: boolean };
 
 export type InsertFxRackOptions = {
   processorName?: string;
+  wasmBytes?: ArrayBuffer;
 };
 
 export class InsertFxRack {
@@ -26,10 +28,12 @@ export class InsertFxRack {
   private slots: EffectSlot[] = [];
   private workletReady = false;
   private workletFailed = false;
+  private pendingWasmBytes: ArrayBuffer | null = null;
 
   constructor(audioContext: AudioContext, options: InsertFxRackOptions = {}) {
     this.audioContext = audioContext;
     this.processorName = options.processorName ?? "insert-fx-processor";
+    this.pendingWasmBytes = options.wasmBytes ?? null;
     this.inputNode = this.audioContext.createGain();
     this.outputNode = this.audioContext.createGain();
     this.setBypassConnection();
@@ -60,14 +64,24 @@ export class InsertFxRack {
     return this.workletFailed;
   }
 
-  async initWorklet(moduleUrl: string, processorName?: string): Promise<void> {
+  async initWorklet(moduleUrl: string, options: InsertFxRackOptions = {}): Promise<void> {
     if (this.workletNode || this.workletFailed) return;
-    if (processorName) {
-      this.processorName = processorName;
+    if (options.processorName) {
+      this.processorName = options.processorName;
+    }
+    if (options.wasmBytes) {
+      this.pendingWasmBytes = options.wasmBytes;
     }
     try {
       await this.audioContext.audioWorklet.addModule(moduleUrl);
-      const workletNode = new AudioWorkletNode(this.audioContext, this.processorName);
+      const nodeOptions = this.pendingWasmBytes
+        ? { processorOptions: { wasmBytes: this.pendingWasmBytes } }
+        : undefined;
+      const workletNode = new AudioWorkletNode(
+        this.audioContext,
+        this.processorName,
+        nodeOptions,
+      );
       this.workletNode = workletNode;
       this.workletReady = true;
       this.setWorkletConnection();
@@ -82,6 +96,12 @@ export class InsertFxRack {
   setChain(slots: EffectSlot[]): void {
     this.slots = slots.map((slot) => this.normalizeSlot(slot));
     this.sendChain();
+  }
+
+  setWasmBytes(wasmBytes: ArrayBuffer): void {
+    this.pendingWasmBytes = wasmBytes;
+    if (!this.workletNode) return;
+    this.sendMessage({ type: "loadWasm", wasmBytes });
   }
 
   updateEffectParam(id: string, key: EffectParamKey, value: number): void {

@@ -4,6 +4,11 @@ import type { EffectParamKey, EffectSlot } from "./effects";
 import { createEffectSlot } from "./effects";
 import { VoiceManager } from "./VoiceManager";
 
+export const INSERT_FX_WORKLET_URL = new URL(
+  "../../audio/insertFxProcessor.ts",
+  import.meta.url,
+).toString();
+
 export type SynthParams = {
   masterGain: number;
   tremoloDepth: number;
@@ -104,11 +109,11 @@ export class AudioEngine {
     this.insertFxRack = null;
   }
 
-  async loadWorklet(moduleUrl: string) {
+  async loadWorklet(moduleUrl = INSERT_FX_WORKLET_URL, wasmBytes?: ArrayBuffer) {
     if (!this.audioContext || !this.insertFxRack) {
       throw new Error("AudioEngine is not initialized.");
     }
-    await this.insertFxRack.initWorklet(moduleUrl);
+    await this.insertFxRack.initWorklet(moduleUrl, { wasmBytes });
   }
 
   setMasterGain(value: number) {
