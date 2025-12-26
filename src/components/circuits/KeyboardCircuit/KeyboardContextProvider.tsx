@@ -1,4 +1,4 @@
-import { useContext, useState, createContext } from "react";
+import { createContext, useContext, useState } from "react";
 
 interface Props {
   children: React.ReactNode;
@@ -14,11 +14,7 @@ const KeyboardContext = createContext<KeyboardContext | null>(null);
 export default ({ children }: Props) => {
   const [isKeyPressed, setIsKeyPressed] = useState<boolean>(false);
   const keyboardState = { isKeyPressed, setIsKeyPressed };
-  return (
-    <KeyboardContext.Provider value={keyboardState}>
-      {children}
-    </KeyboardContext.Provider>
-  );
+  return <KeyboardContext.Provider value={keyboardState}>{children}</KeyboardContext.Provider>;
 };
 
 export const useKeyboardContext = () => useContext(KeyboardContext);

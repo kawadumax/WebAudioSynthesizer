@@ -1,5 +1,5 @@
-import { render, screen } from "@testing-library/react";
 import Led from "@parts/Led";
+import { render } from "@testing-library/react";
 
 it("should have the correct class when active", () => {
   const { container } = render(<Led className="test-led" isActive={true} />);

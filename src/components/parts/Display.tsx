@@ -1,5 +1,4 @@
 import "@styles/Display.scss";
-import { stringify } from "querystring";
 
 interface Props {
   parameter: number | string;
@@ -7,21 +6,20 @@ interface Props {
 
 const Display = ({ parameter }: Props) => {
   let displayValue: string = "";
-  let parameterType: string = typeof parameter;
+  const parameterType: string = typeof parameter;
 
   switch (typeof parameter) {
-    case 'string':
+    case "string":
       displayValue = parameter;
       break;
-    case 'number':
+    case "number":
       displayValue = parameter.toFixed(2);
       break;
     default:
       break;
   }
 
-
-  return <p className={"parameter-display " + parameterType}>{displayValue}</p>;
+  return <p className={`parameter-display ${parameterType}`}>{displayValue}</p>;
 };
 
 export default Display;
