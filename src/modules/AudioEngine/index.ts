@@ -1,4 +1,5 @@
 import type { Tone, Waveform } from "@/modules/AudioEngine/types";
+import type { InsertFxRackStatusListener } from "./InsertFxRack";
 import { InsertFxRack } from "./InsertFxRack";
 import type { EffectParamKey, EffectSlot } from "./effects";
 import { createEffectSlot } from "./effects";
@@ -31,6 +32,7 @@ export class AudioEngine {
   private analyser: AnalyserNode | null = null;
   private preFxGain: GainNode | null = null;
   private insertFxRack: InsertFxRack | null = null;
+  private insertFxStatusListener: InsertFxRackStatusListener | null = null;
   private params: SynthParams = { ...DEFAULT_PARAMS };
   private voiceManager: VoiceManager;
 
@@ -62,6 +64,9 @@ export class AudioEngine {
     preFxGain.gain.setValueAtTime(0.5, ac.currentTime);
 
     const insertFxRack = new InsertFxRack(ac);
+    if (this.insertFxStatusListener) {
+      insertFxRack.setStatusListener(this.insertFxStatusListener);
+    }
     preFxGain.connect(insertFxRack.input);
     insertFxRack.output.connect(analyser);
 
@@ -114,6 +119,11 @@ export class AudioEngine {
       throw new Error("AudioEngine is not initialized.");
     }
     await this.insertFxRack.initWorklet(moduleUrl, { wasmBytes });
+  }
+
+  setInsertFxStatusListener(listener: InsertFxRackStatusListener | null) {
+    this.insertFxStatusListener = listener;
+    this.insertFxRack?.setStatusListener(listener);
   }
 
   setMasterGain(value: number) {

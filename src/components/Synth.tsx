@@ -8,6 +8,7 @@ import PowerToggle from "./controls/PowerToggle";
 import TremoloDepthKnob from "./controls/TremoloDepthKnob";
 import TremoloFrequencyKnob from "./controls/TremoloFrequencyKnob";
 import WaveformSelector from "./controls/WaveformSelector";
+import InsertFxStatus from "./controls/InsertFxStatus";
 
 const Synth = () => {
   const { isInitializing } = useAudioEngine();
@@ -28,6 +29,7 @@ const Synth = () => {
         <div id={style["global-unit"]}>
           <MasterVolumeKnob></MasterVolumeKnob>
           <PowerToggle></PowerToggle>
+          <InsertFxStatus></InsertFxStatus>
         </div>
       </div>
       <KeyboardContextProvider>

@@ -1,13 +1,43 @@
+type EffectSlot = {
+  id: string;
+  type?: string;
+  enabled?: boolean;
+  params?: Record<string, number>;
+};
+
+const EFFECT_TYPE_IDS: Record<string, number> = {
+  none: 0,
+  distortion: 1,
+  delay: 2,
+  reverb: 3,
+  tremolo: 4,
+};
+
 class InsertFxProcessor extends AudioWorkletProcessor {
-  private chain: Array<{ id: string; enabled?: boolean; params?: Record<string, number> }> = [];
+  private chain: EffectSlot[] = [];
+  private slotIndexById = new Map<string, number>();
   private wasmReady = false;
   private memory: WebAssembly.Memory | null = null;
-  private processFn: ((inputPtr: number, outputPtr: number, frames: number, channels: number) => void) | null =
-    null;
+  private processFn:
+    | ((inputPtr: number, outputPtr: number, frames: number, channels: number) => void)
+    | null = null;
+  private initFn: ((sampleRate: number, channels: number) => void) | null = null;
+  private setChainLenFn: ((len: number) => void) | null = null;
+  private setSlotFn:
+    | ((
+        index: number,
+        effectType: number,
+        enabled: number,
+        p0: number,
+        p1: number,
+        p2: number,
+      ) => void)
+    | null = null;
   private inputPtr = 0;
   private outputPtr = 0;
   private bufferFrames = 0;
   private bufferChannels = 0;
+  private maxChannels = 2;
 
   constructor(options?: AudioWorkletNodeOptions) {
     super();
@@ -29,9 +59,8 @@ class InsertFxProcessor extends AudioWorkletProcessor {
       return;
     }
     if (data.type === "setChain") {
-      this.chain = Array.isArray(data.slots)
-        ? (data.slots as Array<{ id: string; enabled?: boolean; params?: Record<string, number> }>)
-        : [];
+      this.chain = Array.isArray(data.slots) ? (data.slots as EffectSlot[]) : [];
+      this.applyChainToWasm();
       return;
     }
     if (data.type === "setParam") {
@@ -47,12 +76,14 @@ class InsertFxProcessor extends AudioWorkletProcessor {
     const slot = this.findSlot(id);
     if (!slot || !slot.params || typeof key !== "string") return;
     slot.params[key] = value;
+    this.applySlotUpdate(id);
   }
 
   private setEnabled(id: string, enabled: boolean) {
     const slot = this.findSlot(id);
     if (!slot) return;
     slot.enabled = !!enabled;
+    this.applySlotUpdate(id);
   }
 
   private findSlot(id: string) {
@@ -87,7 +118,30 @@ class InsertFxProcessor extends AudioWorkletProcessor {
           frames: number,
           channels: number,
         ) => void;
+        this.initFn =
+          typeof exports.init === "function"
+            ? (exports.init as (sampleRate: number, channels: number) => void)
+            : null;
+        this.setChainLenFn =
+          typeof exports.set_chain_len === "function"
+            ? (exports.set_chain_len as (len: number) => void)
+            : null;
+        this.setSlotFn =
+          typeof exports.set_slot === "function"
+            ? (exports.set_slot as (
+                index: number,
+                effectType: number,
+                enabled: number,
+                p0: number,
+                p1: number,
+                p2: number,
+              ) => void)
+            : null;
+        if (this.initFn) {
+          this.initFn(sampleRate, this.maxChannels);
+        }
         this.wasmReady = true;
+        this.applyChainToWasm();
         this.port.postMessage({ type: "ready" });
       })
       .catch(() => {
@@ -96,6 +150,62 @@ class InsertFxProcessor extends AudioWorkletProcessor {
           message: "WASM instantiate failed",
         });
       });
+  }
+
+  private applyChainToWasm() {
+    if (!this.wasmReady || !this.setChainLenFn || !this.setSlotFn) return;
+    this.setChainLenFn(this.chain.length);
+    this.slotIndexById.clear();
+    for (let i = 0; i < this.chain.length; i += 1) {
+      const slot = this.chain[i];
+      this.slotIndexById.set(slot.id, i);
+      this.applySlotToWasm(i, slot);
+    }
+  }
+
+  private applySlotUpdate(id: string) {
+    if (!this.wasmReady || !this.setSlotFn) return;
+    const index = this.slotIndexById.get(id);
+    if (index === undefined) return;
+    const slot = this.chain[index];
+    if (!slot) return;
+    this.applySlotToWasm(index, slot);
+  }
+
+  private applySlotToWasm(index: number, slot: EffectSlot) {
+    if (!this.setSlotFn) return;
+    const effectTypeId =
+      typeof slot.type === "string" ? EFFECT_TYPE_IDS[slot.type] ?? 0 : 0;
+    const enabled = slot.enabled ? 1 : 0;
+    const params = slot.params ?? {};
+    let p0 = 0;
+    let p1 = 0;
+    let p2 = 0;
+    switch (slot.type) {
+      case "distortion":
+        p0 = params.drive ?? 0;
+        p1 = params.tone ?? 0;
+        p2 = params.mix ?? 0;
+        break;
+      case "delay":
+        p0 = params.time ?? 0;
+        p1 = params.feedback ?? 0;
+        p2 = params.mix ?? 0;
+        break;
+      case "reverb":
+        p0 = params.room ?? 0;
+        p1 = params.damping ?? 0;
+        p2 = params.mix ?? 0;
+        break;
+      case "tremolo":
+        p0 = params.rate ?? 0;
+        p1 = params.depth ?? 0;
+        p2 = params.mix ?? 0;
+        break;
+      default:
+        break;
+    }
+    this.setSlotFn(index, effectTypeId, enabled, p0, p1, p2);
   }
 
   private ensureCapacity(frames: number, channels: number) {

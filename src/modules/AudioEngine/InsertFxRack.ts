@@ -14,6 +14,13 @@ type InsertFxWorkletMessage =
   | { type: "setParam"; id: string; key: EffectParamKey; value: number }
   | { type: "setEnabled"; id: string; enabled: boolean };
 
+export type InsertFxRackStatus = {
+  type: "ready" | "error";
+  message?: string;
+};
+
+export type InsertFxRackStatusListener = (status: InsertFxRackStatus) => void;
+
 export type InsertFxRackOptions = {
   processorName?: string;
   wasmBytes?: ArrayBuffer;
@@ -29,6 +36,7 @@ export class InsertFxRack {
   private workletReady = false;
   private workletFailed = false;
   private pendingWasmBytes: ArrayBuffer | null = null;
+  private statusListener: InsertFxRackStatusListener | null = null;
 
   constructor(audioContext: AudioContext, options: InsertFxRackOptions = {}) {
     this.audioContext = audioContext;
@@ -64,6 +72,10 @@ export class InsertFxRack {
     return this.workletFailed;
   }
 
+  setStatusListener(listener: InsertFxRackStatusListener | null): void {
+    this.statusListener = listener;
+  }
+
   async initWorklet(moduleUrl: string, options: InsertFxRackOptions = {}): Promise<void> {
     if (this.workletNode || this.workletFailed) return;
     if (options.processorName) {
@@ -82,6 +94,17 @@ export class InsertFxRack {
         this.processorName,
         nodeOptions,
       );
+      workletNode.port.onmessage = (event) => {
+        const data = event.data as { type?: string; message?: string } | undefined;
+        if (!data || typeof data.type !== "string") return;
+        if (data.type === "ready") {
+          this.emitStatus({ type: "ready" });
+          return;
+        }
+        if (data.type === "error") {
+          this.emitStatus({ type: "error", message: data.message });
+        }
+      };
       this.workletNode = workletNode;
       this.workletReady = true;
       this.setWorkletConnection();
@@ -90,6 +113,7 @@ export class InsertFxRack {
       this.workletFailed = true;
       this.workletReady = false;
       this.setBypassConnection();
+      this.emitStatus({ type: "error", message: "AudioWorklet initialization failed." });
     }
   }
 
@@ -192,6 +216,12 @@ export class InsertFxRack {
     this.safeDisconnect(this.workletNode);
     this.inputNode.connect(this.workletNode);
     this.workletNode.connect(this.outputNode);
+  }
+
+  private emitStatus(status: InsertFxRackStatus): void {
+    if (this.statusListener) {
+      this.statusListener(status);
+    }
   }
 
   private safeDisconnect(node: AudioNode): void {

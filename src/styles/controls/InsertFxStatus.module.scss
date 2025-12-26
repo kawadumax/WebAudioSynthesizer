@@ -1,0 +1,22 @@
+.InsertFxStatus {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.status {
+  font-size: 0.75rem;
+  color: #444;
+}
+
+.InsertFxStatus[data-status="loading"] .status {
+  color: #8a6d1a;
+}
+
+.InsertFxStatus[data-status="ready"] .status {
+  color: #2e7d32;
+}
+
+.InsertFxStatus[data-status="error"] .status {
+  color: #b00020;
+}

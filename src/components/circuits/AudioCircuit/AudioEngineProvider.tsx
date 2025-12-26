@@ -8,13 +8,15 @@ import {
   useRef,
   useState,
 } from "react";
-import { AudioEngine } from "@/modules/AudioEngine";
+import { AudioEngine, INSERT_FX_WORKLET_URL } from "@/modules/AudioEngine";
 
 type AudioEngineContextValue = {
   engine: AudioEngine;
   isReady: boolean;
   isInitializing: boolean;
   isPowered: boolean;
+  fxStatus: "idle" | "loading" | "ready" | "error";
+  fxError: string | null;
   setIsPowered: Dispatch<SetStateAction<boolean>>;
   initEngine: () => Promise<void>;
 };
@@ -26,12 +28,55 @@ const AudioEngineProvider = ({ children }: { children: ReactNode }) => {
   const [isReady, setIsReady] = useState(engineRef.current.isInitialized());
   const [isInitializing, setIsInitializing] = useState(false);
   const [isPowered, setIsPowered] = useState(false);
+  const [fxStatus, setFxStatus] = useState<"idle" | "loading" | "ready" | "error">("idle");
+  const [fxError, setFxError] = useState<string | null>(null);
   const initPromiseRef = useRef<Promise<void> | null>(null);
+  const workletPromiseRef = useRef<Promise<void> | null>(null);
 
   useEffect(() => {
+    engineRef.current.setInsertFxStatusListener((status) => {
+      if (status.type === "ready") {
+        setFxStatus("ready");
+        setFxError(null);
+        return;
+      }
+      if (status.type === "error") {
+        setFxStatus("error");
+        setFxError(status.message ?? "Insert FX worklet error.");
+      }
+    });
     return () => {
       void engineRef.current.dispose();
     };
+  }, []);
+
+  const loadInsertFxWorklet = useCallback(async () => {
+    if (workletPromiseRef.current) {
+      await workletPromiseRef.current;
+      return;
+    }
+    const wasmUrl = `${import.meta.env.BASE_URL}wasm/insert_fx.wasm`;
+    workletPromiseRef.current = (async () => {
+      setFxStatus("loading");
+      setFxError(null);
+      try {
+        const response = await fetch(wasmUrl);
+        if (!response.ok) {
+          throw new Error(`Failed to fetch WASM: ${response.status}`);
+        }
+        const wasmBytes = await response.arrayBuffer();
+        await engineRef.current.loadWorklet(INSERT_FX_WORKLET_URL, wasmBytes);
+      } catch (error) {
+        setFxStatus("error");
+        console.error("Insert FX worklet load failed.", error);
+        if (error instanceof Error) {
+          setFxError(error.message);
+        } else {
+          setFxError("Insert FX worklet load failed.");
+        }
+      }
+    })();
+    await workletPromiseRef.current;
   }, []);
 
   const initEngine = useCallback(async () => {
@@ -42,7 +87,8 @@ const AudioEngineProvider = ({ children }: { children: ReactNode }) => {
       setIsInitializing(true);
       initPromiseRef.current = engineRef.current
         .init()
-        .then(() => {
+        .then(async () => {
+          await loadInsertFxWorklet();
           setIsReady(true);
         })
         .finally(() => {
@@ -59,10 +105,12 @@ const AudioEngineProvider = ({ children }: { children: ReactNode }) => {
       isReady,
       isInitializing,
       isPowered,
+      fxStatus,
+      fxError,
       setIsPowered,
       initEngine,
     }),
-    [initEngine, isInitializing, isPowered, isReady],
+    [fxError, fxStatus, initEngine, isInitializing, isPowered, isReady],
   );
 
   return <AudioEngineContext.Provider value={value}>{children}</AudioEngineContext.Provider>;
