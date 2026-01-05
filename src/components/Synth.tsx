@@ -5,8 +5,7 @@ import MasterVolumeKnob from "@/components/controls/MasterVolumeKnob";
 import KeyboardContextProvider from "./circuits/KeyboardCircuit/KeyboardContextProvider";
 import Oscilloscope from "./controls/Oscilloscope";
 import PowerToggle from "./controls/PowerToggle";
-import TremoloDepthKnob from "./controls/TremoloDepthKnob";
-import TremoloFrequencyKnob from "./controls/TremoloFrequencyKnob";
+import InsertFxRack from "./controls/InsertFxRack";
 import WaveformSelector from "./controls/WaveformSelector";
 import InsertFxStatus from "./controls/InsertFxStatus";
 
@@ -17,10 +16,8 @@ const Synth = () => {
     <div className="synth" id={style.synth}>
       {isInitializing && <p>Initializing....</p>}
       <div id={style["synth-controls"]}>
-        <div id={style["toremolo-unit"]}>
-          {/* <TremoloToggle></TremoloToggle> */}
-          <TremoloFrequencyKnob></TremoloFrequencyKnob>
-          <TremoloDepthKnob></TremoloDepthKnob>
+        <div id={style["insert-fx-unit"]}>
+          <InsertFxRack></InsertFxRack>
         </div>
         <div id={style["oscilloscope-unit"]}>
           <WaveformSelector></WaveformSelector>

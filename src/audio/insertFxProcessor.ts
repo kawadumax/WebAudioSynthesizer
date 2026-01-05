@@ -42,7 +42,7 @@ class InsertFxProcessor extends AudioWorkletProcessor {
   constructor(options?: AudioWorkletNodeOptions) {
     super();
 
-    this.port.onmessage = (event) => {
+    this.port.onmessage = (event: MessageEvent) => {
       this.handleMessage(event?.data as Record<string, unknown> | undefined);
     };
 
@@ -102,8 +102,9 @@ class InsertFxProcessor extends AudioWorkletProcessor {
     this.wasmReady = false;
     WebAssembly.instantiate(bytes, {})
       .then((result) => {
-        const instance = (result as WebAssembly.WebAssemblyInstantiatedSource).instance || result;
-        const exports = (instance as WebAssembly.Instance).exports as Record<string, unknown>;
+        const resolved = result as WebAssembly.WebAssemblyInstantiatedSource | WebAssembly.Instance;
+        const instance = "instance" in resolved ? resolved.instance : resolved;
+        const exports = instance.exports as Record<string, unknown>;
         if (!exports.memory || typeof exports.process !== "function") {
           this.port.postMessage({
             type: "error",

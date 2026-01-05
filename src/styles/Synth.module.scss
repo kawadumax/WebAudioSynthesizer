@@ -10,10 +10,14 @@
     justify-content: space-between;
     margin-bottom: 5px;
 
-    #toremolo-unit,
+    #insert-fx-unit,
     #oscilloscope-unit,
     #global-unit {
       display: flex;
+    }
+
+    #insert-fx-unit {
+      flex: 1;
     }
   }
 }
