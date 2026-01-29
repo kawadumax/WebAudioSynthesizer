@@ -18,9 +18,10 @@ class InsertFxProcessor extends AudioWorkletProcessor {
   private slotIndexById = new Map<string, number>();
   private wasmReady = false;
   private memory: WebAssembly.Memory | null = null;
-  private processFn:
-    | ((inputPtr: number, outputPtr: number, frames: number, channels: number) => void)
-    | null = null;
+  private processFn: ((frames: number, channels: number) => void) | null = null;
+  private allocBuffersFn: ((len: number) => void) | null = null;
+  private getInputPtrFn: (() => number) | null = null;
+  private getOutputPtrFn: (() => number) | null = null;
   private initFn: ((sampleRate: number, channels: number) => void) | null = null;
   private setChainLenFn: ((len: number) => void) | null = null;
   private setSlotFn:
@@ -33,10 +34,7 @@ class InsertFxProcessor extends AudioWorkletProcessor {
         p2: number,
       ) => void)
     | null = null;
-  private inputPtr = 0;
-  private outputPtr = 0;
-  private bufferFrames = 0;
-  private bufferChannels = 0;
+
   private maxChannels = 2;
 
   constructor(options?: AudioWorkletNodeOptions) {
@@ -105,20 +103,28 @@ class InsertFxProcessor extends AudioWorkletProcessor {
         const resolved = result as WebAssembly.WebAssemblyInstantiatedSource | WebAssembly.Instance;
         const instance = "instance" in resolved ? resolved.instance : resolved;
         const exports = instance.exports as Record<string, unknown>;
-        if (!exports.memory || typeof exports.process !== "function") {
+
+        // Check required exports
+        if (
+          !exports.memory ||
+          typeof exports.process_buffers !== "function" ||
+          typeof exports.alloc_buffers !== "function" ||
+          typeof exports.get_input_ptr !== "function" ||
+          typeof exports.get_output_ptr !== "function"
+        ) {
           this.port.postMessage({
             type: "error",
-            message: "Invalid WASM exports",
+            message: "Invalid WASM exports (missing v3 functions)",
           });
           return;
         }
+
         this.memory = exports.memory as WebAssembly.Memory;
-        this.processFn = exports.process as (
-          inputPtr: number,
-          outputPtr: number,
-          frames: number,
-          channels: number,
-        ) => void;
+        this.processFn = exports.process_buffers as (frames: number, channels: number) => void;
+        this.allocBuffersFn = exports.alloc_buffers as (len: number) => void;
+        this.getInputPtrFn = exports.get_input_ptr as () => number;
+        this.getOutputPtrFn = exports.get_output_ptr as () => number;
+
         this.initFn =
           typeof exports.init === "function"
             ? (exports.init as (sampleRate: number, channels: number) => void)
@@ -145,10 +151,10 @@ class InsertFxProcessor extends AudioWorkletProcessor {
         this.applyChainToWasm();
         this.port.postMessage({ type: "ready" });
       })
-      .catch(() => {
+      .catch((e) => {
         this.port.postMessage({
           type: "error",
-          message: "WASM instantiate failed",
+          message: `WASM instantiate failed: ${e}`,
         });
       });
   }
@@ -175,8 +181,7 @@ class InsertFxProcessor extends AudioWorkletProcessor {
 
   private applySlotToWasm(index: number, slot: EffectSlot) {
     if (!this.setSlotFn) return;
-    const effectTypeId =
-      typeof slot.type === "string" ? EFFECT_TYPE_IDS[slot.type] ?? 0 : 0;
+    const effectTypeId = typeof slot.type === "string" ? (EFFECT_TYPE_IDS[slot.type] ?? 0) : 0;
     const enabled = slot.enabled ? 1 : 0;
     const params = slot.params ?? {};
     let p0 = 0;
@@ -209,27 +214,7 @@ class InsertFxProcessor extends AudioWorkletProcessor {
     this.setSlotFn(index, effectTypeId, enabled, p0, p1, p2);
   }
 
-  private ensureCapacity(frames: number, channels: number) {
-    if (!this.memory) return;
-    if (frames <= this.bufferFrames && channels <= this.bufferChannels) return;
-    this.bufferFrames = frames;
-    this.bufferChannels = channels;
-    const bytes = frames * channels * 4 * 2;
-    const current = this.memory.buffer.byteLength;
-    if (bytes > current) {
-      const needed = bytes - current;
-      const pages = Math.ceil(needed / 65536);
-      this.memory.grow(pages);
-    }
-    this.inputPtr = 0;
-    this.outputPtr = frames * channels * 4;
-  }
-
-  private copyInputToOutput(
-    input: Float32Array[],
-    output: Float32Array[],
-    channels: number,
-  ) {
+  private copyInputToOutput(input: Float32Array[], output: Float32Array[], channels: number) {
     for (let c = 0; c < channels; c += 1) {
       output[c].set(input[c]);
     }
@@ -241,6 +226,9 @@ class InsertFxProcessor extends AudioWorkletProcessor {
   process(inputs: Float32Array[][], outputs: Float32Array[][]) {
     const input = inputs[0];
     const output = outputs[0];
+    const channels = output ? output.length : 0;
+    const frames = output && output[0] ? output[0].length : 0;
+
     if (!output || output.length === 0) return true;
     if (!input || input.length === 0) {
       for (let c = 0; c < output.length; c += 1) {
@@ -249,37 +237,51 @@ class InsertFxProcessor extends AudioWorkletProcessor {
       return true;
     }
 
-    const channels = Math.min(input.length, output.length);
-    const frames = input[0].length;
-    if (!this.wasmReady || !this.memory || !this.processFn) {
+    if (
+      !this.wasmReady ||
+      !this.processFn ||
+      !this.allocBuffersFn ||
+      !this.getInputPtrFn ||
+      !this.getOutputPtrFn ||
+      !this.memory
+    ) {
       this.copyInputToOutput(input, output, channels);
       return true;
     }
 
-    this.ensureCapacity(frames, channels);
+    // Ensure WASM buffers are large enough
+    const totalSamples = frames * channels;
+    this.allocBuffersFn(totalSamples);
 
-    const total = frames * channels;
-    const interleaved = new Float32Array(this.memory.buffer, this.inputPtr, total);
-    const outInterleaved = new Float32Array(this.memory.buffer, this.outputPtr, total);
+    const inputPtr = this.getInputPtrFn();
+    const outputPtr = this.getOutputPtrFn();
 
+    // Create views on the WASM memory
+    const wasmInput = new Float32Array(this.memory.buffer, inputPtr, totalSamples);
+    const wasmOutput = new Float32Array(this.memory.buffer, outputPtr, totalSamples);
+
+    // Interleave and copy input to WASM
     let index = 0;
     for (let i = 0; i < frames; i += 1) {
       for (let c = 0; c < channels; c += 1) {
-        interleaved[index] = input[c][i];
+        wasmInput[index] = input[c][i];
         index += 1;
       }
     }
 
-    this.processFn(this.inputPtr, this.outputPtr, frames, channels);
+    // Process
+    this.processFn(frames, channels);
 
+    // De-interleave and copy output
     index = 0;
     for (let i = 0; i < frames; i += 1) {
       for (let c = 0; c < channels; c += 1) {
-        output[c][i] = outInterleaved[index];
+        output[c][i] = wasmOutput[index];
         index += 1;
       }
     }
 
+    // Silence remaining output channels
     for (let c = channels; c < output.length; c += 1) {
       output[c].fill(0);
     }

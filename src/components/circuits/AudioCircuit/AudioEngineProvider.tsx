@@ -45,7 +45,17 @@ const AudioEngineProvider = ({ children }: { children: ReactNode }) => {
         setFxError(status.message ?? "Insert FX worklet error.");
       }
     });
+
+    const handleUserGesture = () => {
+      void engineRef.current.resume();
+    };
+
+    window.addEventListener("click", handleUserGesture, { once: true });
+    window.addEventListener("keydown", handleUserGesture, { once: true });
+
     return () => {
+      window.removeEventListener("click", handleUserGesture);
+      window.removeEventListener("keydown", handleUserGesture);
       void engineRef.current.dispose();
     };
   }, []);

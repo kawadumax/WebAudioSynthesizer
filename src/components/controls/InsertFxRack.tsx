@@ -1,13 +1,14 @@
+import { useAudioEngine } from "@circuits/AudioCircuit/AudioEngineProvider";
 import Display from "@parts/Display";
 import Knob from "@parts/Knob";
 import Label from "@parts/Label";
 import Led from "@parts/Led";
 import Toggle from "@parts/Toggle";
-import { useAudioEngine } from "@circuits/AudioCircuit/AudioEngineProvider";
+import styles from "@styles/controls/InsertFxRack.module.scss";
+import { useEffect, useMemo, useState } from "react";
 import type { EffectParamKey, EffectSlot, EffectType } from "@/modules/AudioEngine/effects";
 import { createEffectSlot } from "@/modules/AudioEngine/effects";
-import { useEffect, useMemo, useState } from "react";
-import styles from "@styles/controls/InsertFxRack.module.scss";
+import InsertFxStatus from "./InsertFxStatus";
 
 type ParamDefinition = {
   key: EffectParamKey;
@@ -77,6 +78,7 @@ const createInitialSlots = (): EffectSlot[] => [
 const InsertFxRack = () => {
   const { engine, isReady } = useAudioEngine();
   const [slots, setSlots] = useState<EffectSlot[]>(() => createInitialSlots());
+  const [selectedSlotId, setSelectedSlotId] = useState<string>(slots[0].id);
 
   useEffect(() => {
     if (!isReady) return;
@@ -88,16 +90,13 @@ const InsertFxRack = () => {
       prev.map((slot) => {
         if (slot.id !== id) return slot;
         const next = createEffectSlot(id, type);
-        const collapsed = type === "none" ? true : slot.collapsed;
-        return { ...next, collapsed };
+        return { ...next, collapsed: slot.collapsed };
       }),
     );
   };
 
   const handleToggle = (id: string, enabled: boolean) => {
-    setSlots((prev) =>
-      prev.map((slot) => (slot.id === id ? { ...slot, enabled } : slot)),
-    );
+    setSlots((prev) => prev.map((slot) => (slot.id === id ? { ...slot, enabled } : slot)));
   };
 
   const handleParamChange = (id: string, key: EffectParamKey, value: number) => {
@@ -118,17 +117,12 @@ const InsertFxRack = () => {
     );
   };
 
-  const handleCollapse = (id: string) => {
-    setSlots((prev) =>
-      prev.map((slot) => (slot.id === id ? { ...slot, collapsed: !slot.collapsed } : slot)),
-    );
-  };
-
   const handleClear = (id: string) => {
     setSlots((prev) => prev.map((slot) => (slot.id === id ? createEffectSlot(id, "none") : slot)));
   };
 
-  const handleMove = (id: string, direction: "up" | "down") => {
+  const handleMove = (id: string, direction: "up" | "down", e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent selection
     setSlots((prev) => {
       const index = prev.findIndex((slot) => slot.id === id);
       if (index === -1) return prev;
@@ -141,26 +135,51 @@ const InsertFxRack = () => {
     });
   };
 
-  const slotsWithIndex = useMemo(
-    () => slots.map((slot, index) => ({ slot, index })),
-    [slots],
-  );
+  const slotsWithIndex = useMemo(() => slots.map((slot, index) => ({ slot, index })), [slots]);
+
+  const selectedSlot = slots.find((s) => s.id === selectedSlotId);
 
   return (
     <section className={styles.InsertFxRack}>
       <div className={styles.header}>
-        <Label className={styles.title}>Insert FX</Label>
-        <span className={styles.subtitle}>Slots: {slots.length}</span>
+        <div className={styles.headerLeft}>
+          <Label className={styles.title}>Insert FX</Label>
+          <span className={styles.subtitle}>Slots: {slots.length}</span>
+        </div>
+        <InsertFxStatus />
       </div>
-      <div className={styles.slots}>
-        {slotsWithIndex.map(({ slot, index }) => (
-          <div key={slot.id} className={styles.slot} data-type={slot.type}>
-            <div className={styles.slotHeader}>
-              <div className={styles.slotLeft}>
-                <Label className={styles.slotLabel}>Slot {index + 1}</Label>
+
+      <div className={styles.container}>
+        {/* Left Pane: Slot List */}
+        <div className={styles.slotList}>
+          {slotsWithIndex.map(({ slot, index }) => (
+            <div
+              key={slot.id}
+              className={`${styles.slotItem} ${selectedSlotId === slot.id ? styles.selected : ""}`}
+              onClick={() => setSelectedSlotId(slot.id)}
+            >
+              <div className={styles.slotHeaderTop}>
+                <div className={styles.slotHeaderLeft}>
+                  <div className={styles.enable} onClick={(e) => e.stopPropagation()}>
+                    <Led
+                      className={styles.led}
+                      isActive={slot.enabled && slot.type !== "none"}
+                      style={{ width: 10, height: 10 }}
+                    />
+                    {/* Toggle always visible, disabled if none */}
+                    <Toggle
+                      isOn={slot.type !== "none" && slot.enabled}
+                      onToggle={(next) => handleToggle(slot.id, next)}
+                      width={32}
+                      height={16}
+                      disabled={slot.type === "none"}
+                    />
+                  </div>
+                </div>
                 <select
                   className={styles.select}
                   value={slot.type}
+                  onClick={(e) => e.stopPropagation()}
                   onChange={(event) => handleTypeChange(slot.id, event.target.value as EffectType)}
                 >
                   {EFFECT_OPTIONS.map((option) => (
@@ -170,72 +189,76 @@ const InsertFxRack = () => {
                   ))}
                 </select>
               </div>
-              <div className={styles.slotRight}>
-                <div className={styles.enable}>
-                  <Led className={styles.led} isActive={slot.enabled && slot.type !== "none"}></Led>
-                  {slot.type === "none" ? (
-                    <span className={styles.empty}>Empty</span>
-                  ) : (
-                    <Toggle isOn={slot.enabled} onToggle={(next) => handleToggle(slot.id, next)} />
-                  )}
-                </div>
-                <div className={styles.actions}>
-                  <button
-                    type="button"
-                    className={styles.actionButton}
-                    onClick={() => handleMove(slot.id, "up")}
-                    disabled={index === 0}
-                  >
-                    Up
-                  </button>
-                  <button
-                    type="button"
-                    className={styles.actionButton}
-                    onClick={() => handleMove(slot.id, "down")}
-                    disabled={index === slots.length - 1}
-                  >
-                    Down
-                  </button>
-                  <button
-                    type="button"
-                    className={styles.actionButton}
-                    onClick={() => handleCollapse(slot.id)}
-                    disabled={slot.type === "none"}
-                  >
-                    {slot.collapsed ? "Show" : "Hide"}
-                  </button>
-                  <button
-                    type="button"
-                    className={styles.actionButton}
-                    onClick={() => handleClear(slot.id)}
-                  >
-                    Clear
-                  </button>
-                </div>
+
+              {/* Actions Grid */}
+              <div className={styles.actionsGrid}>
+                <button
+                  type="button"
+                  className={styles.actionButton}
+                  onClick={(e) => handleMove(slot.id, "up", e)}
+                  disabled={index === 0}
+                >
+                  Up
+                </button>
+                <button
+                  type="button"
+                  className={styles.actionButton}
+                  onClick={(e) => handleMove(slot.id, "down", e)}
+                  disabled={index === slots.length - 1}
+                >
+                  Down
+                </button>
+                <button
+                  type="button"
+                  className={styles.actionButton}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleClear(slot.id);
+                  }}
+                >
+                  Clear
+                </button>
               </div>
             </div>
-            {slot.type !== "none" && !slot.collapsed && (
+          ))}
+        </div>
+
+        {/* Right Pane: Parameters */}
+        <div className={styles.paramPanel}>
+          {selectedSlot && selectedSlot.type !== "none" ? (
+            <>
+              <div className={styles.paramHeader}>
+                <Label>{selectedSlot.type.toUpperCase()} PARAMETERS</Label>
+              </div>
               <div className={styles.params}>
-                {PARAMS_BY_TYPE[slot.type].map((param) => {
-                  const params = slot.params as Partial<Record<EffectParamKey, number>>;
+                {PARAMS_BY_TYPE[selectedSlot.type].map((param) => {
+                  const params = selectedSlot.params as Partial<Record<EffectParamKey, number>>;
                   const value = params[param.key] ?? 0;
                   return (
-                  <div key={`${slot.id}-${slot.type}-${param.key}`} className={styles.param}>
-                    <Label>{param.label}</Label>
-                    <Knob
-                      onChange={(value) => handleParamChange(slot.id, param.key, value)}
-                      defaultValue={value}
-                      minValue={param.min}
-                      maxValue={param.max}
-                    />
-                    <Display parameter={value}></Display>
-                  </div>
+                    <div
+                      key={`${selectedSlot.id}-${selectedSlot.type}-${param.key}`}
+                      className={styles.param}
+                    >
+                      <Label>{param.label}</Label>
+                      <Knob
+                        onChange={(value) => handleParamChange(selectedSlot.id, param.key, value)}
+                        defaultValue={value}
+                        minValue={param.min}
+                        maxValue={param.max}
+                        size={60}
+                      />
+                      <Display parameter={value} className={styles.smallDisplay}></Display>
+                    </div>
                   );
                 })}
               </div>
-            )}
-          </div>
-        ))}
+            </>
+          ) : (
+            <div className={styles.emptyPanel}>
+              <Label>NO EFFECT SELECTED</Label>
+            </div>
+          )}
+        </div>
       </div>
     </section>
   );

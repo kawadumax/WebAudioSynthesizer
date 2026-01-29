@@ -19,9 +19,10 @@ interface Props {
   defaultValue?: number;
   maxValue?: number;
   minValue?: number;
+  size?: number;
 }
 
-const Knob = ({ onChange, defaultValue = 0.5, maxValue = 1, minValue = 0 }: Props) => {
+const Knob = ({ onChange, defaultValue = 0.5, maxValue = 1, minValue = 0, size = 100 }: Props) => {
   const knobCenterPos = { x: 50, y: 50 };
 
   const [angle, setAngle] = useState<number>(0);
@@ -100,12 +101,12 @@ const Knob = ({ onChange, defaultValue = 0.5, maxValue = 1, minValue = 0 }: Prop
 
   const getValue = useCallback(
     (angle: number) => {
-    // 角度に応じてValueを返す。
-    // 現在のAngleの重みを計算
-    const rateAngle = (angle - MIN_ANGLE) / (MAX_ANGLE - MIN_ANGLE);
-    //重みを元に現在のvalueを計算
-    const value = (maxValue - minValue) * rateAngle + minValue;
-    return value;
+      // 角度に応じてValueを返す。
+      // 現在のAngleの重みを計算
+      const rateAngle = (angle - MIN_ANGLE) / (MAX_ANGLE - MIN_ANGLE);
+      //重みを元に現在のvalueを計算
+      const value = (maxValue - minValue) * rateAngle + minValue;
+      return value;
     },
     [maxValue, minValue],
   );
@@ -121,14 +122,19 @@ const Knob = ({ onChange, defaultValue = 0.5, maxValue = 1, minValue = 0 }: Prop
     };
   }, [handleMouseDownAndTouchStart, initAngle]);
 
+  const onChangeRef = useRef(onChange);
+  useEffect(() => {
+    onChangeRef.current = onChange;
+  }, [onChange]);
+
   useEffect(() => {
     if (isDragging) {
       const newAngle = getAngle(currentPos);
       setAngle(newAngle);
       const newValue = getValue(newAngle);
-      onChange(newValue);
+      onChangeRef.current(newValue);
     }
-  }, [isDragging, currentPos, getAngle, getValue, onChange]);
+  }, [isDragging, currentPos, getAngle, getValue]);
 
   // 移動のイベントはdocumentから取ることでSVGの領域を超えてノブを動かせる
   useEffect(() => {
@@ -150,6 +156,7 @@ const Knob = ({ onChange, defaultValue = 0.5, maxValue = 1, minValue = 0 }: Prop
     <svg
       ref={knobRef}
       className={style.Knob}
+      style={{ width: size, height: size }}
       viewBox={`0 0 ${width} ${height}`}
       aria-label="Knob control"
     >

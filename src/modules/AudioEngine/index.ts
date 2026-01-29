@@ -1,14 +1,12 @@
+import insertFxProcessorUrl from "@/audio/insertFxProcessor.ts?worker&url";
 import type { Tone, Waveform } from "@/modules/AudioEngine/types";
-import type { InsertFxRackStatusListener } from "./InsertFxRack";
-import { InsertFxRack } from "./InsertFxRack";
 import type { EffectParamKey, EffectSlot } from "./effects";
 import { createEffectSlot } from "./effects";
+import type { InsertFxRackStatusListener } from "./InsertFxRack";
+import { InsertFxRack } from "./InsertFxRack";
 import { VoiceManager } from "./VoiceManager";
 
-export const INSERT_FX_WORKLET_URL = new URL(
-  "../../audio/insertFxProcessor.ts",
-  import.meta.url,
-).toString();
+export const INSERT_FX_WORKLET_URL = insertFxProcessorUrl;
 
 export type SynthParams = {
   masterGain: number;
@@ -69,6 +67,9 @@ export class AudioEngine {
     }
     preFxGain.connect(insertFxRack.input);
     insertFxRack.output.connect(analyser);
+
+    // DEBUG: Bypass InsertFxRack to test basic audio
+    // preFxGain.connect(analyser);
 
     this.audioContext = ac;
     this.masterVolume = masterVolume;

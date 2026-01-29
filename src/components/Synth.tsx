@@ -1,13 +1,13 @@
+import { useAudioEngine } from "@circuits/AudioCircuit/AudioEngineProvider";
 import Keyboard from "@components/controls/Keyboard";
 import style from "@styles/Synth.module.scss";
-import { useAudioEngine } from "@circuits/AudioCircuit/AudioEngineProvider";
 import MasterVolumeKnob from "@/components/controls/MasterVolumeKnob";
 import KeyboardContextProvider from "./circuits/KeyboardCircuit/KeyboardContextProvider";
+import InsertFxRack from "./controls/InsertFxRack";
+import InsertFxStatus from "./controls/InsertFxStatus";
 import Oscilloscope from "./controls/Oscilloscope";
 import PowerToggle from "./controls/PowerToggle";
-import InsertFxRack from "./controls/InsertFxRack";
 import WaveformSelector from "./controls/WaveformSelector";
-import InsertFxStatus from "./controls/InsertFxStatus";
 
 const Synth = () => {
   const { isInitializing } = useAudioEngine();
@@ -26,7 +26,7 @@ const Synth = () => {
         <div id={style["global-unit"]}>
           <MasterVolumeKnob></MasterVolumeKnob>
           <PowerToggle></PowerToggle>
-          <InsertFxStatus></InsertFxStatus>
+          {/* InsertFxStatus moved to InsertFxRack */}
         </div>
       </div>
       <KeyboardContextProvider>
@@ -37,4 +37,3 @@ const Synth = () => {
 };
 
 export default Synth;
-

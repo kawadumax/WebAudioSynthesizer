@@ -1,4 +1,5 @@
 @use "./variables" as *;
+
 * {
   box-sizing: border-box;
 }
@@ -7,9 +8,9 @@ body {
   margin: 0;
   background-color: $base-color;
 
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
-    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
-    sans-serif;
+  font-family: "Share Tech Mono", "WDXL Lubrifont JP N", -apple-system,
+    BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell",
+    "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }

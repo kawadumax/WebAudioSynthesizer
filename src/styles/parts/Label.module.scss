@@ -1,4 +1,6 @@
+@use "../variables" as *;
+
 .label {
-  font-family: "Share Tech Mono", monospace;
+  font-family: $font-stack;
   color: #00000099;
 }

@@ -4,9 +4,12 @@ import { useEffect, useRef, useState } from "react";
 interface ToggleProps {
   isOn?: boolean;
   onToggle?: (isChecked: boolean) => void;
+  width?: number;
+  height?: number;
+  disabled?: boolean;
 }
 
-const Toggle = ({ isOn, onToggle }: ToggleProps) => {
+const Toggle = ({ isOn, onToggle, width = 100, height = 40, disabled = false }: ToggleProps) => {
   const [internalOn, setInternalOn] = useState(false);
   const isChecked = isOn ?? internalOn;
   const animateRef = useRef<SVGAnimateElement>(null);
@@ -22,8 +25,6 @@ const Toggle = ({ isOn, onToggle }: ToggleProps) => {
     }
   };
 
-  const height = 40;
-  const width = 100;
   const radius = height / 4;
   const offX = width / 3;
   const onX = (2 * width) / 3;
@@ -50,6 +51,13 @@ const Toggle = ({ isOn, onToggle }: ToggleProps) => {
       aria-pressed={isChecked}
       aria-label="Toggle switch"
       onClick={handleClick}
+      style={{
+        width,
+        height,
+        opacity: disabled ? 0.5 : 1,
+        cursor: disabled ? "default" : "pointer",
+      }}
+      disabled={disabled}
     >
       <svg className={style.toggle} width={width} height={height} role="img" aria-hidden="true">
         <title>Toggle switch</title>
@@ -72,13 +80,7 @@ const Toggle = ({ isOn, onToggle }: ToggleProps) => {
           <feComposite operator="over" in="shadow" in2="SourceGraphic" />
         </filter>
         <circle cx={isChecked ? onX : offX} cy={height / 2} r={radius} fill="white">
-          <animate
-            ref={animateRef}
-            attributeName="cx"
-            dur="0.1s"
-            fill="freeze"
-            id="move"
-          />
+          <animate ref={animateRef} attributeName="cx" dur="0.1s" fill="freeze" id="move" />
         </circle>
       </svg>
     </button>

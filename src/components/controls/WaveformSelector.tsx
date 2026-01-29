@@ -1,10 +1,10 @@
 // 他のコンポーネントまたはページで
 
+import { useAudioEngine } from "@circuits/AudioCircuit/AudioEngineProvider";
 import SelectBox from "@components/parts/SelectBox";
 import styles from "@styles/controls/WaveformSelector.module.scss";
 import type React from "react";
 import { useEffect, useState } from "react";
-import { useAudioEngine } from "@circuits/AudioCircuit/AudioEngineProvider";
 import type { Waveform } from "@/modules/AudioEngine/types";
 import Label from "../parts/Label";
 
@@ -23,11 +23,12 @@ const WaveFormSelector: React.FC = () => {
     }
   }, [engine, value]);
 
-  useEffect(() => {
-    if (isPowered && value !== "sine") {
-      setValue("sine");
-    }
-  }, [isPowered, value]);
+  // Removed auto-reset to sine on power toggle to prevent state fighting
+  // useEffect(() => {
+  //   if (isPowered && value !== "sine") {
+  //     setValue("sine");
+  //   }
+  // }, [isPowered, value]);
 
   return (
     <div className={styles.WaveformSelector}>
@@ -38,4 +39,3 @@ const WaveFormSelector: React.FC = () => {
 };
 
 export default WaveFormSelector;
-

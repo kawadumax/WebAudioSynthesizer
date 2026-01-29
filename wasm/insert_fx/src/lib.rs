@@ -245,51 +245,77 @@ pub extern "C" fn set_slot(
     }
 }
 
+static mut INPUT_BUFFER: Vec<f32> = Vec::new();
+static mut OUTPUT_BUFFER: Vec<f32> = Vec::new();
+
 #[no_mangle]
-pub extern "C" fn process(
-    input_ptr: *const f32,
-    output_ptr: *mut f32,
-    frames: usize,
-    channels: usize,
-) {
-    if input_ptr.is_null() || output_ptr.is_null() {
-        return;
-    }
-    let total = frames.saturating_mul(channels);
-    let input = unsafe { std::slice::from_raw_parts(input_ptr, total) };
-    let output = unsafe { std::slice::from_raw_parts_mut(output_ptr, total) };
-    let Some(state) = (unsafe { STATE.as_mut() }) else {
-        output.copy_from_slice(input);
-        return;
-    };
-    let active_channels = channels.min(state.channels).max(1);
-    for frame in 0..frames {
-        let write_index = state.delay.write_index;
-        for channel in 0..channels {
-            let index = frame * channels + channel;
-            let mut sample = input[index];
-            if channel < active_channels {
-                for slot_index in 0..state.chain_len {
-                    let slot = state.slots[slot_index];
-                    if !slot.enabled {
-                        continue;
-                    }
-                    sample = match slot.effect_type {
-                        EFFECT_DISTORTION => process_distortion(state, sample, channel, slot),
-                        EFFECT_DELAY => process_delay(state, sample, channel, slot, write_index),
-                        EFFECT_REVERB => process_reverb(state, sample, channel, slot),
-                        EFFECT_TREMOLO => process_tremolo(state, sample, channel, slot),
-                        _ => sample,
-                    };
-                }
-            }
-            output[index] = sample;
+pub extern "C" fn alloc_buffers(len: usize) {
+    unsafe {
+        if INPUT_BUFFER.len() < len {
+            INPUT_BUFFER.resize(len, 0.0);
         }
-        state.delay.write_index = (write_index + 1) % state.delay.max_samples;
+        if OUTPUT_BUFFER.len() < len {
+            OUTPUT_BUFFER.resize(len, 0.0);
+        }
+    }
+}
+
+#[no_mangle]
+pub extern "C" fn get_input_ptr() -> *mut f32 {
+    unsafe { INPUT_BUFFER.as_mut_ptr() }
+}
+
+#[no_mangle]
+pub extern "C" fn get_output_ptr() -> *mut f32 {
+    unsafe { OUTPUT_BUFFER.as_mut_ptr() }
+}
+
+#[no_mangle]
+pub extern "C" fn process_buffers(frames: usize, channels: usize) {
+    unsafe {
+        let total = frames.saturating_mul(channels);
+        if INPUT_BUFFER.len() < total || OUTPUT_BUFFER.len() < total {
+            return;
+        }
+
+        let input = &INPUT_BUFFER[..total];
+        let output = &mut OUTPUT_BUFFER[..total];
+
+        let Some(state) = STATE.as_mut() else {
+            output.copy_from_slice(input);
+            return;
+        };
+
+        let active_channels = channels.min(state.channels).max(1);
+        
+        for frame in 0..frames {
+            let write_index = state.delay.write_index;
+            for channel in 0..channels {
+                let index = frame * channels + channel;
+                let mut sample = input[index];
+                if channel < active_channels {
+                    for slot_index in 0..state.chain_len {
+                        let slot = state.slots[slot_index];
+                        if !slot.enabled {
+                            continue;
+                        }
+                        sample = match slot.effect_type {
+                            EFFECT_DISTORTION => process_distortion(state, sample, channel, slot),
+                            EFFECT_DELAY => process_delay(state, sample, channel, slot, write_index),
+                            EFFECT_REVERB => process_reverb(state, sample, channel, slot),
+                            EFFECT_TREMOLO => process_tremolo(state, sample, channel, slot),
+                            _ => sample,
+                        };
+                    }
+                }
+                output[index] = sample;
+            }
+            state.delay.write_index = (write_index + 1) % state.delay.max_samples;
+        }
     }
 }
 
 #[no_mangle]
 pub extern "C" fn version() -> u32 {
-    2
+    3
 }

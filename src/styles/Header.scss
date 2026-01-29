@@ -1,5 +1,6 @@
 @use "./variables" as *;
 
+
 header {
   display: flex;
   justify-content: space-around;
@@ -10,7 +11,7 @@ header {
   h1,
   a,
   small {
-    font-family: "Share Tech Mono", monospace;
+    font-family: $font-stack;
   }
 
   h1 {

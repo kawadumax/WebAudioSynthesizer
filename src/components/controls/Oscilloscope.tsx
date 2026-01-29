@@ -1,6 +1,6 @@
+import { useAudioEngine } from "@circuits/AudioCircuit/AudioEngineProvider";
 import style from "@styles/controls/Oscilloscope.module.scss";
 import { useEffect, useRef } from "react";
-import { useAudioEngine } from "@circuits/AudioCircuit/AudioEngineProvider";
 
 interface Props {
   className?: string;
@@ -127,4 +127,3 @@ const Oscilloscope = ({ className = "" }: Props) => {
 };
 
 export default Oscilloscope;
-

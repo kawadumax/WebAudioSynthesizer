@@ -2,9 +2,10 @@ import "@styles/Display.scss";
 
 interface Props {
   parameter: number | string;
+  className?: string;
 }
 
-const Display = ({ parameter }: Props) => {
+const Display = ({ parameter, className }: Props) => {
   let displayValue: string = "";
   const parameterType: string = typeof parameter;
 
@@ -19,7 +20,7 @@ const Display = ({ parameter }: Props) => {
       break;
   }
 
-  return <p className={`parameter-display ${parameterType}`}>{displayValue}</p>;
+  return <p className={`parameter-display ${parameterType} ${className ?? ""}`}>{displayValue}</p>;
 };
 
 export default Display;
