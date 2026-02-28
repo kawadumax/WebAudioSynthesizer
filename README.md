@@ -3,6 +3,18 @@
 React + WebAudioAPI を使ったシンセサイザーのアプリです。 動作は
 https://web-audio-synthesizer.vercel.app/ で確認できます。
 
+## WebAssembly (WASM) による信号処理
+
+音声信号の高度なエフェクト処理には、Rust で記述され WebAssembly (WASM) にコンパイルされたカスタムオーディオプロセッサを導入しています。
+現在の WASM 実装（`insert_fx`）では、最大4スロットのインサートエフェクトチェーンを提供しており、以下のエフェクトに対応しています：
+
+- **Distortion** (ディストーション)
+- **Delay** (ディレイ)
+- **Reverb** (リバーブ)
+- **Tremolo** (トレモロ)
+
+ブラウザ上でより低レイテンシーかつ柔軟な音声処理を実現しています。
+
 # 設計
 
 ## コンポーネント

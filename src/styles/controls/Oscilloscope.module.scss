@@ -1,4 +1,9 @@
 .Oscilloscope {
+  flex: 1;
+  display: flex;
+  height: 100%;
+  min-height: 0;
+
   canvas {
     border-radius: 5px;
     width: calc(100% - 10px);

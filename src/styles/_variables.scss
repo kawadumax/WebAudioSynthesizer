@@ -1,4 +1,5 @@
 $base-color: #282c34;
+$font-stack: "Share Tech Mono", "WDXL Lubrifont JP N", monospace, sans-serif;
 $primary-color: #61dafb;
 
 $min-width: 500px;
@@ -11,19 +12,27 @@ $min-width: 500px;
     @media (max-width: 599px) {
       @content;
     }
-  } @else if $size ==tablet-portrait-up {
+  }
+
+  @else if $size ==tablet-portrait-up {
     @media (min-width: 600px) {
       @content;
     }
-  } @else if $size ==tablet-landscape-up {
+  }
+
+  @else if $size ==tablet-landscape-up {
     @media (min-width: 900px) {
       @content;
     }
-  } @else if $size ==desktop-up {
+  }
+
+  @else if $size ==desktop-up {
     @media (min-width: 1200px) {
       @content;
     }
-  } @else if $size ==big-desktop-up {
+  }
+
+  @else if $size ==big-desktop-up {
     @media (min-width: 1800px) {
       @content;
     }

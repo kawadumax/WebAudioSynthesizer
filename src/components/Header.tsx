@@ -1,5 +1,5 @@
-import logo from "@assets/logo.svg";
 import githubIcon from "@assets/github-mark-white.svg";
+import logo from "@assets/logo.svg";
 import "@styles/Header.scss";
 
 const Header = () => {
@@ -15,15 +15,15 @@ const Header = () => {
       </div>
       <nav>
         <ul>
-          <li><a href="#about">About</a></li>
-          <li><a href="#synth">Synth</a></li>
+          <li>
+            <a href="#about">About</a>
+          </li>
+          <li>
+            <a href="#synth">Synth</a>
+          </li>
           <li>
             <a href="https://github.com/kawadumax/WebAudioSynthesizer">
-              <img
-                decoding="async"
-                src={githubIcon}
-                alt="GitHub Repository"
-              />
+              <img decoding="async" src={githubIcon} alt="GitHub Repository" />
             </a>
           </li>
         </ul>

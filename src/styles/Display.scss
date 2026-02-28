@@ -1,3 +1,4 @@
+@use "./variables" as *;
 @import url("https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap");
 
 .parameter-display {
@@ -10,14 +11,14 @@
   background-color: white;
   color: rgba(0, 0, 0, 0.7);
   border-radius: 5px;
-  font-family: "Share Tech Mono", monospace;
+  font-family: $font-stack;
   box-shadow: 1px 1px 4px 1px rgba(0, 0, 0, 0.5) inset;
 
-  &.number{
+  &.number {
     font-size: larger;
   }
 
-  &.string{
+  &.string {
     font-size: medium;
   }
 }

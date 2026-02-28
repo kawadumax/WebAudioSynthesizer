@@ -1,4 +1,5 @@
-@import "variables";
+@use "./variables" as *;
+
 
 section.about {
   background-color: $base-color;
@@ -12,6 +13,6 @@ section.about {
 
   h2,
   p {
-    font-family: "Share Tech Mono", monospace;
+    font-family: $font-stack;
   }
 }

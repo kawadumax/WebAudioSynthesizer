@@ -1,5 +1,6 @@
-import { render, screen } from "@testing-library/react";
 import Label from "@parts/Label";
+import { render, screen } from "@testing-library/react";
+import styles from "@styles/parts/Label.module.scss";
 
 describe("Label", () => {
   it("renders with the correct text content", () => {
@@ -16,7 +17,7 @@ describe("Label", () => {
     render(<Label className={customClassName}>{labelText}</Label>);
 
     const labelElement = screen.getByText(labelText);
-    expect(labelElement).toHaveClass("label");
+    expect(labelElement).toHaveClass(styles.label);
     expect(labelElement).toHaveClass(customClassName);
   });
 });
