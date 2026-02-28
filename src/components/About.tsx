@@ -8,7 +8,7 @@ const About = () => {
         This Software is made by <a href="https://github.com/kawadumax">kawadumax</a>
       </p>
       <p>
-        He is currently looking for a position as an audio software engineer.
+        He is currently looking for a job.
         <br />
         If you would like to hire him, please feel free to contact (
         ultima.times.sounds[at]gmail.com ).
@@ -19,9 +19,9 @@ const About = () => {
         によって作られました。
       </p>
       <p>
-        彼は今、音響ソフトウェアのエンジニアの職を求めています。
+        彼は現在求職中です。
         <br />
-        彼を雇ってあげたい場合はこちら( ultima.times.sounds[at]gmail.com )に連絡してみてください。
+        お仕事のご依頼等は、こちら( ultima.times.sounds[at]gmail.com )へご連絡ください。
       </p>
     </section>
   );
